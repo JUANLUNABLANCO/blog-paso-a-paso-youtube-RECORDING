@@ -1,0 +1,14 @@
+# BACKEND CONFIGURATION NODE_ENV= test | dev | prod
+version: '2'
+services:
+  postgres:
+    image: 'postgres:latest'
+    restart: always
+    volumes:
+      - './${VOLUME_FOLDER}:/var/lib/postgresql/data'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - ${PORT}:${PORT}
