@@ -231,3 +231,20 @@ git push --set-stream origin feature/task-01
 git flow feature finish
 ```
 
+## Task 02: CRUD de usuario 
+
+### specifications
+
+Como líder o jefe técnico quisiera tener un CRUD básico para la entidad usuario
+
+#### Acceptance  Criteria:
+1. Usar typeorm y el repositorio desde este
+2. Usar observables en vez de promesas
+3. feature Module "user"
+4. user should have properties
+  — name
+  — email (unique)
+  — id (primary key)
+5.  Use git flow
+
+
