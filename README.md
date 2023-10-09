@@ -131,7 +131,7 @@ ve al package.json y añade los siguientes scripts
     "nest:test": "set NODE_ENV=test&& npm run nest",
     "nest:prod": "set NODE_ENV=prod&& node dist/main",  
 ```
-### Probemso
+### Probemos
 prueba la api
 
 ```bash
@@ -276,6 +276,222 @@ vrear además manualmente los siguientes:
 3. ir a postman y probar todo
 4. git flow
 
+
+
+
+## TASK 03: Module auth with JWT authentication (login)
+
+**specifictaions**
+
+As a  User I want to be able to authenticate myself so I can perform (later protected) requests.
+
+**Acceptance criteria:**
+New Endpoint: POST '/login', check password in method —- DOING
+Expand User Model with password —- DOING
+Expand create Endpoint —- DOING
+Store 'email' always in lowercase in database —- DOING
+Store 'password' always as hashed value in database —- DOING
+Add an Auth Module for this —- DOING
+
+### Task 03: (vídeo-03 parte 1+2) Expand user api with login, JWT-validation and Basic Role Auth - Content
+
+```
+git checkout develop
+git flow feature start task-03
+```
+```
+cd ./api
+nest generate module auth
+```
+
+Esto genera un módulo a la misma altura que el módulo del usuario.
+
+![auth-module-structure](./documentation/screenshoots/Screenshot_01_auth-module.png)
+
+También actualiza el app.module.ts, incluyendo el nuevo módulo
+
+![app-module-updated](./documentation/screenshoots/Screenshot_02_app-module-updated.png)
+
+Actualizamos el .env con:
+DATABASE_URL, API_PORT, JWT_SECRET
+
+Instalamos jwt para nest con
+
+```
+npm install @nestjs/jwt  --save
+```
+
+y lo añadimos en auth.module
+
+A continuación crearemos el servicio de auth
+
+```
+nest generate service auth/auth
+```
+
+Renombra la carpeta generada dentro de auth: auth/auth por auth/services
+
+Necesitamos bcrypt, para encriptar el password
+
+```
+npm install bcrypt --save
+```
+
+Observa los cambios en uth.module y en auth.service
+
+Ahora vamos con el user.module, vamos a importar lo necesario para usar ese authModule
+
+Cambiemos también el user.interface y el entity añadiendo el password, y la condición de email siempre en minusculas
+
+Cambiaremos el user.service, para incluir aquí el authService
+
+Después debemos modificar el user.controller, para que pueda recibir un mensaje de error en el create() y hacer el 'login'
+
+
+### Important things
+
+1. Al cambiar la estructura de la base de datos, añadiendo nuevas columnas aparece un error porque existen registro que no tienen esa estructura eso se soluciona de una delas siguientes formas:
+
+  1.1. Se borra la base de datos y comenzamos de nuevo, recuerda cambiar la url de la base de datos en .env
+  1.2. o se añade a las columnas nuevas esto otro:
+
+  ```typescript
+  @Column({ nullable: true })
+  password: string;
+  ```
+
+2. La configuración de la base de datos en app.module.ts, debe quedar así:
+    ```typescript
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
+    ```
+
+3. En versiones modernas de typescript no se admite esto:
+    ```typescript
+    create(@Body() user: User): Observable<User | Object> {
+    ```
+    en cambio esto otro es mejor ...
+
+    ```typescript
+    create(@Body() user: User): Observable<User | { error: any }> {
+    ```
+
+4. La importaciones deben tener url´s relativas y no absolutas, porque el ./dist no las encuentra
+
+    ```
+    import { User } from 'src/user/user.interface.ts';
+    ```
+    eso sería incorrecto
+
+    ```
+    import { User } from '../../user/user.interface.ts';
+    ```
+    mejor así.
+
+
+Como vemos en la imagen, al solicitar todos los usuarios el password ha sido omitido, gracias a nuestros pipes()
+
+![Data sin password](./documentation/screenshoots/Screenshot_03_data-whitout-password.png)
+
+También si hacemos login desde postman con usuario y password válidos recibimos el jwt, que podemos analizar y extraer su info en jwt.io
+
+![JWTio correct token](./documentation/screenshoots/Screenshot_04_jwt-correct.png)
+
+Recuerda para ver si la signature is ok debes colocar tu JWT_SECRET del archivo .env en el recuadro de abajo a la derecha y te mostrará Signature Verified
+
+
+
+### prettier configuration
+
+1. Teníamos un problema con los finales de línea, nosotros usamos CRLF en VSC, pero el prettier nos marcaba un error en cada final de línea:
+
+```bash
+Delete `␍`eslintprettier/prettier
+```
+
+Este error es muy molesto, para ello hay varias formas de solucionarlo, directamente en el archivo de configuración de prettier '.prettierrc' o en el '.eslintrc.js', he optado por este último y en la parte de rules: he colocado lo siguiente:
+
+```
+rules: {
+    ...
+    "prettier/prettier": ["error",{
+      "endOfLine": "auto"}
+    ]
+  },
+```
+
+![config prettier](./documentation/screenshoots/Screenshot_05_config-prettier.png)
+
+solucionado
+
+
+2. Hay otras cosillas que se pueden modificar en el '.pretierrc', puedes verlo en la documentación:
+
+  [documentación de prettier](https://prettier.io/docs/en/options.html)
+
+
+### Pequeño Bug en el código
+Cuando hacemos login, si ponemos una contraseña inválida igualmente nos envía el token, y no debería.
+Haciendo una especie de debug colocando un console.log en el código, 
+
+```typescript
+private validateUser(email: string, password: string): Observable<User> {
+    return from(this.findByEmail(email)).pipe(
+      switchMap((user: User) =>
+        this.authService.comparePasswords(password, user.password).pipe(
+          map((match: boolean) => {
+
+            // ### METEMOS EL CONSOLE.LOG AQUÍ
+            console.log('### validate User match passwords', match);
+            // ### METEMOS EL CONSOLE.LOG AQUÍ
+
+            if (match) {
+              const { password, ...result } = user;
+              return result;
+            } else {
+              throw Error;
+            }
+          }),
+        ),
+      ),
+    );
+  }
+```
+
+... vemos lo siguiente, por consola:
+
+```
+### validate User match passwords Promise { <pending> }
+```
+
+Eso nos da que pensar, será un proceso asyncrono que no estamos controlando.
+
+La solución pasa por cambiar el método compare() de bcrypt por compareSync()
+
+```typescript
+comparePasswords(
+    passwordSended: string,
+    passwordHash: string,
+  ): Observable<any> {
+    const match = bcrypt.compareSync(passwordSended, passwordHash);
+    return of<any | boolean>(match);
+  }
+```
+o dejarlo como estaba pero poniendo en vez de of from en el retorno del observable
+
+```typescript
+comparePasswords(
+    passwordSended: string,
+    passwordHash: string,
+  ): Observable<any> {
+    const match = bcrypt.compare(passwordSended, passwordHash);
+    return from<any | boolean>(match);
+  }
+```
 
 
 
