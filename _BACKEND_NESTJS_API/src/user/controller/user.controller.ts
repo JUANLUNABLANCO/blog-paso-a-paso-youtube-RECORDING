@@ -22,6 +22,14 @@ export class UserController {
       catchError((err) => of({ error: err.message })),
     );
   }
+  @Post('login')
+  login(@Body() user: User): Observable<{ access_token: any }> {
+    return this.userService.login(user).pipe(
+      map((jwt: string) => {
+        return { access_token: jwt };
+      }),
+    );
+  }
 
   @Get(':id')
   findOne(@Param() params): Observable<User> {
