@@ -306,11 +306,11 @@ nest generate module auth
 
 Esto genera un módulo a la misma altura que el módulo del usuario.
 
-![auth-module-structure](./documentation/screenshoots/Screenshot_01_auth-module.png)
+![auth-module-structure](./documentation/screenshots/Screenshot_01_auth-module.png)
 
 También actualiza el app.module.ts, incluyendo el nuevo módulo
 
-![app-module-updated](./documentation/screenshoots/Screenshot_02_app-module-updated.png)
+![app-module-updated](./documentation/screenshots/Screenshot_02_app-module-updated.png)
 
 Actualizamos el .env con:
 DATABASE_URL, API_PORT, JWT_SECRET
@@ -393,13 +393,13 @@ Después debemos modificar el user.controller, para que pueda recibir un mensaje
     mejor así.
 
 
-Como vemos en la imagen, al solicitar todos los usuarios el password ha sido omitido, gracias a nuestros pipes()
+Como vemos en la imagen, al solicitar todos los usuarios el password ha sido omitido, gracias a nuestros pipes(map())
 
-![Data sin password](./documentation/screenshoots/Screenshot_03_data-whitout-password.png)
+![Data sin password](./documentation/screenshots/Screenshot_03_data-whitout-password.png)
 
 También si hacemos login desde postman con usuario y password válidos recibimos el jwt, que podemos analizar y extraer su info en jwt.io
 
-![JWTio correct token](./documentation/screenshoots/Screenshot_04_jwt-correct.png)
+![JWTio correct token](./documentation/screenshots/Screenshot_04_jwt-correct.png)
 
 Recuerda para ver si la signature is ok debes colocar tu JWT_SECRET del archivo .env en el recuadro de abajo a la derecha y te mostrará Signature Verified
 
@@ -424,7 +424,7 @@ rules: {
   },
 ```
 
-![config prettier](./documentation/screenshoots/Screenshot_05_config-prettier.png)
+![config prettier](./documentation/screenshots/Screenshot_05_config-prettier.png)
 
 solucionado
 
@@ -492,6 +492,115 @@ comparePasswords(
     return from<any | boolean>(match);
   }
 ```
+
+## Task-04: (vídeo-04) JWT- and Role based API Protection | Blog Project
+
+### Custom Decorator
+
+in auth/decorators
+```
+import { SetMetadata } from '@nestjs/common';
+
+export const hasRoles = (...hasRoles: string[]) =>
+  SetMetadata('roles', hasRoles);
+```
+
+para usar esto debemos instalar los siguientes paquetes, que incialmente no se encontraban en la instalación de nestjs
+
+```
+npm i @nestjs/passport passport passport-jwt --save
+```
+
+No olvides en el módulo llamar a los guards, strategy y demás
+
+![jwtAuthGuard](./documentation/screenshots/Screenshot_06_auth-module.png)
+
+En este punto solo podemos acceder a todos los usuarios solo con el role de administrador
+
+![postman endpoint role unauthorized](./documentation/screenshots/Screenshot_07_postman-endpoint-role-admin-unauthorized.png)
+
+Ahora hacemos login y el token devuelto se lo pasamos al get-all-users en el postman, nos devuelve todos los usuarios, debido a que no hemos implementado correctamente todavía el hasRoles('Admin'), ya que no hemos creado los roles, ni el RolesGuard, simplemente tiene un true y pasa la utenticación.
+
+![authRolesGuard](./documentation/screenshots/Screenshot_08_roles-guard.png)
+
+y claro este código todavía no está al 100%
+
+```
+  @hasRoles('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get()
+  findAll(): Observable<User[]> {
+    return this.userService.findAll();
+  }
+```
+
+... solo funciona el JwtAuthGuard el cual pide un jwt en la cabecera, gracias a la estrategia declarada
+
+```
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get('JWT_SECRET'),
+    });
+  }
+
+  async validate(payload: any): Promise<any> {
+    const user = { user: payload.user };
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
+  }
+```
+
+Ahora vamos a implementar los roles en el usuario:
+
+```
+export interface User {
+  id?: number;
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: UserRole;
+}
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+```
+
+![user roles in entity DB](./documentation/screenshots/Screenshot_09_user-entity-for-roles.png)
+
+Fíjate como quedan los métodos del controlador después de indicar quien puede editar borrar, crear, etc
+
+![metodos del controller](./documentation/screenshots/Screenshot_10_user-controller.png)
+
+A partir de entonces no podrás hacer nada sino esres administrador y si no pones el token en la cabecera
+
+```
+user: {
+  id: 70,
+  name: 'prueba 1',
+  email: 'admin@prueba1.com',
+  role: 'admin',
+  password: 'test123'
+}
+```
+
+las contraseñas son todas iguales, para todos los usuarios 'test123' | 'prueba123'
+
+Si observamos la BD en ElephantSQL, vemos los usuarios que hay hasta ahora, como se ha llamado a la tabla 'user_entity' y los campos correspondientes:
+
+![BD in ElephantSQL](./documentation/screenshots/Screenshot_11_bd_postgrees.png)
+
+A partir de ahora me abstengo de usar ElephantSQL (postgres), para ello alimenté el contenedor de docker que mantiene una base de datos postgresql gratuita en la máquina local.
+
+![docker-compose](./documentation/screenshots/Screenshot_20_docker-container-postgres.png)
 
 
 
