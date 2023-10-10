@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../model/user.entity';
-import { Repository } from 'typeorm';
-import { User } from '../model/user.interface';
+import { Like, Repository } from 'typeorm';
+import { User, UserRole } from '../model/user.interface';
 import { Observable, from, throwError } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { AuthService } from '../../auth/services/auth.service';
@@ -22,6 +22,19 @@ export class UserService {
         newUser.email = user.email;
         newUser.password = passwordHash;
 
+        // SOLO para dev/test mode
+        if (process.env.CONTROL === 'prod' || process.env.CONTROL === 'dev') {
+          newUser.role = UserRole.USER;
+        }
+        if (
+          user.email == 'admin@admin.com' &&
+          process.env.NODE_ENV !== 'prod'
+        ) {
+          newUser.role = UserRole.ADMIN;
+          console.log('#### ADMIN REGISTER ####', newUser);
+        }
+        // SOLO para dev/test mode
+
         return from(this.userRepository.save(newUser)).pipe(
           map((user: User) => {
             const { password, ...result } = user;
@@ -32,22 +45,11 @@ export class UserService {
       }),
     );
   }
-  findAll(): Observable<User[]> {
-    return from(this.userRepository.find()).pipe(
-      map((users: User[]) => {
-        users.forEach((user) => {
-          // delete user.password;
-        });
-        return users;
-      }),
-    );
-  }
-
   findOne(id: number): Observable<User> {
     return from(this.userRepository.findOneBy({ id })).pipe(
       map((user: User) => {
         if (user) {
-          // const { password, ...result } = user;
+          const { password, ...result } = user;
           return user;
         } else {
           return null;
@@ -56,12 +58,59 @@ export class UserService {
     );
   }
 
+  findOneByEmail(user: User): Observable<User> {
+    console.log('user:', user);
+    return from(
+      this.userRepository.findOne({
+        select: ['id', 'name', 'email', 'role'],
+        where: { email: user.email },
+      }),
+    );
+  }
+  emailExist(user: User): Observable<boolean> {
+    return from(
+      this.userRepository
+        .findOne({
+          where: {
+            email: Like(`%${user.email}%`),
+          },
+        })
+        .then((resp) => {
+          if (resp !== null) {
+            return true;
+          } else {
+            return false;
+          }
+        }),
+    );
+  }
+
+  findAll(): Observable<User[]> {
+    return from(this.userRepository.find()).pipe(
+      map((users: User[]) => {
+        users.forEach((user) => {
+          delete user.password;
+        });
+        return users;
+      }),
+    );
+  }
   updateOne(id: number, user: User): Observable<any> {
     delete user.email;
+    delete user.password;
+    delete user.role;
 
     return from(this.userRepository.update(Number(id), user)).pipe(
       switchMap(() => this.findOne(id)),
     );
+  }
+
+  updateRoleOfUser(id: number, user: User): Observable<any> {
+    delete user.email;
+    delete user.password;
+    delete user.name;
+
+    return from(this.userRepository.update(Number(id), user));
   }
 
   deleteOne(id: number): Observable<any> {
@@ -110,4 +159,6 @@ export class UserService {
       }),
     );
   }
+
+  // TODO TASK FOR YOU updatePassword() USER
 }
