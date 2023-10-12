@@ -65,7 +65,6 @@ export class UserController {
     return this.userService.updateOne(Number(id), user);
   }
 
-  // TODO permitir solo roles del enum a través de un guard, 'bombero' rechazarlo
   @hasRoles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id/role')
@@ -73,7 +72,13 @@ export class UserController {
     @Param('id') id: string,
     @Body() user: User,
   ): Observable<any> {
-    return this.userService.updateRoleOfUser(Number(id), user);
+    const roles = Object.values(UserRole);
+    // console.log('## roles keys', roles);
+    if (roles.includes(user.role)) {
+      return this.userService.updateRoleOfUser(Number(id), user);
+    } else {
+      return of({ error: `Role '${user.role}' not allowed` });
+    }
   }
   @hasRoles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
