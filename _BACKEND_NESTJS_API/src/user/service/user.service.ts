@@ -6,6 +6,11 @@ import { User, UserRole } from '../model/user.interface';
 import { Observable, from, throwError } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { AuthService } from '../../auth/services/auth.service';
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class UserService {
@@ -31,7 +36,7 @@ export class UserService {
           process.env.NODE_ENV !== 'prod'
         ) {
           newUser.role = UserRole.ADMIN;
-          console.log('#### ADMIN REGISTER ####', newUser);
+          // console.log('#### ADMIN REGISTER ####', newUser);
         }
         // SOLO para dev/test mode
 
@@ -50,7 +55,7 @@ export class UserService {
       map((user: User) => {
         if (user) {
           const { password, ...result } = user;
-          return user;
+          return result;
         } else {
           return null;
         }
@@ -95,17 +100,49 @@ export class UserService {
       }),
     );
   }
+  paginate(options: IPaginationOptions): Observable<Pagination<User>> {
+    return from(paginate<User>(this.userRepository, options)).pipe(
+      map((usersPageable: Pagination<User>) => {
+        usersPageable.items.forEach((user) => {
+          delete user.password;
+        });
+        console.log('## usersPageable: ', usersPageable);
+        return usersPageable;
+      }),
+    );
+  }
   updateOne(id: number, user: User): Observable<any> {
+    // console.log('### User: ', user);
+    delete user.id;
     delete user.email;
     delete user.password;
     delete user.role;
 
     return from(this.userRepository.update(Number(id), user)).pipe(
-      switchMap(() => this.findOne(id)),
+      switchMap(() => {
+        return this.findOne(id);
+      }),
+    );
+  }
+  updatePassword(id: number, user: User): Observable<any> {
+    delete user.id;
+    delete user.email;
+    delete user.name;
+    delete user.role;
+    return this.authService.hashPassword(user.password).pipe(
+      switchMap((passwordHash: string) => {
+        const newUser = new UserEntity();
+        newUser.password = passwordHash;
+
+        return from(this.userRepository.update(Number(id), newUser)).pipe(
+          switchMap(() => this.findOne(id)),
+        );
+      }),
     );
   }
 
   updateRoleOfUser(id: number, user: User): Observable<any> {
+    delete user.id;
     delete user.email;
     delete user.password;
     delete user.name;
@@ -118,7 +155,7 @@ export class UserService {
   }
 
   login(user: User): Observable<string> {
-    console.log('### User: ', user);
+    // console.log('### User: ', user);
     return this.validateUser(user.email, user.password).pipe(
       switchMap((user: User) => {
         if (user) {
@@ -159,6 +196,4 @@ export class UserService {
       }),
     );
   }
-
-  // TODO TASK FOR YOU updatePassword() USER
 }
