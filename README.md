@@ -467,7 +467,7 @@ comparePasswords(
 ### Custom Decorator
 
 in auth/decorators
-```
+```typescript
 import { SetMetadata } from '@nestjs/common';
 
 export const hasRoles = (...hasRoles: string[]) =>
@@ -476,7 +476,7 @@ export const hasRoles = (...hasRoles: string[]) =>
 
 para usar esto debemos instalar los siguientes paquetes, que incialmente no se encontraban en la instalación de nestjs
 
-```
+```bash
 npm i @nestjs/passport passport passport-jwt --save
 ```
 
@@ -494,7 +494,7 @@ Ahora hacemos login y el token devuelto se lo pasamos al get-all-users en el pos
 
 y claro este código todavía no está al 100%
 
-```
+```typescript
   @hasRoles('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
@@ -505,7 +505,7 @@ y claro este código todavía no está al 100%
 
 ... solo funciona el JwtAuthGuard el cual pide un jwt en la cabecera, gracias a la estrategia declarada
 
-```
+```typescript
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
@@ -527,7 +527,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
 Ahora vamos a implementar los roles en el usuario:
 
-```
+```typescript
 export interface User {
   id?: number;
   name?: string;
@@ -551,13 +551,13 @@ Fíjate como quedan los métodos del controlador después de indicar quien puede
 
 A partir de entonces no podrás hacer nada sino esres administrador y si no pones el token en la cabecera
 
-```
-user: {
-  id: 70,
-  name: 'prueba 1',
-  email: 'admin@prueba1.com',
-  role: 'admin',
-  password: 'test123'
+```json
+"user": {
+  "id": 70,
+  "name": "prueba 1",
+  "email": "admin@prueba1.com",
+  "role": "admin",
+  "password": "test123"
 }
 ```
 
@@ -571,5 +571,171 @@ A partir de ahora me abstengo de usar ElephantSQL (postgres), para ello aliment�
 
 ![docker-compose](./documentation/screenshots/Screenshot_20_docker-container-postgres.png)
 
+
+
+## Task-06:  Set up angular project with PWA and CORS
+
+**PARTE - 1**
+- [+] set up with angular cli
+- [+] CORS use cors with NextJs and frontend cors in prdo mode for http-server
+- [+] PWA ng add @angular/pwa
+
+**PARTE - 2**
+- [+] modules for admin lazy loading
+- [+] basic routing between pages: login, register, home= app, admin
+- [+] basic components/pages login, register, hoem, admin
+- [ ] paginating overview over all users
+
+**bugs pendientes para próximas features**
+1. login erróneo cuando no coinciden el email y el password
+2. Si envías un email no válido, (postman) da igual, no hay validación backend
+
+
+## Task-06: (vídeo-06) Set up angular project
+
+1. Angular project set up
+2. Create Admin module, and login/register pages and basic routing
+3. Verify connection to backend is working
+
+```bash
+git flow feature start task-06
+ng version                      // ver si tenemos el ng-cli de angular
+npm install -g @angular/cli     // lo instalamos sino
+```
+```
+     _                      _                 ____ _     ___ 
+    / \   _ __   __ _ _   _| | __ _ _ __     / ___| |   |_ _|
+   / △ \ | '_ \ / _` | | | | |/ _` | '__|   | |   | |    | |
+  / ___ \| | | | (_| | |_| | | (_| | |      | |___| |___ | |
+ /_/   \_\_| |_|\__, |\__,_|_|\__,_|_|       \____|_____|___|
+                |___/
+
+
+Angular CLI: 16.1.4
+Node: 16.17.0
+Package Manager: npm 9.7.2
+OS: win32 x64
+
+Angular:
+...
+
+Package                      Version
+------------------------------------------------------
+@angular-devkit/architect    0.1601.4 (cli-only)
+@angular-devkit/core         16.1.4 (cli-only)
+@angular-devkit/schematics   16.1.4 (cli-only)
+@schematics/angular          16.1.4 (cli-only)
+```
+
+```bash
+ng new frontend
+cd frontend
+ng serve --open
+```
+
+Open navigator in localhost:4200
+
+### angular material
+
+```bash
+ng add @angular/material
+```
+
+Add some component from angular-material like a toolbar material
+
+### modules
+
+```bash
+ng g m admin --routing
+```
+
+### components
+
+```bash
+ng g c admin/components/overview
+```
+
+solito se añadirá al módulo padre 'admin'
+
+```bash
+ng g c components/login
+ng g c components/register
+```
+
+mira el routing como se hace, en app-routing.module.ts
+
+```typescript
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { RegisterComponent } from './components/register/register.component';
+import { LoginComponent } from './components/login/login.component';
+
+const routes: Routes = [
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then( m => m.AdminModule)
+  },
+  {
+    path: 'register',
+    component: RegisterComponent
+  },
+  {
+    path: 'login',
+    component: LoginComponent
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
+
+en admin-routing.module.ts
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    component: OverviewComponent
+  }
+];
+```
+
+### servicio de authentication
+
+```
+ng g s services/authentication
+```
+
+```
+constructor(private http: HttpClient) { }
+
+  login(email: string, password: string) {
+    return this.http.post<any>('/api/users/login', { email, password }).pipe( // gracias a nuestra configuración del proxy, la ruta es http://localhost:3000/api/...
+      map((token) => {
+        // TODO servicio genérico para grabado y recuperación de datos de la app en el localStorage
+        localStorage.setItem('SC666_token', token.access_token);
+      })
+    )
+  }
+```
+
+en el backend debes configurar para que cada url añada un prefijo api después de http://localhost:3000/ --> http://localhost:3000/api/
+
+--- main.ts ---
+```
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+  await app.listen(process.env.API_PORT);
+}
+bootstrap();
+```
 
 
