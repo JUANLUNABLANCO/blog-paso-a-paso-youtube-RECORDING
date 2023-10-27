@@ -1,0 +1,24 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <span>Blog Status Code 666</span>
+    <span class="example-spacer"></span>
+    <button mat-flat-button class="link-button" routerLink= 'users' aria-label="Example icon-button with heart icon">
+      Users
+    </button>
+    <button mat-flat-button class="link-button" routerLink= 'admin' aria-label="Example icon-button with heart icon">
+      Admin
+    </button>
+    <mat-form-field style="margin-left: 16px; margin-top: 16px;" name="loginRegisterDropdown">
+      <mat-select placeholder="Acceso" (selectionChange)="navigateTo($event.value)">
+        <mat-option *ngFor="let entry of entries" [value]="entry.link">
+            {{ entry.title }}
+        </mat-option>
+
+      </mat-select>
+    </mat-form-field>
+  </mat-toolbar-row>
+</mat-toolbar>
+<router-outlet></router-outlet>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../model/user.entity';
 import { Like, Repository } from 'typeorm';
@@ -180,7 +180,7 @@ export class UserService {
                   const { password, ...result } = user;
                   return result;
                 } else {
-                  throw Error;
+                  throw new UnauthorizedException('Wrong Credentials');
                 }
               }),
             );
@@ -190,10 +190,18 @@ export class UserService {
   }
   private findByEmail(email: string): Observable<User> {
     return from(
-      this.userRepository.findOne({
-        select: ['id', 'name', 'email', 'password'],
-        where: { email: email },
-      }),
+      this.userRepository
+        .findOne({
+          select: ['id', 'name', 'email', 'role', 'password'],
+          where: { email: email.toLowerCase() },
+        })
+        .then((user: User) => {
+          if (!user) {
+            throw new NotFoundException('User not found');
+          } else {
+            return user;
+          }
+        }),
     );
   }
 }

@@ -467,7 +467,7 @@ comparePasswords(
 ### Custom Decorator
 
 in auth/decorators
-```
+```typescript
 import { SetMetadata } from '@nestjs/common';
 
 export const hasRoles = (...hasRoles: string[]) =>
@@ -476,7 +476,7 @@ export const hasRoles = (...hasRoles: string[]) =>
 
 para usar esto debemos instalar los siguientes paquetes, que incialmente no se encontraban en la instalación de nestjs
 
-```
+```bash
 npm i @nestjs/passport passport passport-jwt --save
 ```
 
@@ -494,7 +494,7 @@ Ahora hacemos login y el token devuelto se lo pasamos al get-all-users en el pos
 
 y claro este código todavía no está al 100%
 
-```
+```typescript
   @hasRoles('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
@@ -505,7 +505,7 @@ y claro este código todavía no está al 100%
 
 ... solo funciona el JwtAuthGuard el cual pide un jwt en la cabecera, gracias a la estrategia declarada
 
-```
+```typescript
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
@@ -527,7 +527,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
 Ahora vamos a implementar los roles en el usuario:
 
-```
+```typescript
 export interface User {
   id?: number;
   name?: string;
@@ -551,13 +551,13 @@ Fíjate como quedan los métodos del controlador después de indicar quien puede
 
 A partir de entonces no podrás hacer nada sino esres administrador y si no pones el token en la cabecera
 
-```
-user: {
-  id: 70,
-  name: 'prueba 1',
-  email: 'admin@prueba1.com',
-  role: 'admin',
-  password: 'test123'
+```json
+"user": {
+  "id": 70,
+  "name": "prueba 1",
+  "email": "admin@prueba1.com",
+  "role": "admin",
+  "password": "test123"
 }
 ```
 
@@ -571,5 +571,555 @@ A partir de ahora me abstengo de usar ElephantSQL (postgres), para ello aliment�
 
 ![docker-compose](./documentation/screenshots/Screenshot_20_docker-container-postgres.png)
 
+
+
+## Task-06:  Set up angular project with PWA and CORS
+
+**PARTE - 1**
+- [+] set up with angular cli
+- [+] CORS use cors with NextJs and frontend cors in prdo mode for http-server
+- [+] PWA ng add @angular/pwa
+
+**PARTE - 2**
+- [+] modules for admin lazy loading
+- [+] basic routing between pages: login, register, home= app, admin
+- [+] basic components/pages login, register, hoem, admin
+- [ ] paginating overview over all users
+
+**bugs pendientes para próximas features**
+1. login erróneo cuando no coinciden el email y el password
+2. Si envías un email no válido, (postman) da igual, no hay validación backend
+
+
+## Task-06: (vídeo-06) Set up angular project
+
+1. Angular project set up
+2. Create Admin module, and login/register pages and basic routing
+3. Verify connection to backend is working
+
+```bash
+git flow feature start task-06
+ng version                      // ver si tenemos el ng-cli de angular
+npm install -g @angular/cli     // lo instalamos sino
+```
+```
+     _                      _                 ____ _     ___ 
+    / \   _ __   __ _ _   _| | __ _ _ __     / ___| |   |_ _|
+   / △ \ | '_ \ / _` | | | | |/ _` | '__|   | |   | |    | |
+  / ___ \| | | | (_| | |_| | | (_| | |      | |___| |___ | |
+ /_/   \_\_| |_|\__, |\__,_|_|\__,_|_|       \____|_____|___|
+                |___/
+
+
+Angular CLI: 16.1.4
+Node: 16.17.0
+Package Manager: npm 9.7.2
+OS: win32 x64
+
+Angular:
+...
+
+Package                      Version
+------------------------------------------------------
+@angular-devkit/architect    0.1601.4 (cli-only)
+@angular-devkit/core         16.1.4 (cli-only)
+@angular-devkit/schematics   16.1.4 (cli-only)
+@schematics/angular          16.1.4 (cli-only)
+```
+
+```bash
+ng new frontend
+cd frontend
+ng serve --open
+```
+
+Open navigator in localhost:4200
+
+### angular material
+
+```bash
+ng add @angular/material
+```
+
+Add some component from angular-material like a toolbar material
+
+### modules
+
+```bash
+ng g m admin --routing
+```
+
+### components
+
+```bash
+ng g c admin/components/overview
+```
+
+solito se añadirá al módulo padre 'admin'
+
+```bash
+ng g c components/login
+ng g c components/register
+```
+
+mira el routing como se hace, en app-routing.module.ts
+
+```typescript
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { RegisterComponent } from './components/register/register.component';
+import { LoginComponent } from './components/login/login.component';
+
+const routes: Routes = [
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then( m => m.AdminModule)
+  },
+  {
+    path: 'register',
+    component: RegisterComponent
+  },
+  {
+    path: 'login',
+    component: LoginComponent
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
+
+en admin-routing.module.ts
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    component: OverviewComponent
+  }
+];
+```
+
+### servicio de authentication
+
+```
+ng g s services/authentication
+```
+
+```
+constructor(private http: HttpClient) { }
+
+  login(email: string, password: string) {
+    return this.http.post<any>('/api/users/login', { email, password }).pipe( // gracias a nuestra configuración del proxy, la ruta es http://localhost:3000/api/...
+      map((token) => {
+        // TODO servicio genérico para grabado y recuperación de datos de la app en el localStorage
+        localStorage.setItem('SC666_token', token.access_token);
+      })
+    )
+  }
+```
+
+en el backend debes configurar para que cada url añada un prefijo api después de http://localhost:3000/ --> http://localhost:3000/api/
+
+--- main.ts ---
+```
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+  await app.listen(process.env.API_PORT);
+}
+bootstrap();
+```
+
+
+
+## Task-07: Cypress Unit testing, e2e testing
+
+### instalación configuración cypress
+
+```bash
+mkgir _FRONTEND_NESTJS_API
+cd ./_FRONTEND_NESTJS_API
+npm install cypress --save-dev
+```
+
+Esto instalará la versión v12.17.1 de cypress
+
+```bash
+npx cypress open
+```
+'npx' se diferencia de 'npm', en que si hay conflictos entre instalaciones genéricas y locales usará la local
+
+Esto nos abrirá cypress, con una consola que muestra dos opciones e2e test y components test, seleccionamos el primero e2e.
+Ahora nos muestra lo siguiente:
+
+![cypress consola 1](./documentation/screenshoots/Screenshot_13_cy_consola-1.png)
+
+![cypress consola 2](./documentation/screenshoots/Screenshot_14_cy_consola-2.png)
+
+Luego seleccionamos el navegador, en mi caso chrome y veremos un simulador de navegador chrome con algunas características especiales, es una app que nos muestra un menú a la izda.
+
+![cypress chrome browser](./documentation/screenshoots/Screenshot_15_cy_chrome.png)
+
+En la estructura del proyecto, en el FRONTEND aparece una nueva carpeta llamada cypress
+
+Puedes ver tres carpetas en su interior:
+
+1. downloads (vacía)
+2. fixtures (con un ejemplo)
+3. support
+  3.1. commands.ts
+  3.2. e2e.ts
+
+además vemos el cypress.config.ts, en la raíz del proyecto FRONTEND
+
+Que contiene el siguiente código por defecto_
+
+```typescript
+import { defineConfig } from "cypress";
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+  },
+});
+```
+
+![cypress structure folder](./documentation/screenshoots/Screenshot_16_cy_structure-folder.png)
+
+Como no hemos escrito nungún test, no puede encontrarlo y en el navegador de cypress, vemos que en la pestaña 'run' no se está ejecutando nada, sin embargo en la pestaña de Specs hay algunos ejemplos ya desarrollados para poder ver y ejecutar
+
+Si por lo que sea los test te dan un error de sourceMap, cambia en la configuración de tsconfig.json el sourceMap: true a false del compiler options
+
+Cualquier cambio en el código relanzará el tests, está pendiente a cambios, lo que para TDD es perfecto.
+
+El código de esos tests se encuentra en la carpeta:
+
+./cypress/e2e
+
+y es ahí precisamente donde colocaremos nuestros tests, yo seguiría una estructura de historias de usuario:
+
+./cypress/e2e/3 User-Authentication
+./cypress/e2e/4 Blog-Components
+./cypress/e2e/5 Admin-Panel
+./cypress/e2e/6 User-profile
+...
+Los números son el orden de ejecución de los tests
+
+
+
+...
+
+así si el proyecto crece mucho tenemos todo identificado y organizado con una visual
+
+No borremos esos ejemplos, porque ahí hay de todo tipo de tests y nos puede ayudar a entender bastante como fucniona cypress, por otro lado existe una documentación oficial en:
+
+[cypress documentation](https://docs.cypress.io/)
+
+### Nuestros primeros tests
+
+estos tests tienen sentido en el FRONTEND, para tests unitarios del backend podemos usar Karma si fuera necesario, no obstante postman y swagger (el cual admite ejecuciones de las peticiones) son complementarios entre sí, debemos investigar si existe una extensión que simule lo del postman pero que quede un coverage de las pruebas realizadas.
+
+Leámos las tareas del asana una por una para definir esos tests:
+
+1. Task-01:
+  Como Jefe Técnico 'Technical Lead', quisiera ver el proyecto funcionando con un 'Hello World!'
+
+  Acceptance criteria:
+    Use git and GitLab - DONE
+    Api set up with NestJS - DONE
+    Postgree Database - DONE
+    .env file - DONE
+    api have to respond 'Hello world!' - DONE   --> test llegando a la url localhost:3000 debemos ver ese mensaje
+
+2. Task-02:
+  Como líder o jefe técnico quisiera tener un CRUD básico para la entidad usuario-
+
+  Acceptance  Criteria:
+    Usar typeorm y el repositorio desde este —- DONE
+    Usar observables en vez de promesas —- DONE
+    feature Module "user" —- DONE
+    user should have properties —- DONE
+    — name
+    — emeil (unique)
+    — id (primary key)        --> test crear un usuario, con 'name', 'email' y ver que al crearlo nos devuelve ese usuario con un 'id'
+    Use git flow —- DONE
+
+
+3. Task-03:
+  As a  User I want to be able to authenticate myself so I can perform (later protected) requests.
+
+  Acceptance criteria:
+    New Endpoint: POST '/login', check password in method —- DONE  --> test: acceder al endpoint '/login' check password
+    Expand User Model with password —- DONE --> test: al crear un usuario este debe guardar una password encriptada en bd
+    Expand create Endpoint —- DONE
+    Store 'email' always in lowercase in database —- DONE  --> test el email debe estar en minusculas en la BD siempre
+    Store 'password' always as hashed value in database —- DONE
+    Add an Auth Module for this —- DONE
+
+  ![algunos tests y sus resultados](./documentation/screenshoots/Screenshot_17_cy-test-1.png)
+
+  ![algunos tests y sus resultados](./documentation/screenshoots/Screenshot_18_cy-test1-result.png)
+
+4. Task-04:
+  Secure some endpoints with JWT, add a role to the User and protect some endpoints with @hashRole
+  As a technical Lead I want that  we are able to protect endpoints with a custom hasRole('roleName') annotation, so we can protect endpoints so they are only available for a user with a avlid JWT and the specific role
+
+  Acceptance Criteria:
+    should be able to use the hasRole() annotation — DONE  --> test comprobar si una petición necesita el hasRole()
+    use jwtGuard and RolesGuard — DONE  --> test lo mismo para Roles guard
+    user should have property 'role' — DONE   --> todos los usuarios deben tener un role 'user' | 'editor' | 'admin'
+    protected endpoint (with 'role' admin) PUT 'users/:id/role' to update a user role — DONE  --> test solo un usuario con role admmin podrá actualizar el role de otro usuario
+
+5. Task-05:
+  As a admin, I want to see all users, for this I want pagination, so i can turn the page, and the users are displayed in a this way. Also we should fix some minor bugs.
+
+  Acceptance criteria:
+    Getting all Users should be pageable, queryParams — DONE  --> test ver que funciona la paginacion, crear al menos 15 usuarios para estas comprobaciones
+    fix minor bugs/issues: — DONE
+    user should not be able to update his own role — DONE   --> test ningún usuario podrá actualizar su propio role, ya lo hicimos anteriormente
+    Endpoint create(), should always create a user with the role "user" — DONE --> test create() solo puede crear usuarios con role 'user'
+    Admin is the only that can change roles in users — DONE  --> ya lo hicimos en el anterior
+
+6. Task-06:
+  As a User I want to navigate between login and register, and overview
+
+  Acceptance Criteria:
+    set up with angular
+    modules for admin
+    basic routing --> test ver que se puede acceder a diferentes rutas y que el título de la página se actualiza, no tenemos otros elementos en la página de momento
+    basic components/pages login, register
+    paginating overview over all users
+    use proxy.conf to check if connection server is working. --> test obtener un token si accedemos como administrador
+
+
+Más adelante cuando decidamos la BD, como va a ser, tendremos una para desarrollo, una para producción y una que se resetea en cada test para testing
+
+Resumiendo e2e tests: FRONTEND <Fecha fin tarea Domingo 23, 00:00>
+--> test llegando a la url localhost:3000 debemos ver ese mensaje -- DONE
+--> test crear un usuario, con 'name', 'email', 'password' y ver que al crearlo nos devuelve ese usuario con un 'id', prestar atención aquí a las validaciones -- DONE
+--> test acceder al endpoint '/login' check password, hay que enviar email + password y deben ser válidas
+
+  1.
+  request: {
+    method: 'POST', url: 'http://localhost:4200/users/login', data:{
+    name: "test",
+    email: "test@gmail.com",
+    password:"test123",
+    role: 'admin'
+  }
+  response
+  { yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo1NSwibmFtZSI6InRlc3QiLCJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwicm9sZSI6InVzZXIifSwiaWF0IjoxNjg5NTkxNTc4LCJleHAiOjE2ODk1OTUxNzh9.eoK3ZqgLaXWrY25VeLvAccXvazEEEYRoRRG2Pu8xRvc }
+
+  request: other // no está todavía implementado
+  {
+    "statusCode": 500,
+    "message": "Internal server error"
+  }
+  --DONE
+
+--> test el email debe estar en minusculas en la BD siempre. Subelo en mayúscula y mira cuando lo crees que devuelve -- DONE
+
+--> test comprobar si una petición necesita el hasRole(), lo mismo para Roles guard(), hay un endpoint del administrador que es el de actualizar el role del usuario, de moemnto solo ese.
+
+// WARNING no hay forma de crear un admin, a no ser que pongamos una lógica tipo, if email = "admin@admin.com" -> role = 'admin'. Ya que todos los usuarios serán role='user' y solo el admin puede cambiar el role de un usuario. Y para estos tests necesitamos poder crear una dmin desde cypress.
+
+
+--> test todos los usuarios deben tener un role 'user' | 'editor' | 'admin' -- DONE
+--> test create() solo puede crear usuarios con role 'user', da igual si envías o no el role -- DONE
+--> test ver que funciona la paginacion, crear al menos 15 usuarios para estas comprobaciones, que pasa si pido 5 y solo hay tres ()enviamos tres), o no hay nadie (enviamos un mensaje, no hay usuarios en la base de datos aún o algo similar), controlar si estás en la última página y te pide una más, devolver la misma y lo contrario,
+estamos en la primera y queremos ir ahcia atrás. -- DONE
+
+![pagination cypress](./documentation/screenshoots/Screenshot_25_pagination-getallUsers.png)
+
+ver test en el file: './cypress/e2e/3-User-Authentication/07_pagination.cy.js'
+
+
+Resumiendo e2e tests: BACKEND :alarm_clock: <Fecha fin tarea Domingo 23, 00:00>
+--> test llegando a la url localhost:3000 debemos ver ese mensaje 
+--> test crear un usuario, con 'name', 'email', 'password' y ver que al crearlo nos devuelve ese usuario con un 'id', prestar atención aquí a las validaciones y a los mensajes de error que se devuelven así como el status code 
+--> test acceder al endpoint '/login' check password, hay que enviar email + password y deben ser válidas
+--> test al crear un usuario este debe guardar una password encriptada en bd
+--> test el email debe estar en minusculas en la BD siempre
+--> test comprobar si una petición necesita el hasRole(), lo mismo para Roles guard(), hay un endpoint del administrador que es el de actualizar el role del usuario, de moemnto solo ese.
+
+--> test todos los usuarios deben tener un role 'user' | 'editor' | 'admin'
+--> test create() solo puede crear usuarios con role 'user', da igual si envías o no el role
+--> test ver que funciona la paginacion, crear al menos 15 usuarios para estas comprobaciones, que pasa si pido 5 y solo hay tres ()enviamos tres), o no hay nadie (enviamos un mensaje, no hay usuarios en la base de datos aún o algo similar), controlar si estás en la última página y te pide una más, devolver la misma y lo contrario,
+estamos en la primera y queremos ir ahcia atrás.
+
+
+Aquí tenemos ejemplos de tests a peticiones http y los resultados, observamos que cada vez que ejecutamos el test, la primera vez funciona,la segunda falla, porque el email se repitiría, para ello debemos crear una base de datos de testing, que se resetee por completo antes de empezar el test
+
+![cypress test 02 create-user](./documentation/screenshoots/Screenshot_17_cy-test-1.png)
+
+![cypress test 02 create-user-result](./documentation/screenshoots/Screenshot_18_cy-test1-result.png)
+
+### Base de datos en maquina local
+
+  ```WARNING
+  Hay que decir que en este ejemplo he instalado y configurado la BD de postgrees para conexión desde cypress sin llamar al BACKEND, esto no es usual, normalmente nosotros desde cypress llamaríamos al backend el cual debe inicializar una instancia de la BD, pero también hay que decir que viene bien tener una conexión a la BD directa pues para limpieza de tablas, crear datos ficticios, etc.  Portanto esto es sumamente importante.
+  ```
+  
+  1. Instalar docker w10, en la máquina local o docker binario en el vps
+
+  2. instalar postgress en el proyecto frontend para usar la conexion local a la bd en los test e2e
+
+    ```bash
+    npm install pg --save-dev
+    ```
+
+  3. Crear un docker-compose.yml para una imagen y contendor de postgress con la configuracion necesaria para los tests (en principio)
+
+    ![docker-compose.yml](./documentation/screenshoots/Screenshot_21_docker-compose-yml.png)
+
+  4. abrir docker en w10, en linux no hace falta es un proceso, lanzarlo
+
+
+  5. ejecutamos el .yml
+
+      ```bash
+        docker-compose up -d
+      ```
+
+      ![docker funcionando y lanzado el contenedor](./documentation/screenshoots/Screenshot_20_docker-container-postgres.png)
+
+  6. vemos si se está ejecutando correctamente
+
+      ```bash
+        docker ps
+      ```
+  7. En los tests crearemos un plugin para cypress para conectarnos a la base de datos y pasarle una consulta simple
+
+    ![plugin connexion db](./documentation/screenshoots/Screenshot_22_plugin-connexion-db.png)
+
+  8. Hay que configurar el cypress.env.json con los datos de la configuracion para la conexión a la base de datos
+
+  ```cypress.env.json
+  {
+    "DB_CONNECT_URL": "postgres://test_cypress:test123@localhost:5432/blogTest"  // postgres
+  }
+  ```
+
+  9. Habilitar el plugin de cypress creado
+
+  ```cypress.config.ts
+  import { defineConfig } from 'cypress';
+
+  export default defineConfig({
+    e2e: {
+      setupNodeEvents(on, config) {
+        return require('./cypress/plugins/index.js')(on, config)
+      },
+    },
+  });
+  ```
+
+  10. crear un test en cypress que use esa conexión creada, con query simple
+
+  ```00_connectDB.cy,js
+    describe('Conexion to DB', ()=>{
+      it('Conexion and, Select all users from database', ()=>{
+        cy.task("queryDb", "CREATE TABLE IF NOT EXISTS user_entity (id int, name varchar(255), email varchar(255), password varchar(255), role varchar(255))").then(result => {
+          cy.log(result)
+        })
+        cy.task("queryDb", "SELECT * from user_entity").then(results => {
+          cy.log(results)
+        })
+      });
+    });
+  ```
+
+  11. lanzar cypress y seleccionar el test
+
+    ```bash
+    npx cypress open
+    ```
+
+    ![test ok](./documentation/screenshoots/Screenshot_23_tests-connection-ok.png)
+
+
+    Con esto ya estaría para los tests, ahora nos falta crear otra configuración para desarrollo en backend que use docker y configuración como la que hemos hecho en cypress
+
+    ### Thunder Client
+
+    Es una extensión de VSC, que nos puede ayudar a realizar los tests en backend a peticiones http, une la fuerza de postman con los tests teniendo así una herramienta poderosa, se instala la extensión en VSC y además existe un cli para esto:
+
+    ```bash
+    npm i -g @thunderclient/cli
+    ```
+
+    documentación oficial y web de thunder client cli en:
+
+    [web Thunder Client](https://rangav.medium.com/thunder-client-cli-a-new-way-to-test-apis-inside-vscode-d91eb5c71d8e)
+
+    [documentacion Thunder Client](https://github.com/rangav/thunder-client-support)
+
+    Lo usaremos, o si quieres lo puedes probar con algunos tests a peticiones http, con diferentes valores en el body, y me comentas el feedback, yo ya lo estoy probando.
+
+    Ejemplos de código para ejecutar tests con Thunder Client:
+
+    ```example.cy.js
+    // status code test
+    pm.test("Status code is 200", function () {
+      pm.response.to.have.status(200);
+    });
+    // property check
+    pm.test("Property message contains Thunder Client", function () {
+      var jsonData = pm.response.json();
+      pm.expect(jsonData.message).to.contains("Thunder Client");
+    });
+    // response content-type check
+    pm.test("Content-Type contains application/json", function () {
+      pm.response.to.be.header("Content-Type", "application/json");
+    });
+    ```
+
+    ![funcionamiento Thunder Client](./documentation/screenshoots/Screenshot_24_thunderclient.png)
+
+    ### Fake Data Library
+
+    ```bash
+    npm install --save-dev @faker-js/faker
+    ```
+
+    How to use
+
+    ```example.cy.js
+    // ESM
+    import { faker } from '@faker-js/faker';
+
+    // CJS
+    const { faker } = require('@faker-js/faker');
+
+    export function createRandomUser(): User {
+      return {
+        userId: faker.string.uuid(),
+        username: faker.internet.userName(),
+        email: faker.internet.email(),
+        avatar: faker.image.avatar(),
+        password: faker.internet.password(),
+        birthdate: faker.date.birthdate(),
+        registeredAt: faker.date.past(),
+      };
+    }
+
+    export const USERS: User[] = faker.helpers.multiple(createRandomUser, {
+      count: 5,
+    });
+    ```
+
+    Esto nos generará 5 usuarios aleatorios con los campos que vemos, lo podemos usar para datos ficticios (testing), dentro de cypress o en Jest
+
+    ver test en el file: './cypress/e2e/3-User-Authentication/07_pagination.cy.js'
 
 
