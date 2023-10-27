@@ -19,7 +19,7 @@ export class UserEntity {
     type: 'enum',
     enum: UserRole,
     default: UserRole.USER,
-    nullable: true, // This is important to avoid errors when creating a new user
+    // nullable: true, // This is important to avoid errors when creating a new user
   })
   role: UserRole;
 
