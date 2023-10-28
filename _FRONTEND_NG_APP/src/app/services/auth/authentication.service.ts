@@ -28,7 +28,7 @@ export class AuthenticationService {
     );
   }
   register(registerForm: RegisterForm) {
-    return this.http.post<any>(`${BASE_URL}/api/users/register`, registerForm).pipe(
+    return this.http.post<any>(`${BASE_URL}/api/users`, registerForm).pipe(
       map(user => user)
     );
   }

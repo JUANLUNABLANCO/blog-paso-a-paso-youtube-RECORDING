@@ -1,1 +1,20 @@
-<p data-test-id="">login works!</p>
+<h1 style="text-align: center;">Login de Usuario</h1>
+<form [formGroup]="formLogin" (ngSubmit)="onSubmit(formLogin)">
+  <div class="container">
+    <mat-form-field>
+      <input matInput formControlName="email" placeholder="Your email" data-test-id="emailField">
+      <mat-error *ngIf="emailField?.invalid">
+        Por favor provea un correo electrónico válido.
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput formControlName="password" type="password" placeholder="Your password" data-test-id="passwordField">
+      <mat-error *ngIf="passwordField?.invalid">
+        Por favor provea una contraseña válida, (mínimo 8 caracteres).
+      </mat-error>
+    </mat-form-field>
+    <div>
+      <button mat-flat-button color="primary" type="submit" [disabled]="!formLogin.valid" data-test-id="submitButton">Enviar</button>
+    </div>
+  </div>
+</form>
