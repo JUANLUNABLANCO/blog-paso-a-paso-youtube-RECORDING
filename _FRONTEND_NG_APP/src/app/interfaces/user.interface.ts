@@ -1,3 +1,10 @@
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+
 export interface User {
   id?: number;
   name?: string;
@@ -6,9 +13,3 @@ export interface User {
   role?: UserRole;
 }
 
-export enum UserRole {
-  ADMIN = 'admin',
-  CHIEFEDITOR = 'chiefeditor',
-  EDITOR = 'editor',
-  USER = 'user',
-}

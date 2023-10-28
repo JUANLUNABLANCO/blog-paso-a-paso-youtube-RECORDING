@@ -964,3 +964,35 @@ Aquí tenemos ejemplos de tests a peticiones http y los resultados, observamos q
 
 ![cypress test 02 create-user-result](./documentation/screenshoots/Screenshot_18_cy-test1-result.png)
 
+
+
+## Task-08: Formularios reactivos y validaciones con angular
+
+**description**
+Terminemos esos componentes pendientes de angular, con formularios reactivos, validaciones, angular material, etc.
+
+**Acceptance Criteria:**
+1. login formulario reactivo con validaciones
+2. register formulario reactivo con validaciones
+3. Custom validators para 'Comparing Passwords'
+4. async validation para emailExist
+
+
+Vamos con el auth service y el user service, nos hará falta para poder loguearnos, registranos, saber si un usuario ya existe a partir de su email, para ello utilizaremos los endpoints que hemos creado en el backend:
+
+1. **auth.sevice**
+- login: http://localhost:4200/api/users/login
+- register: http://localhost:4200/api/users/register
+
+estos dos ya los hicimos, vamos con el user service.
+
+2. **user.service**
+- emailExists: http://localhost:4200/api/users/exist
+
+Ahora vamos a los componentes, empecemos por el register:
+
+crearemos un formulario reactivo con angular material, con un email, password, password2 y un botón de submit.
+Utilizaremos el FormGroup, FormBuilder y el Validators de @angular/forms.
+
+Vamos a la parte de Html y con los mat-form-field creemos esos campos
+

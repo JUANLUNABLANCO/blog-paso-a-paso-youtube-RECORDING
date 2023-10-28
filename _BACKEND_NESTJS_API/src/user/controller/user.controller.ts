@@ -52,6 +52,7 @@ export class UserController {
 
   @Post('exist')
   emailExist(@Body() user: User): Observable<boolean> {
+    user.email = user.email.toLowerCase();
     return this.userService.emailExist(user);
   }
 
