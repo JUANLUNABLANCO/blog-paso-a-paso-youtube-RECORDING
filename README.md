@@ -996,3 +996,211 @@ Utilizaremos el FormGroup, FormBuilder y el Validators de @angular/forms.
 
 Vamos a la parte de Html y con los mat-form-field creemos esos campos
 
+Para que angular pueda usar reactive forms debemos importar en el 'app.module' lo siguiente:
+
+```typescript
+  // app.module.ts
+  import { ReactiveFormsModule } from '@angular/forms';
+  ...
+  imports:[
+  ...,
+    ReactiveFormsModule
+  ]
+```
+
+en el componente donde se vaya a usar, lo siguiente:
+
+```typescript
+// register.component.ts
+import { Component, OnInit } from '@angular/core';
+// # reactive forms
+import { FormControl, FormGroup } from '@angular/forms';
+@Component({
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss']
+})
+export class RegisterComponent implements OnInit {
+  formRegister: FormGroup;
+
+  ngOnInit(): void {
+    this.formRegister = new FormGroup({
+      name: new FormControl(''),
+      email: new FormControl(''),
+      password: new FormControl('')
+    });
+  }
+  onSubmit(form: FormGroup) {
+    console.log('Valid?', form.valid); // true or false
+    console.log('Name', form.value.name);
+    console.log('Email', form.value.email);
+    console.log('password', form.value.password);
+  }
+}
+```
+formRegister es marcado como error del linter: "Property 'formRegister' has no initializer and is not definitely assigned in the constructor."
+
+Pero esto es debido a una configuración del tsconfig.json: o si lo prefieres puedes inicializarlo en el constructor
+
+```typescript
+// tsconfig.json
+"compilerOptions": {
+    "strictPropertyInitialization": false,
+    ...
+}
+```
+
+Un ejemplo de html usando lo anterior sería:
+
+```typescript
+// register.component.ts
+<form [formGroup]="formRegister" (ngSubmit)="onSubmit(formRegister)">
+  <div>
+    <label>
+      Name:
+      <input formControlName="name" placeholder="Your name">
+    </label>
+  </div>
+  <div>
+    <label>
+      Email:
+      <input formControlName="email" placeholder="Your email">
+    </label>
+  </div>
+  <div>
+    <label>
+      Password:
+      <input formControlName="password" placeholder="Your password">
+    </label>
+  </div>
+  <button type="submit">Send</button>
+</form>
+```
+
+Otra cuestión interesante es usar la clase 'formBuilder' dentro del formGroup de esta manera
+
+```typescript
+// register.component.ts
+import { FormGroup, FormBuilder } from '@angular/forms'; // hemos eliminado formControl
+
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit() {
+    this.formRegister = this.fb.group({
+      name: '',
+      email: '',
+      password: ''
+    });
+  }
+
+```
+
+Si importamos la clase Validators también podemos sustituir en cada control de la siguiente manera:
+
+```typescript
+  // register.component.ts
+  ngOnInit() {
+    this.myForm = this.fb.group({
+      name: [null, Validators.required],
+      email: [null, [Validators.required, Validators.email]],
+      password: [null, [Validators.required, Validators.minLength(8)]],
+    });
+  }
+```
+
+Añadir unos getters para los campos
+
+```typescript
+  // register.component.ts
+  // # getters
+  get nameField() {
+    return this.formRegister.get('name');
+  }
+  get emailField() {
+    return this.formRegister.get('email');
+  }
+  get passwordField() {
+    return this.formRegister.get('password');
+  }
+```
+
+Usarlos en el formulario para la lógica y la validación:
+
+```html
+  <!-- register.component.html -->
+  <div>
+    <label>
+      Email:
+      <input formControlName="email" placeholder="Your email">
+    </label>
+    <div *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)">
+      Please provide a valid email address.
+    </div>
+    <!-- <div *ngIf="nameField.hasError('required') && (nameField.dirty || nameField.touched)">
+      Por favor, el 'nombre' es requerido.
+    </div> o por separado cada validación-->
+  </div>
+```
+
+Vemos que el linter también se queja en este caso, error: Object is possibly 'null', vamos al tsconfig.json de nuevo y cambiamos el modo strict: true por strict:false
+
+```json # tsconfig.json
+"compilerOptions": {
+  "strict": false, ...}
+```
+o también puedes colocar el signo de interrogación antes del punto del objeto en cuestión, de esta forma:
+
+```html
+<div *ngIf="emailField?.invalid && (emailField?.dirty || emailField?.touched)">
+  Please provide a valid email address.
+</div>
+```
+
+## Task 09: Cypress testing
+
+**tests**
+--> test crear un usuario, con 'name', 'email', 'password' y ver que al crearlo nos devuelve ese usuario con un 'id', prestar atención aquí a las validaciones, (email correcto y formulario completo)
+--> test acceder al endpoint '/login' check password (email válido, formulario completo)
+--> test al crear un usuario este debe guardar una password encriptada en bd
+--> test el email debe estar en minúsculas en la BD siempre
+--> test comprobar si una petición (el admin actualiza un role) necesita el hasRole()
+--> test lo mismo para Roles guard()
+--> test todos los usuarios deben tener un role de tipo 'user' | 'editor' | 'admin'
+--> test create() solo puede crear usuarios con role 'user'
+--> test ver que funciona la paginación, crear al menos 15 usuarios para estas comprobaciones
+
+
+
+
+## Task-10: Pagination users and fix some bugs
+
+1. Pagination for getting all users
+2. Refactoring code, so the user can´t change his own role, only admin can do that
+3. Some other minor refactoring
+
+```bash
+git flow feature start task-05
+```
+
+1. Recordemos:
+
+  - que hicimos en el backend y cómo funcionaba nuestra paginación
+
+2. Postman:
+
+  - Hagamos algunos tests de api con postman y lo documentamos
+
+3. Vamos con el frontned_
+
+  - Tablas con angular material
+  - el servicio
+  - parámetros en la url
+  - paginación
+
+4. Cypress e2e tests
+
+
+
+
+
+

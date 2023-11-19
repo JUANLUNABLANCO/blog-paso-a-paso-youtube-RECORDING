@@ -7,4 +7,5 @@ context('Hello world!', () => {
   it('You connect with the api in localhost:3000/api, and you must to see the message "Hello World!"', () => {
     cy.contains('Hello World!');
   });
+  // Ejemplo de un test de inicio de sesión con Cypress
 });

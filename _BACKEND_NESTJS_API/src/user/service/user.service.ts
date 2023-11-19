@@ -47,6 +47,7 @@ export class UserService {
         return from(this.userRepository.save(newUser)).pipe(
           map((user: User) => {
             const { password, ...result } = user;
+            console.log('#### USER REGISTER ####', result);
             return result;
           }),
           catchError((err) => throwError(() => err)),
@@ -115,6 +116,8 @@ export class UserService {
       }),
     );
   }
+
+  // TODO paginateByName(page, size, name)
   updateOne(id: number, user: User): Observable<any> {
     // console.log('### User: ', user);
     delete user.id;

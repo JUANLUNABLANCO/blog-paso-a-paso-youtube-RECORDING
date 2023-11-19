@@ -23,7 +23,7 @@ context('Login User', ()=>{
       cy.get('[data-test-id="emailField"]').type('test@gmail.com');
       cy.get('[data-test-id="passwordField"]').type('test12345678');
       cy.get('[data-test-id="submitButton"]').click()
-        .then((resp) =>{
+        .then(() =>{
           cy.wrap(localStorage)
             .invoke('getItem', 'access_token')
             .should('exist')
@@ -32,21 +32,23 @@ context('Login User', ()=>{
   });
 
   it('acceder al endpoint "/login" enviando datos del login desde cypress',()=>{
-      // visitemos la página y borremos el token
-      cy.visit('http://localhost:4200/login').then(()=>{
-      localStorage.clear();
-      // enviamos un usuario para crearlo primero
-      cy.request({
-        method:"POST",
-        url: 'http://localhost:3000/api/users',
-        form: false,
-        body: {
-            name: "test",
-            email: "test@gmail.com",
-            password:"test12345678",
-            role: 'admin'
-        }
-      }).then(()=> {
+    // visitemos la página y borremos el token
+    // borrar la tabla
+    cy.task("queryDb", "DELETE from user_entity").then(results => {
+      cy.log(results)
+    })
+    // crear usuario
+    cy.request({
+      method:"POST",
+      url: 'http://localhost:3000/api/users',
+      form: false,
+      body: {
+          name: "test",
+          email: "test@gmail.com",
+          password:"test12345678",
+          role: 'admin'
+      }
+    }).then(()=> {
         // ahora enviaremos una petición de login
         cy.request({
           method:"POST",
@@ -67,4 +69,3 @@ context('Login User', ()=>{
       });
     });
   });
-});

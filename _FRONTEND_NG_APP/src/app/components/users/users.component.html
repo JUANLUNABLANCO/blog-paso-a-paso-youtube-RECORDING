@@ -1,1 +1,41 @@
-<p>users works! tabla de ususarios</p>
+<h1>Todos los usuarios paginados</h1>
+
+<div *ngIf="dataSource">
+  <mat-table [dataSource]="dataSource.items" class="mat-elevation-z8" data-test-id="usersTable">
+
+    <!-- id column -->
+    <ng-container matColumnDef="id">
+      <mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.id }} </mat-cell>
+    </ng-container>
+
+    <!-- name column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
+    </ng-container>
+
+    <!-- email column -->
+    <ng-container matColumnDef="email">
+      <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.email }} </mat-cell>
+    </ng-container>
+
+    <!-- Role Column -->
+    <ng-container matColumnDef="role">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> Role </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{row.role}} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns" (click)="navigateToProfile(row.id)"></mat-row>
+  </mat-table>
+  <mat-paginator
+    [length]="dataSource.meta.totalItems"
+    [pageSize]="dataSource.meta.itemsPerPage"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="pageEvent = $event; onPaginateChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+</div>
+<h2 *ngIf="!dataSource" style="text-align: center;"> Todavía, no hay Usuarios en la Base de datos</h2>
