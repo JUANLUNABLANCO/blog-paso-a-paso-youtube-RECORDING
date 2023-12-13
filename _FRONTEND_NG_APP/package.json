@@ -1,13 +1,15 @@
 {
   "name": "frontend-ng-app",
   "version": "0.0.0",
+  "engine": "node v16.17.0",
   "scripts": {
     "ng": "ng",
-    "ng:dev": "ng serve --open",
-    "ng:build:dev": "ng build --configuration development",
+    "ng:build:dev": "ng build --configuration=development",
     "ng:build:prod": "rimraf ./dist && ng build --configuration=production",
-    "ng:serve:prod": "npx http-server -p 8080 --cors -c-1 dist",
     "ng:build-serve:prod": "rimraf ./dist && ng build --configuration=production && npx http-server -p 8080 -c-1 dist",
+    "ng:serve:dev": "ng serve --open",
+    "ng:serve:test": "ng serve --configuration='test-local' --open",
+    "ng:serve:prod": "npx http-server -p 8080 --cors -c-1 dist",
     "test": "ng test",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",

@@ -1,5 +1,6 @@
 {
   "name": "blog_paso_a_paso",
+  "engine": "node v16.17.0",
   "version": "0.0.1",
   "description": "",
   "author": "",

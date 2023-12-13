@@ -53,13 +53,18 @@ export class UsersComponent implements OnInit {
         })
       ).subscribe();
     } else {
-      // this.userService.findAllByName( page, size, this.filterValue).pipe(
-      //   map((usersPaginated: UsersPaginated) => {
-      //     this.dataSource = usersPaginated;
-      //     return usersPaginated;
-      //   })
-      // ).subscribe();
+      this.userService.paginateByName( page, size, this.filterValue).pipe(
+        map((usersPaginated: UsersPaginated) => {
+          this.dataSource = usersPaginated;
+          return usersPaginated;
+        })
+      ).subscribe();
     }
+  }
+  findByName(name: string) {
+    this.userService.paginateByName(0, 10, name).pipe(
+      map((usersPaginated)=> this.dataSource = usersPaginated),
+    ).subscribe();
   }
   navigateToProfile(id: number) {
     this.router.navigate(['/users' + id], { relativeTo: this.activatedRoute });

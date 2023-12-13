@@ -32,7 +32,18 @@ export class UsersService {
       catchError(err => throwError(()=> new Error(err)))
     );
   }
-  // TODO findAllByName()
+  paginateByName(page: number, size: number, name: string): Observable<UsersPaginated> {
+    let params = new HttpParams();
+    params = params.append('page', String(page));
+    params = params.append('limit', String(size));
+    params = params.append('name', name);
+
+    return this.http.get<UsersPaginated>(`${BASE_URL}/api/users`, { params }).pipe(
+      map((userData: UsersPaginated)=> userData),
+      catchError(err => throwError(()=> new Error(err)))
+    );
+
+  }
   findOne(id: number): Observable<User> {
     return this.http.get(`${BASE_URL}/api/users/${id}`).pipe(
       map((user: User) => user ));

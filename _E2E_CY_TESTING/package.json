@@ -1,5 +1,6 @@
 {
   "name": "_e2e_cy_testing",
+  "engine": "node v16.17.0",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

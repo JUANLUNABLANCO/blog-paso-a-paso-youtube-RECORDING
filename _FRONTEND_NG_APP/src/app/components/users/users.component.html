@@ -1,4 +1,9 @@
 <h1>Todos los usuarios paginados</h1>
+<mat-form-field>
+  <mat-label>Filtering By Name</mat-label>
+  <input type="text" matInput [(ngModel)]="filterValue" (input)="findByName(filterValue)" placeholder="Search by name"
+  data-test-id="searchNameField">
+</mat-form-field>
 
 <div *ngIf="dataSource">
   <mat-table [dataSource]="dataSource.items" class="mat-elevation-z8" data-test-id="usersTable">

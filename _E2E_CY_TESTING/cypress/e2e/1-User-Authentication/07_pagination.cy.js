@@ -214,7 +214,7 @@ context('Pagination, Real Time Server Side User Search with Pagination', () => {
 
   // debemos ir escribiendo el nombre a buscar y nos debe devolver una respuesta en tiempo real
   it('Escribiremos dentro del formulario de busqueda, campo [data-test-id]="searchNameField"', () =>{
-    cy.visit('http://localhost:4200/users')
+    cy.visit('http://localhost:4200/users') // http://localhost:4200/users
     cy.get('[data-test-id="searchNameField"]').focus().type('test');  // el focus es importante para que desaparezca el mat-label que está encima
     cy.get('[data-test-id="usersTable"]').get('mat-row').eq(0).get('mat-cell').eq(1).contains('test');  // accedemos a la tabla row[0] (registro 1) cell[1] columna name
     cy.get('[data-test-id="usersTable"]').get('mat-row').eq(1).get('mat-cell').eq(1).contains('test');  // accedemos a la tabla row[1] (registro 2) cell[1] columna name 

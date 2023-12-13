@@ -79,26 +79,32 @@ export class UserController {
         route: route,
       });
     } else {
-      // return this.userService.paginateFilterByName(
-      //   {
-      //     page: Number(page),
-      //     limit: Number(limit),
-      //     route: route,
-      //   },
-      //   { name },
-      // );
+      return this.userService.paginateFilterByName(
+        {
+          page: Number(page),
+          limit: Number(limit),
+          route: route,
+        },
+        { name },
+      );
     }
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(':id')
   updateOne(@Param('id') id: string, @Body() user: User): Observable<any> {
+    console.log('### USER: ', user);
+    // solo permitimos el cambio de nombre y de email
+    delete user.role;
+    delete user.password;
+    delete user.email;
     return this.userService.updateOne(Number(id), user);
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(':id/password')
   updatePassword(@Param('id') id: string, @Body() user: User): Observable<any> {
+    // TODO condiciones especiales, forgot password?, etc.
     return this.userService.updatePassword(Number(id), user);
   }
 
