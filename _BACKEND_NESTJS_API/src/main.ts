@@ -8,7 +8,7 @@ async function bootstrap() {
   const corsConfig = {
     origin: origins,
     allowedHeaders:
-      'Access-Control-Allow-Origin, X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
+      'Access-Control-Allow-Origin, X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe, Authorization',
     methods: 'GET,PUT,POST,DELETE',
     preflightContinue: false,
     credentials: true,

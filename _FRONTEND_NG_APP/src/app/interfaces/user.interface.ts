@@ -11,6 +11,7 @@ export interface User {
   email?: string;
   password?: string;
   role?: UserRole;
+  profileImage?: string;
 }
 
 export interface UsersPaginated {
@@ -21,12 +22,11 @@ export interface UsersPaginated {
     itemsPerPage: number;
     totalPages: number;
     currentPage: number;
-  },
+  };
   links: {
     first: string;
     previous: string;
     next: string;
     last: string;
-  }
+  };
 }
-

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment.dev';
+import { environment } from 'src/environments/environment';
+import { AuthenticationService } from './services/auth/authentication.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
   title = 'FRONTEND_NG_APP';
@@ -14,20 +15,38 @@ export class AppComponent {
     {
       title: 'Register',
       description: 'Register a new user',
-      link: 'register'
+      link: 'register',
     },
     {
       title: 'Login',
       description: 'Login as a user',
-      link: 'login'
-    }
+      link: 'login',
+    },
+    {
+      title: 'Logout',
+      description: 'Logout as a user',
+      link: 'logout',
+    },
+    {
+      title: 'Update Profile',
+      description: 'Update your profile',
+      link: 'update-profile',
+    },
   ];
-  constructor(private router: Router) { 
+  constructor(
+    private router: Router,
+    private authService: AuthenticationService
+  ) {
     console.log('environment CONTROL: ', environment.CONTROL);
     console.log('environment API_URL: ', environment.API_URL);
   }
 
   navigateTo(value: string) {
-    this.router.navigate(['../', value])
+    if (value !== 'logout') {
+      this.router.navigate(['../', value]);
+    } else {
+      this.authService.logout();
+      this.router.navigate(['']);
+    }
   }
 }

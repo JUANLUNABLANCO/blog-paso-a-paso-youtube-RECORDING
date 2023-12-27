@@ -8,19 +8,42 @@ import {
   Delete,
   UseGuards,
   Query,
+  Request,
+  Response,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { Observable, catchError, map, of } from 'rxjs';
-import { User, UserRole } from '../model/user.interface';
+import { Observable, catchError, map, of, tap } from 'rxjs';
+import { User, UserRole, File } from '../model/user.interface';
 import { hasRoles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import { UserIsUserGuard } from '../../auth/guards/userIsUser.guard';
 import { Pagination } from 'nestjs-typeorm-paginate';
+import { ConfigService } from '@nestjs/config';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import path = require('path');
+import { UserIsUserGuard } from '../../auth/guards/userIsUser.guard';
 
+export const storage = {
+  storage: diskStorage({
+    destination: './uploads/profileImages',
+    filename: (req, file, cb) => {
+      const filename: string =
+        path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+      const extension: string = path.parse(file.originalname).ext;
+      cb(null, `${filename}${extension}`);
+    },
+  }),
+};
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private configService: ConfigService,
+  ) {}
 
   @Post()
   create(@Body() user: User): Observable<User | { error: any }> {
@@ -108,6 +131,40 @@ export class UserController {
     return this.userService.updatePassword(Number(id), user);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file', storage))
+  uploadFile(@UploadedFile() file, @Request() req): Observable<File> {
+    const user: User = req.user.user;
+
+    console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL')); // aquí si funciona
+    console.log('#### file name: ', file.filename);
+
+    return this.userService
+      .updateOne(user.id, { profileImage: file.filename })
+      .pipe(
+        tap((user: User) => console.log(user)),
+        map((user: User) => ({ profileImage: user.profileImage })),
+      );
+  }
+
+  @Get('profile-image/:imageName')
+  findProfileImage(
+    @Param('imageName') imageName,
+    @Response() resp,
+  ): Observable<unknown> {
+    console.log(
+      'ruta file',
+      path.join(process.cwd(), 'uploads/profileImages', imageName),
+    );
+    return of(
+      resp.sendFile(
+        path.join(process.cwd(), 'uploads/profileImages', imageName),
+      ),
+    );
+  }
+
+  // ######################  ADMIN #######################################
   @hasRoles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id/role')
@@ -129,4 +186,5 @@ export class UserController {
   deleteOne(@Param('id') id: string): Observable<any> {
     return this.userService.deleteOne(Number(id));
   }
+  // ######################  ADMIN #######################################
 }

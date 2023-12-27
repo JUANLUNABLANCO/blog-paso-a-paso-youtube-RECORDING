@@ -3,17 +3,23 @@ import { RouterModule, Routes } from '@angular/router';
 import { RegisterComponent } from './components/register/register.component';
 import { LoginComponent } from './components/login/login.component';
 import { UsersComponent } from './components/users/users.component';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { UpdateUserProfileComponent } from './components/update-user-profile/update-user-profile.component';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
     path: 'admin',
-    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
+    loadChildren: () =>
+      import('./admin/admin.module').then((m) => m.AdminModule),
   },
   {
-    path: 'register', component: RegisterComponent
+    path: 'register',
+    component: RegisterComponent,
   },
   {
-    path: 'login', component: LoginComponent
+    path: 'login',
+    component: LoginComponent,
   },
   {
     path: 'users',
@@ -23,22 +29,25 @@ const routes: Routes = [
         component: UsersComponent,
         // TODO canActivate: [AuthGuard, AdminGuard]
       },
-      // TODO {
-      //   path: ':id',
-      //   component: UserProfileComponent
-      //   canActivate: [AuthGuard, AdminGuard]
-      // }
-    ]
+      {
+        path: ':id',
+        component: UserProfileComponent,
+        canActivate: [AuthGuard],
+      },
+    ],
   },
-  // TODO {
-  //   path: 'update-profile',
-  //   component: UpdateUserProfileComponent,
-  //   canActivate: [AuthGuard, UserIsUserGuard]
-  // }
+  {
+    path: 'update-profile',
+    component: UpdateUserProfileComponent,
+    canActivate: [
+      AuthGuard,
+      // TODO UserIsUserGuard
+    ],
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

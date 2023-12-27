@@ -1,0 +1,30 @@
+<form [formGroup]="updateProfileForm" (ngSubmit)="updateProfile()">
+  <mat-card class="container">
+    <div class="container" style="width: 80%">
+      <mat-form-field>
+        <input matInput placeholder="id" formControlName="id" />
+      </mat-form-field>
+      <mat-form-field>
+        <input
+          matInput
+          placeholder="name"
+          formControlName="name"
+          data-test-id="nameField"
+        />
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="email" formControlName="email" />
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="!updateProfileForm.valid"
+        type="submit"
+        data-test-id="submitButton"
+      >
+        Update Profile
+      </button>
+    </div>
+  </mat-card>
+</form>
