@@ -1,4 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -33,8 +37,7 @@ export class UsersService {
         map((usersPaginated: UsersPaginated) => {
           console.log('### usuarios paginados: ', usersPaginated);
           return usersPaginated;
-        }),
-        catchError((err) => throwError(() => new Error(err)))
+        })
       );
   }
   paginateByName(
@@ -50,8 +53,8 @@ export class UsersService {
     return this.http
       .get<UsersPaginated>(`${BASE_URL}/api/users`, { params })
       .pipe(
-        map((userData: UsersPaginated) => userData),
-        catchError((err) => throwError(() => new Error(err)))
+        map((userData: UsersPaginated) => userData)
+        // catchError((err) => throwError(() => new Error(err)))
       );
   }
   findOne(id: number): Observable<User> {

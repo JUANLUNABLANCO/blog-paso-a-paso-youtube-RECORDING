@@ -1,7 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 
 .borderred {
   border: 1px solid red;
@@ -9,4 +15,37 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .error {
   color: red;
+}
+
+.mat-mdc-snack-bar-container {
+  &.bg-error {
+    --mdc-snackbar-container-color: #ffcfcb;
+    --mdc-snackbar-supporting-text-color: #000;
+  }
+}
+.mat-mdc-snack-bar-container.bg-error .mat-mdc-snack-bar-action {
+  color: orangered !important;
+}
+.mat-mdc-snack-bar-container.bg-warn {
+  --mdc-snackbar-container-color: ##ffe8c3;
+  --mdc-snackbar-supporting-text-color: #000;
+}
+.mat-mdc-snack-bar-container.bg-warn .mat-mdc-snack-bar-action {
+  color: orange !important;
+}
+
+.mat-mdc-snack-bar-container.bg-info {
+  --mdc-snackbar-container-color: #2196f3;
+  --mdc-snackbar-supporting-text-color: #000;
+}
+.mat-mdc-snack-bar-container.bg-info .mat-mdc-snack-bar-action {
+  color: #0c8ff9 !important;
+}
+
+.mat-mdc-snack-bar-container.bg-success {
+  --mdc-snackbar-container-color: #c5f7dc;
+  --mdc-snackbar-supporting-text-color: #000;
+}
+.mat-mdc-snack-bar-container.bg-success .mat-mdc-snack-bar-action {
+  color: #70f5ae !important;
 }

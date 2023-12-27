@@ -1,13 +1,22 @@
 <h1>Todos los usuarios paginados</h1>
 <mat-form-field>
   <mat-label>Filtering By Name</mat-label>
-  <input type="text" matInput [(ngModel)]="filterValue" (input)="findByName(filterValue)" placeholder="Search by name"
-  data-test-id="searchNameField">
+  <input
+    type="text"
+    matInput
+    [(ngModel)]="filterValue"
+    (input)="findByName(filterValue)"
+    placeholder="Search by name"
+    data-test-id="searchNameField"
+  />
 </mat-form-field>
 
 <div *ngIf="dataSource">
-  <mat-table [dataSource]="dataSource.items" class="mat-elevation-z8" data-test-id="usersTable">
-
+  <mat-table
+    [dataSource]="dataSource.items"
+    class="mat-elevation-z8"
+    data-test-id="usersTable"
+  >
     <!-- id column -->
     <ng-container matColumnDef="id">
       <mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
@@ -28,19 +37,27 @@
 
     <!-- Role Column -->
     <ng-container matColumnDef="role">
-      <mat-header-cell *matHeaderCellDef mat-sort-header> Role </mat-header-cell>
-      <mat-cell *matCellDef="let row"> {{row.role}} </mat-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Role
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.role }} </mat-cell>
     </ng-container>
 
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns" (click)="navigateToProfile(row.id)"></mat-row>
+    <mat-row
+      *matRowDef="let row; columns: displayedColumns"
+      (click)="navigateToProfile(row.id)"
+    ></mat-row>
   </mat-table>
   <mat-paginator
     [length]="dataSource.meta.totalItems"
     [pageSize]="dataSource.meta.itemsPerPage"
     [pageSizeOptions]="pageSizeOptions"
     (page)="pageEvent = $event; onPaginateChange($event)"
-    showFirstLastButtons>
+    showFirstLastButtons
+  >
   </mat-paginator>
 </div>
-<h2 *ngIf="!dataSource" style="text-align: center;"> Todavía, no hay Usuarios en la Base de datos</h2>
+<h2 *ngIf="!dataSource" style="text-align: center">
+  No tienes Acceso a la base de datos, autentícate!
+</h2>

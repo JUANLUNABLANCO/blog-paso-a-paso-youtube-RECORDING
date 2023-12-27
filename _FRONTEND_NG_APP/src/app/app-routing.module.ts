@@ -6,6 +6,7 @@ import { UsersComponent } from './components/users/users.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { UpdateUserProfileComponent } from './components/update-user-profile/update-user-profile.component';
 import { AuthGuard } from './guards/auth.guard';
+import { ErrorTestComponent } from './core/errors/component-test/error.test.component';
 
 const routes: Routes = [
   {
@@ -32,7 +33,7 @@ const routes: Routes = [
       {
         path: ':id',
         component: UserProfileComponent,
-        canActivate: [AuthGuard],
+        // canActivate: [AuthGuard],
       },
     ],
   },
@@ -43,6 +44,20 @@ const routes: Routes = [
       AuthGuard,
       // TODO UserIsUserGuard
     ],
+  },
+  {
+    path: 'error-test',
+    component: ErrorTestComponent,
+  },
+  {
+    path: '',
+    redirectTo: '/login',
+    pathMatch: 'full',
+  },
+  {
+    path: '**',
+    redirectTo: '/login',
+    pathMatch: 'full',
   },
 ];
 

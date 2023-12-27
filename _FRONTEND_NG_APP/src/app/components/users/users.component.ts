@@ -1,7 +1,8 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs';
+import { EMPTY, catchError, map, throwError } from 'rxjs';
 import { UsersPaginated } from 'src/app/interfaces/user.interface';
 import { UsersService } from 'src/app/services/users/users.service';
 
@@ -22,6 +23,9 @@ export class UsersComponent implements OnInit {
   // filtering
   filterValue: string;
 
+  // control errores
+  errMessage!: string;
+
   constructor(
     private userService: UsersService,
     private router: Router,
@@ -38,7 +42,7 @@ export class UsersComponent implements OnInit {
       .pipe(
         map((usersPaginated: UsersPaginated) => {
           this.dataSource = usersPaginated;
-          console.log('### DATA SOURCE: ', this.dataSource);
+          // console.log('### DATA SOURCE: ', this.dataSource);
           return usersPaginated;
         })
       )

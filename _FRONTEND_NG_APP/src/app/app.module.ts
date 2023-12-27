@@ -1,4 +1,4 @@
-import { NgModule, isDevMode } from '@angular/core';
+import { ErrorHandler, NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 // # genéricos
 import { AppRoutingModule } from './app-routing.module';
@@ -17,6 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 // # librerias externas
 import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
@@ -35,6 +36,8 @@ import { RegisterComponent } from './components/register/register.component';
 import { UsersComponent } from './components/users/users.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { UpdateUserProfileComponent } from './components/update-user-profile/update-user-profile.component';
+import { ServerErrorInterceptor } from './core/errors/interceptors/server-error.interceptor';
+import { GlobalErrorHandler } from './core/errors/global-error-handler';
 
 @NgModule({
   declarations: [
@@ -59,6 +62,7 @@ import { UpdateUserProfileComponent } from './components/update-user-profile/upd
     MatPaginatorModule,
     MatCardModule,
     MatSelectModule,
+    MatSnackBarModule,
 
     HttpClientModule,
     ReactiveFormsModule,
@@ -74,6 +78,12 @@ import { UpdateUserProfileComponent } from './components/update-user-profile/upd
     JwtHelperService,
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ServerErrorInterceptor,
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
 })
