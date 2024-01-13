@@ -18,6 +18,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 // # librerias externas
 import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
@@ -25,10 +26,12 @@ import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
 // # interceptors
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from './interceptors/jwt.interceptor';
+import { ServerErrorInterceptor } from './core/errors/interceptors/server-error.interceptor';
+// otros
+import { GlobalErrorHandler } from './core/errors/global-error-handler';
+
 // # PWA
 import { ServiceWorkerModule } from '@angular/service-worker';
-
-// TODO interceptors HTTP_INTERCEPTORS & JwtInterceptor
 
 // # custom modules and components
 import { LoginComponent } from './components/login/login.component';
@@ -36,8 +39,6 @@ import { RegisterComponent } from './components/register/register.component';
 import { UsersComponent } from './components/users/users.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { UpdateUserProfileComponent } from './components/update-user-profile/update-user-profile.component';
-import { ServerErrorInterceptor } from './core/errors/interceptors/server-error.interceptor';
-import { GlobalErrorHandler } from './core/errors/global-error-handler';
 
 @NgModule({
   declarations: [
@@ -63,6 +64,7 @@ import { GlobalErrorHandler } from './core/errors/global-error-handler';
     MatCardModule,
     MatSelectModule,
     MatSnackBarModule,
+    MatProgressBarModule,
 
     HttpClientModule,
     ReactiveFormsModule,

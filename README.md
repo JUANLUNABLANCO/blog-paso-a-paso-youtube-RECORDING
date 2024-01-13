@@ -1253,3 +1253,23 @@ ngOnInit(): void {
 implementemos la parte de subida de un fichero de tipo imagen, para la foto del perfil.
 
 ## Task-13 control de errores
+
+En el core existe un módulo completo, para el manejo de errores de todo tipo incluso un componente para probar los errores
+
+También se ha de configurar ciertas cosas en el app.module.ts
+
+```typescript
+    ...
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ServerErrorInterceptor,
+      multi: true,
+    },
+    ...
+```
+
+## Task-14 Menú, acceso, rutas, guards
+Toda la lógica para que en el menú solo aparezcan las opciones correspondientes y además que los guards  impidan el acceso a ciertas rutas si no se está authenticado.
+
+// TODO Para grabar el vídeo fíjate en el otro proyecto `Blog 666` y la lógica del app.component.ts

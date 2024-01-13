@@ -7,12 +7,15 @@ import { UserProfileComponent } from './components/user-profile/user-profile.com
 import { UpdateUserProfileComponent } from './components/update-user-profile/update-user-profile.component';
 import { AuthGuard } from './guards/auth.guard';
 import { ErrorTestComponent } from './core/errors/component-test/error.test.component';
+import { AdminGuard } from './guards/userIsAdmin.guard';
+import { UserGuard } from './guards/userIsUser.guard';
 
 const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () =>
       import('./admin/admin.module').then((m) => m.AdminModule),
+    canActivate: [AdminGuard], // user is Admin
   },
   {
     path: 'register',
@@ -28,12 +31,12 @@ const routes: Routes = [
       {
         path: '',
         component: UsersComponent,
-        // TODO canActivate: [AuthGuard, AdminGuard]
+        canActivate: [AdminGuard],
       },
       {
         path: ':id',
         component: UserProfileComponent,
-        // canActivate: [AuthGuard],
+        canActivate: [UserGuard],
       },
     ],
   },

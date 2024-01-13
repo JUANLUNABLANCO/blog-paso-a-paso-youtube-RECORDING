@@ -1,4 +1,6 @@
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../model/user.entity';
 import { Like, Repository } from 'typeorm';
 import { User, UserRole } from '../model/user.interface';
-import { Observable, from, throwError } from 'rxjs';
+import { EMPTY, Observable, from, throwError } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { AuthService } from '../../auth/services/auth.service';
 import {
@@ -16,6 +18,7 @@ import {
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
 
+// TODO control de errores backend, enviar este tipo throw new NotFoundException('User not found');
 @Injectable()
 export class UserService {
   constructor(
@@ -23,7 +26,10 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
     private authService: AuthService,
   ) {}
-  create(user: User): Observable<User> {
+  create(user: User): Observable<{
+    user: User;
+    token: string;
+  }> {
     return this.authService.hashPassword(user.password).pipe(
       switchMap((passwordHash: string) => {
         const newUser = new UserEntity();
@@ -45,12 +51,28 @@ export class UserService {
         // SOLO para dev/test mode
 
         return from(this.userRepository.save(newUser)).pipe(
-          map((user: User) => {
-            const { password, ...result } = user;
-            console.log('#### USER REGISTER ####', result);
-            return result;
+          switchMap((createdUser: User) => {
+            const { password, ...result } = createdUser;
+
+            return this.authService.generateJWT(createdUser).pipe(
+              map((token: string) => ({
+                user: result,
+                token: token,
+              })),
+              catchError((err) => {
+                throw new HttpException(
+                  `user not created, something went wrong`,
+                  HttpStatus.BAD_REQUEST,
+                );
+              }),
+            );
           }),
-          catchError((err) => throwError(() => err)),
+          catchError((err) => {
+            throw new HttpException(
+              `user not created, something went wrong`,
+              HttpStatus.BAD_REQUEST,
+            );
+          }),
         );
       }),
     );
@@ -214,7 +236,7 @@ export class UserService {
             .generateJWT(user)
             .pipe(map((jwt: string) => jwt));
         } else {
-          return 'Wrong Credentials';
+          return EMPTY; // la validación y búsqueda se encargan de  enviar el error
         }
       }),
     );

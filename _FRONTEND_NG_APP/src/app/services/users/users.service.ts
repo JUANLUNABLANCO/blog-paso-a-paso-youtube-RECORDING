@@ -4,7 +4,7 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { from, Observable, throwError } from 'rxjs';
+import { from, Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
@@ -52,10 +52,7 @@ export class UsersService {
 
     return this.http
       .get<UsersPaginated>(`${BASE_URL}/api/users`, { params })
-      .pipe(
-        map((userData: UsersPaginated) => userData)
-        // catchError((err) => throwError(() => new Error(err)))
-      );
+      .pipe(map((userData: UsersPaginated) => userData));
   }
   findOne(id: number): Observable<User> {
     console.log('## ID: ', id);
@@ -68,5 +65,11 @@ export class UsersService {
     return this.http
       .put<User>(`${BASE_URL}/api/users/${user.id}`, user)
       .pipe(map((user: User) => user));
+  }
+  uploadProfileImage(formData: FormData): Observable<any> {
+    return this.http.post<FormData>(`${BASE_URL}/api/users/upload`, formData, {
+      reportProgress: true,
+      observe: 'events',
+    });
   }
 }

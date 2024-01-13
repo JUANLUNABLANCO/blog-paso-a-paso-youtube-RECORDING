@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthenticationService } from '../../services/auth/authentication.service';
 import { map } from 'rxjs/operators';
+import { AuthenticationService } from '../../services/auth/authentication.service';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 })
 export class LoginComponent implements OnInit {
   formLogin: FormGroup;
+  userId!: number;
 
   constructor(
     private fb: FormBuilder,
@@ -30,6 +31,14 @@ export class LoginComponent implements OnInit {
         ],
       ],
     });
+
+    this.authService.userId$
+      .pipe(
+        map((userId: number | null) => {
+          if (userId) this.userId = userId;
+        })
+      )
+      .subscribe();
   }
 
   get emailField() {
@@ -44,9 +53,14 @@ export class LoginComponent implements OnInit {
       return;
     }
     // TODO manejo de errores por consola, dentro del subscribe y uso del tap y redirección al perfil del usuario
-    this.authService
-      .login(this.formLogin.value)
-      .pipe(map((token) => this.router.navigate(['/'])))
-      .subscribe();
+    this.authService.login(this.formLogin.value).subscribe({
+      next: (token) => {
+        if (token) {
+          const userId = this.authService.getBehaviorUserId();
+          if (userId) this.userId = userId;
+          this.router.navigate(['users', this.userId]);
+        }
+      },
+    });
   }
 }

@@ -46,14 +46,23 @@ export class UserController {
   ) {}
 
   @Post()
-  create(@Body() user: User): Observable<User | { error: any }> {
+  create(@Body() user: User): Observable<
+    | {
+        user: User;
+        access_token: string;
+      }
+    | { error: any }
+  > {
     return this.userService.create(user).pipe(
-      map((user: User) => user),
+      map(({ user, token }) => {
+        return { user: user, access_token: token };
+      }),
       catchError((err) => of({ error: err.message })),
     );
   }
   @Post('login')
   login(@Body() user: User): Observable<{ access_token: any }> {
+    console.log('## USER CONTROLLER: IN LOGIN ', user);
     return this.userService.login(user).pipe(
       map((jwt: string) => {
         return { access_token: jwt };
@@ -61,13 +70,12 @@ export class UserController {
     );
   }
 
+  // TODO user is user or user is Admin
   @Get(':id')
   findOne(@Param() params): Observable<User> {
     return this.userService.findOne(params.id);
   }
 
-  @hasRoles(UserRole.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('email')
   findOneByEmail(@Body() user: User): Observable<User> {
     return this.userService.findOneByEmail(user);
@@ -77,40 +85,6 @@ export class UserController {
   emailExist(@Body() user: User): Observable<boolean> {
     user.email = user.email.toLowerCase();
     return this.userService.emailExist(user);
-  }
-
-  // @hasRoles(UserRole.ADMIN)
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Get()
-  // findAll(): Observable<User[]> {
-  //   return this.userService.findAll();
-  // }
-  @Get()
-  index(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('name') name: string,
-  ): Observable<Pagination<User>> {
-    limit = limit > 100 ? 100 : limit;
-
-    const route = `${process.env.API_URL}:${process.env.API_PORT}/api/users`;
-    // console.log('## route', route);
-    if (name === null || name === undefined) {
-      return this.userService.paginate({
-        page: Number(page),
-        limit: Number(limit),
-        route: route,
-      });
-    } else {
-      return this.userService.paginateFilterByName(
-        {
-          page: Number(page),
-          limit: Number(limit),
-          route: route,
-        },
-        { name },
-      );
-    }
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
@@ -165,6 +139,41 @@ export class UserController {
   }
 
   // ######################  ADMIN #######################################
+  // @hasRoles(UserRole.ADMIN)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Get()
+  // findAll(): Observable<User[]> {
+  //   return this.userService.findAll();
+  // }
+  @hasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get()
+  index(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('name') name: string,
+  ): Observable<Pagination<User>> {
+    limit = limit > 100 ? 100 : limit;
+
+    const route = `${process.env.API_URL}:${process.env.API_PORT}/api/users`;
+    // console.log('## route', route);
+    if (name === null || name === undefined) {
+      return this.userService.paginate({
+        page: Number(page),
+        limit: Number(limit),
+        route: route,
+      });
+    } else {
+      return this.userService.paginateFilterByName(
+        {
+          page: Number(page),
+          limit: Number(limit),
+          route: route,
+        },
+        { name },
+      );
+    }
+  }
   @hasRoles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id/role')

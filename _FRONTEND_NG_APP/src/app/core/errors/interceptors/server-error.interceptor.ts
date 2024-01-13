@@ -18,14 +18,14 @@ export class ServerErrorInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        // console.log('########## ERROR: ', error);
-        let errorMessage = '';
+        console.log('########## ERROR type: ', typeof error);
+        let errorMessage: any;
         if (error.error instanceof ErrorEvent) {
           errorMessage = `Message: ${error.error.message}`;
+          return throwError(() => errorMessage);
         } else {
-          errorMessage = `Text: ${error.statusText}, Code: ${error.status}, message: ${error.message}`;
+          return throwError(() => error);
         }
-        return throwError(() => errorMessage);
       })
     );
   }
