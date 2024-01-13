@@ -8,7 +8,7 @@ import { UpdateUserProfileComponent } from './components/update-user-profile/upd
 import { AuthGuard } from './guards/auth.guard';
 import { ErrorTestComponent } from './core/errors/component-test/error.test.component';
 import { AdminGuard } from './guards/userIsAdmin.guard';
-import { UserGuard } from './guards/userIsUser.guard';
+import { PreserveUserGuard } from './guards/userIsUser.guard';
 
 const routes: Routes = [
   {
@@ -36,17 +36,14 @@ const routes: Routes = [
       {
         path: ':id',
         component: UserProfileComponent,
-        canActivate: [UserGuard],
+        canActivate: [PreserveUserGuard],
       },
     ],
   },
   {
     path: 'update-profile',
     component: UpdateUserProfileComponent,
-    canActivate: [
-      AuthGuard,
-      // TODO UserIsUserGuard
-    ],
+    canActivate: [PreserveUserGuard],
   },
   {
     path: 'error-test',

@@ -2,9 +2,11 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthenticationService } from '../services/auth/authentication.service';
 import { inject } from '@angular/core';
 
-export const UserGuard: CanActivateFn = (route, state) => {
+export const PreserveUserGuard: CanActivateFn = (route, state) => {
+  const userIdFromUrl = Number(route.paramMap.get('id'));
   if (
-    !inject(AuthenticationService).userIsUser(Number(route.paramMap.get('id')))
+    !userIdFromUrl ||
+    !inject(AuthenticationService).userIsUser(userIdFromUrl)
   ) {
     inject(Router).navigate(['/login']);
     return false;

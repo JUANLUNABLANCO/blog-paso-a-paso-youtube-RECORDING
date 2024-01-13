@@ -95,7 +95,7 @@ export class AuthenticationService {
     return false;
   }
   userIsUser(userIdFromParams: number): boolean {
-    if (!this.isAuthenticated()) return false;
+    if (!userIdFromParams || !this.isAuthenticated()) return false;
     const token = this.getToken();
     if (token) {
       const idFromToken = this.getUserIdFromToken(token);

@@ -1270,6 +1270,15 @@ También se ha de configurar ciertas cosas en el app.module.ts
 ```
 
 ## Task-14 Menú, acceso, rutas, guards
-Toda la lógica para que en el menú solo aparezcan las opciones correspondientes y además que los guards  impidan el acceso a ciertas rutas si no se está authenticado.
+
+Toda la lógica para que en el menú solo aparezcan las opciones correspondientes y además que los guards impidan el acceso a ciertas rutas si no se está authenticado.
 
 // TODO Para grabar el vídeo fíjate en el otro proyecto `Blog 666` y la lógica del app.component.ts
+
+## Task 15 Guards, accesos y botones del administrador
+
+Pintaremos en la interfaz solo los botones del administrador (users | admin) si y solo si el usuario está autenticado com administrador
+
+También veremos el user is user gurad, para que solo el usuario que es el que dice ser a través del id de la ruta comprobemos que corresponde con el id del token, para la entrada en el perfil del usuario.
+
+Esta estrategia es diferente a la usada por muchos desarrolladores, que lo que hacen es volcar el peso de esa lógica totalemente en el backend permitiendo la entratda en el path desde el routing pero accediendo inmediatamente a los datos y al ser denegada la autorización por el backend devolviendo un Unauthorized code 401, y el frontned debe primero mostrar un loader y segundo rediirigir al user hacia otra ruta permitida normalmente el login, la decisió nes tuya, puedes hacer la una o la otra, lo único que cambia es la experiencia de usuario que con la primera estartegia cambia puesto que el usuario no va a ver un loader en ningún momento, nisiquiera el frontned va a permitir el acceso al path
