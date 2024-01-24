@@ -1282,3 +1282,9 @@ Pintaremos en la interfaz solo los botones del administrador (users | admin) si 
 También veremos el user is user gurad, para que solo el usuario que es el que dice ser a través del id de la ruta comprobemos que corresponde con el id del token, para la entrada en el perfil del usuario.
 
 Esta estrategia es diferente a la usada por muchos desarrolladores, que lo que hacen es volcar el peso de esa lógica totalemente en el backend permitiendo la entratda en el path desde el routing pero accediendo inmediatamente a los datos y al ser denegada la autorización por el backend devolviendo un Unauthorized code 401, y el frontned debe primero mostrar un loader y segundo rediirigir al user hacia otra ruta permitida normalmente el login, la decisió nes tuya, puedes hacer la una o la otra, lo único que cambia es la experiencia de usuario que con la primera estartegia cambia puesto que el usuario no va a ver un loader en ningún momento, nisiquiera el frontned va a permitir el acceso al path
+
+## Task 16 Donde estamos y hacia donde vamos
+
+[Enlace a Asana](https://app.asana.com/0/1204934367072674/1204934000087942)
+
+## Task 17: @ManyToOne()
