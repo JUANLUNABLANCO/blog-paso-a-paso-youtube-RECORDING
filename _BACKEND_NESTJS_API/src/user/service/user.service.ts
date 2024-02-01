@@ -1,4 +1,5 @@
 import {
+  HttpCode,
   HttpException,
   HttpStatus,
   Injectable,
@@ -17,6 +18,7 @@ import {
   Pagination,
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
+import { ErrorHandler } from 'src/core/error.handler';
 
 // TODO control de errores backend, enviar este tipo throw new NotFoundException('User not found');
 @Injectable()
@@ -30,64 +32,99 @@ export class UserService {
     user: User;
     token: string;
   }> {
-    return this.authService.hashPassword(user.password).pipe(
-      switchMap((passwordHash: string) => {
-        const newUser = new UserEntity();
-        newUser.name = user.name;
-        newUser.email = user.email;
-        newUser.password = passwordHash;
+    try {
+      // TODO Validaciones asíncronas
+      // comprobación si usuario ya existe
+      const existingUser = this.findOneByEmail(user).toPromise();
+      if (existingUser) {
+        throw new ErrorHandler({
+          type: 'BAD_REQUEST',
+          message: 'User already exists',
+        });
+      }
+      // si usuario no existe lo guardamos en la BD
+      return this.authService.hashPassword(user.password).pipe(
+        switchMap((passwordHash: string) => {
+          if (passwordHash.length === 0) {
+            throw new ErrorHandler({
+              type: 'BAD_REQUEST',
+              message: 'Password not valid, something went wrong',
+            });
+          }
+          const newUser = new UserEntity();
+          newUser.name = user.name;
+          newUser.email = user.email;
+          newUser.password = passwordHash;
 
-        // SOLO para dev/test mode
-        if (process.env.CONTROL === 'prod' || process.env.CONTROL === 'dev') {
-          newUser.role = UserRole.USER;
-        }
-        if (
-          user.email == 'admin@admin.com' &&
-          process.env.NODE_ENV !== 'prod'
-        ) {
-          newUser.role = UserRole.ADMIN;
-          // console.log('#### ADMIN REGISTER ####', newUser);
-        }
-        // SOLO para dev/test mode
+          // SOLO para dev/test mode
+          if (process.env.CONTROL === 'prod' || process.env.CONTROL === 'dev') {
+            newUser.role = UserRole.USER;
+          }
+          if (
+            user.email == 'admin@admin.com' &&
+            process.env.NODE_ENV !== 'prod'
+          ) {
+            newUser.role = UserRole.ADMIN;
+            // console.log('#### ADMIN REGISTER ####', newUser);
+          }
+          // SOLO para dev/test mode
 
-        return from(this.userRepository.save(newUser)).pipe(
-          switchMap((createdUser: User) => {
-            const { password, ...result } = createdUser;
+          return from(this.userRepository.save(newUser)).pipe(
+            switchMap((createdUser: User) => {
+              console.log('############### created User: ', createdUser);
+              // por si acaso la BD falla
+              if (!createdUser) {
+                throw new ErrorHandler({
+                  type: 'BAD_REQUEST',
+                  message: 'User not created, something went wrong',
+                });
+              }
+              const { password, ...result } = createdUser;
 
-            return this.authService.generateJWT(createdUser).pipe(
-              map((token: string) => ({
-                user: result,
-                token: token,
-              })),
-              catchError((err) => {
-                throw new HttpException(
-                  `user not created, something went wrong`,
-                  HttpStatus.BAD_REQUEST,
-                );
-              }),
-            );
-          }),
-          catchError((err) => {
-            throw new HttpException(
-              `user not created, something went wrong`,
-              HttpStatus.BAD_REQUEST,
-            );
-          }),
-        );
-      }),
-    );
+              return this.authService.generateJWT(createdUser).pipe(
+                map((token: string) => ({
+                  user: result,
+                  token: token,
+                })),
+                // generate JWT errors
+                catchError((err) => {
+                  throw new ErrorHandler({
+                    type: 'BAD_REQUEST',
+                    message: 'Token not created, something went wrong',
+                  });
+                }),
+              );
+            }),
+            catchError((err) => {
+              // throw new ErrorHandler.createSignatureError(err.message);
+              throw new ErrorHandler({
+                type: 'NOT_ACCEPTABLE',
+                message: 'User not created, something went wrong',
+              });
+            }),
+          );
+        }),
+      );
+    } catch (err) {
+      throw ErrorHandler.createSignatureError(err.message);
+    }
   }
   findOne(id: number): Observable<User> {
-    return from(this.userRepository.findOneBy({ id })).pipe(
-      map((user: User) => {
-        if (user) {
-          const { password, ...result } = user;
-          return result;
-        } else {
-          return null;
-        }
-      }),
-    );
+    try {
+      return from(this.userRepository.findOneBy({ id })).pipe(
+        map((user: User) => {
+          if (!user) {
+            ErrorHandler.handleNotFoundError('User not found');
+          } else {
+            const { password, ...result } = user;
+            return result;
+          }
+        }),
+      );
+    } catch (error) {
+      // otro tipo de errores no controlados
+      throw error;
+    }
   }
 
   findOneByEmail(user: User): Observable<User> {
@@ -99,7 +136,7 @@ export class UserService {
       }),
     );
   }
-  emailExist(user: User): Observable<boolean> {
+  checkEmailExist(user: User): Observable<boolean> {
     return from(
       this.userRepository
         .findOne({

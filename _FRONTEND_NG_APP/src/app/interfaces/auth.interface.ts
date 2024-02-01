@@ -6,7 +6,7 @@ export interface LoginForm {
 export interface RegisterForm {
   name: string;
   email: string;
-  passowrd: string;
+  password: string;
   role?: string;
 }
 
@@ -28,8 +28,5 @@ export interface JWTDecoded {
     id: number;
     name: string;
     email: string;
-  }
+  };
 }
-
-
-

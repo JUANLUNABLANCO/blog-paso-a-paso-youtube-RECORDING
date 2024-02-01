@@ -7,8 +7,8 @@ import {
   RegisterForm,
 } from '../../interfaces/auth.interface';
 import { environment } from '../../../environments/environment';
-import { of, Observable, BehaviorSubject } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { of, Observable, BehaviorSubject, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { User, UserRole } from 'src/app/interfaces/user.interface';
 
@@ -43,8 +43,10 @@ export class AuthenticationService {
   ): Observable<{ user: User; access_token: string }> {
     return this.http.post<any>(`${BASE_URL}/api/users`, user).pipe(
       tap(({ user, access_token }) => {
-        console.log('#### user', user);
-        this.loginAfterRegistration(access_token);
+        if (user && access_token) {
+          console.log('#### user', user);
+          this.loginAfterRegistration(access_token);
+        }
       })
     );
   }
@@ -74,12 +76,14 @@ export class AuthenticationService {
       );
   }
   private loginAfterRegistration(token: string): void {
-    // anotar el token en el localstorage
-    localStorage.setItem(JWT_NAME, token);
-    // setear el id en el behavior subject
-    this.fetchAndSetUserIdFromToken().subscribe();
-    // comunicar el estado del suario autenticado
-    this.isLoggedSubject.next(true);
+    if (token) {
+      // anotar el token en el localstorage
+      localStorage.setItem(JWT_NAME, token);
+      // setear el id en el behavior subject
+      this.fetchAndSetUserIdFromToken().subscribe();
+      // comunicar el estado del suario autenticado
+      this.isLoggedSubject.next(true);
+    }
   }
 
   isAuthenticated(): boolean {

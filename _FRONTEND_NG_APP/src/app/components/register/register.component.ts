@@ -100,14 +100,21 @@ export class RegisterComponent {
   }
   onSubmit(form: FormGroup) {
     if (this.formRegister.invalid) {
+      this.formRegister.markAllAsTouched();
       return;
     }
     this.authService
-      .registerAndLogin(form.value)
+      .registerAndLogin({
+        name: form.value.name,
+        email: 'pollo01@gmail.com',
+        password: form.value.password,
+      })
       .pipe(
         map(({ user, access_token }) => {
-          console.log('## resp: ', user, access_token);
-          this.router.navigate([`/users/${user.id}`]);
+          if (user && access_token) {
+            console.log('## resp: ', user, access_token);
+            this.router.navigate([`/users/${user.id}`]);
+          }
         })
       )
       .subscribe();

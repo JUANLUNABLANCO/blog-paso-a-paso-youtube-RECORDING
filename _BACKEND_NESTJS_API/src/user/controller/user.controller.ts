@@ -1,3 +1,4 @@
+// external
 import {
   Body,
   Controller,
@@ -14,18 +15,21 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { Observable, of, from } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { Pagination } from 'nestjs-typeorm-paginate';
+// mine
+import { ConfigService } from '@nestjs/config';
 import { User, UserRole, File } from '../model/user.interface';
 import { hasRoles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Pagination } from 'nestjs-typeorm-paginate';
-import { ConfigService } from '@nestjs/config';
+import { UserIsUserGuard } from '../../auth/guards/userIsUser.guard';
+// files
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path = require('path');
-import { UserIsUserGuard } from '../../auth/guards/userIsUser.guard';
 
 export const storage = {
   storage: diskStorage({
@@ -57,7 +61,7 @@ export class UserController {
       map(({ user, token }) => {
         return { user: user, access_token: token };
       }),
-      catchError((err) => of({ error: err.message })),
+      // catchError((err) => of({ error: err.message })),
     );
   }
   @Post('login')
@@ -70,7 +74,10 @@ export class UserController {
     );
   }
 
+  // TODO logout
+
   // TODO user is user or user is Admin
+  // @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
   findOne(@Param() params): Observable<User> {
     return this.userService.findOne(params.id);
@@ -81,10 +88,10 @@ export class UserController {
     return this.userService.findOneByEmail(user);
   }
 
-  @Post('exist')
+  @Post('check-email-exists')
   emailExist(@Body() user: User): Observable<boolean> {
     user.email = user.email.toLowerCase();
-    return this.userService.emailExist(user);
+    return this.userService.checkEmailExist(user);
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
@@ -99,7 +106,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
-  @Put(':id/password')
+  @Put(':id/change-password')
   updatePassword(@Param('id') id: string, @Body() user: User): Observable<any> {
     // TODO condiciones especiales, forgot password?, etc.
     return this.userService.updatePassword(Number(id), user);

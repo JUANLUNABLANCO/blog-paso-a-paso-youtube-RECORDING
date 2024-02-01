@@ -13,7 +13,7 @@ export class ErrorService {
   getServerErrorMessage(error: HttpErrorResponse): string {
     console.log('#### server error message', error.error);
     return navigator.onLine
-      ? `${error.error.message}, ${error.error.statusCode}`
+      ? `${error.statusText}, ${error.status}`
       : 'No Internet Connection';
   }
 }

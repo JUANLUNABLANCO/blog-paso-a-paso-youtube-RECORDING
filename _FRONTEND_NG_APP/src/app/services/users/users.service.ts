@@ -20,7 +20,7 @@ export class UsersService {
 
   userExist(email: string): Observable<boolean> {
     return from(
-      this.http.post<any>(`${BASE_URL}/api/users/exist`, {
+      this.http.post<any>(`${BASE_URL}/api/users/check-email-exists`, {
         email: email.toLowerCase(),
       })
     );

@@ -1285,6 +1285,117 @@ Esta estrategia es diferente a la usada por muchos desarrolladores, que lo que h
 
 ## Task 16 Donde estamos y hacia donde vamos
 
-[Enlace a Asana](https://app.asana.com/0/1204934367072674/1204934000087942)
+nothing here
 
 ## Task 17: @ManyToOne()
+
+Archivos que crearemos:
+
+blog.module.ts, blog-entry.entity.ts, blog-entry.interface...
+
+[Enlace tarea en Asana](https://app.asana.com/0/1204934367072674/1205414675863245/f)
+
+Creamos la rama para esta tarea:
+
+```bash
+git flow feature start task_17_ManyToOne
+```
+
+Después iremos a la carpeta del backend y crearemos el módulo:
+
+```bash
+# npm i -g @nestjs/cli
+nest generate module blog
+CREATE src/blog/blog.module.ts (81 bytes)
+UPDATE src/app.module.ts (840 bytes)
+```
+
+Te genera este archivo: blog.module.ts y actualiza el app.mdule.ts
+
+```typescript
+import { Module } from '@nestjs/common'
+
+@Module({})
+export class BlogModule {}
+```
+
+Crearemos dos ficheros dentro de la carpeta ./blog/model: `blog-entry.model.ts` y `blog-entry.entity.ts`
+
+```typescript
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
+@Entity('blog_entry')
+export class BlogEntryEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @Column({ unique: true })
+  slug: string;
+
+  ...
+```
+
+Debemos actualizar nuestro `user.entity` y `user.interface`
+
+```typescript
+// user.entity
+@OneToMany(
+    (type) => BlogEntryEntity,
+    (blogEntryEntity) => blogEntryEntity.author,
+  )
+  blogEntries: BlogEntryEntity[];
+
+// user.interface
+interface User {
+  ...
+  blogEntries?: BlogEntry[];
+  }
+```
+
+y ahora podremos hacer referencia al autor desde blog-entry
+
+```typescript
+...
+@ManyToOne((type) => UserEntity, (user) => user.blogEntries)
+  author: UserEntity;
+```
+
+Arranquemos DockerDesktop, la base de datos y el backend, para ver lo que hemos hecho ahasta ahora, si funciona
+
+```bash
+# in /_BACKEND_NETSJS_API
+npm run docker:db:dev
+
+npm  run nest:dev
+```
+
+Si obteneis este error:
+
+```bash
+TypeORMError: Entity metadata for UserEntity#blogEntries was not found. Check if you specified a correct entity object and if it's connected in the connection options.
+```
+
+Esto es debido a la configuración del módulo, debemos configurar el imports.
+
+```typescript
+imports: [TypeOrmModule.forFeature([BlogEntryEntity]), AuthModule, UserModule]
+```
+
+Si abrimos la base de datos vemos que la tabla está creada aunque vacía. Y en usuarios no hay ningún campo añadido
+
+```bash
+ git status
+ git addd .
+ git commit -m "Task_17: Many To One relationship with user and blog entries finish."
+ git push
+ git flow feature finish
+```
+
+Hasta aquí este vídeo, espero os haya gustado, si es así ya sabéis, click in like, comment, shared, subscribe, donar en patreon, Onlyfans, os coratis el pelo al cero y hacéis balconning sin piscina.
+
+## vX Control de errores NestJs
+
+vamos a crear un error handler para dar respuesta a los http response errors
