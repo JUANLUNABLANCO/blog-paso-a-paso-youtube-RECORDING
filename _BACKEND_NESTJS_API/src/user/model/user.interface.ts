@@ -1,6 +1,6 @@
 import { BlogEntry } from 'src/blog/model/blog-entry.interface';
 
-export interface User {
+export interface IUser {
   id?: number;
   name?: string;
   email?: string;

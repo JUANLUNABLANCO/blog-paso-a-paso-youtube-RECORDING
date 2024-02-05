@@ -103,12 +103,13 @@ export class RegisterComponent {
       this.formRegister.markAllAsTouched();
       return;
     }
+    // {
+    //    name: form.value.name,
+    //    email: 'pollo01@gmail.com',
+    //    password: form.value.password,
+    //  }
     this.authService
-      .registerAndLogin({
-        name: form.value.name,
-        email: 'pollo01@gmail.com',
-        password: form.value.password,
-      })
+      .registerAndLogin(form.value)
       .pipe(
         map(({ user, access_token }) => {
           if (user && access_token) {

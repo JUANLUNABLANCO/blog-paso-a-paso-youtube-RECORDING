@@ -20,7 +20,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Pagination } from 'nestjs-typeorm-paginate';
 // mine
 import { ConfigService } from '@nestjs/config';
-import { User, UserRole, File } from '../model/user.interface';
+import { IUser, UserRole, File } from '../model/user.interface';
 import { hasRoles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -30,6 +30,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path = require('path');
+import { IUserCreateResponse, UserCreateDto } from '../model/user-create.dto';
+import { IUserLoginResponse, UserLoginDto } from '../model/user-login.dto';
 
 export const storage = {
   storage: diskStorage({
@@ -50,9 +52,9 @@ export class UserController {
   ) {}
 
   @Post()
-  create(@Body() user: User): Observable<
+  create(@Body() user: UserCreateDto): Observable<
     | {
-        user: User;
+        user: IUserCreateResponse;
         access_token: string;
       }
     | { error: any }
@@ -65,7 +67,7 @@ export class UserController {
     );
   }
   @Post('login')
-  login(@Body() user: User): Observable<{ access_token: any }> {
+  login(@Body() user: UserLoginDto): Observable<IUserLoginResponse> {
     console.log('## USER CONTROLLER: IN LOGIN ', user);
     return this.userService.login(user).pipe(
       map((jwt: string) => {
@@ -79,24 +81,24 @@ export class UserController {
   // TODO user is user or user is Admin
   // @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
-  findOne(@Param() params): Observable<User> {
+  findOne(@Param() params): Observable<IUser> {
     return this.userService.findOne(params.id);
   }
 
   @Post('email')
-  findOneByEmail(@Body() user: User): Observable<User> {
+  findOneByEmail(@Body() user: IUser): Observable<IUser> {
     return this.userService.findOneByEmail(user);
   }
 
   @Post('check-email-exists')
-  emailExist(@Body() user: User): Observable<boolean> {
+  emailExist(@Body() user: IUser): Observable<boolean> {
     user.email = user.email.toLowerCase();
     return this.userService.checkEmailExist(user);
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(':id')
-  updateOne(@Param('id') id: string, @Body() user: User): Observable<any> {
+  updateOne(@Param('id') id: string, @Body() user: IUser): Observable<any> {
     console.log('### USER: ', user);
     // solo permitimos el cambio de nombre y de email
     delete user.role;
@@ -107,7 +109,10 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(':id/change-password')
-  updatePassword(@Param('id') id: string, @Body() user: User): Observable<any> {
+  updatePassword(
+    @Param('id') id: string,
+    @Body() user: IUser,
+  ): Observable<any> {
     // TODO condiciones especiales, forgot password?, etc.
     return this.userService.updatePassword(Number(id), user);
   }
@@ -116,7 +121,7 @@ export class UserController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
   uploadFile(@UploadedFile() file, @Request() req): Observable<File> {
-    const user: User = req.user.user;
+    const user: IUser = req.user.user;
 
     console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL')); // aquí si funciona
     console.log('#### file name: ', file.filename);
@@ -124,8 +129,8 @@ export class UserController {
     return this.userService
       .updateOne(user.id, { profileImage: file.filename })
       .pipe(
-        tap((user: User) => console.log(user)),
-        map((user: User) => ({ profileImage: user.profileImage })),
+        tap((user: IUser) => console.log(user)),
+        map((user: IUser) => ({ profileImage: user.profileImage })),
       );
   }
 
@@ -159,7 +164,7 @@ export class UserController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('name') name: string,
-  ): Observable<Pagination<User>> {
+  ): Observable<Pagination<IUser>> {
     limit = limit > 100 ? 100 : limit;
 
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/users`;
@@ -186,7 +191,7 @@ export class UserController {
   @Put(':id/role')
   updateRoleOfUser(
     @Param('id') id: string,
-    @Body() user: User,
+    @Body() user: IUser,
   ): Observable<any> {
     const roles = Object.values(UserRole);
     // console.log('## roles keys', roles);

@@ -1396,6 +1396,378 @@ Si abrimos la base de datos vemos que la tabla está creada aunque vacía. Y en 
 
 Hasta aquí este vídeo, espero os haya gustado, si es así ya sabéis, click in like, comment, shared, subscribe, donar en patreon, Onlyfans, os coratis el pelo al cero y hacéis balconning sin piscina.
 
-## vX Control de errores NestJs
+## Task 18: Control de errores NestJs
 
-vamos a crear un error handler para dar respuesta a los http response errors
+Para controlar errores vamos a hacer dos cosas:
+
+1. Crear un handler de errores de tipo http que nos ayude en principio, a diferenciar los errores http y las respuestas a priori.
+2. Crear un interceptor para que nos permita mostrar los errores en la interfaz. Nest lo llama filter. Este interceptor o filter se encargará no solo de los errores de tipo http sino todo tipo de errores y así poder mostrarlos en la interfaz y que la app no se rompa.
+
+**1a parte: error handler**
+
+```typescript
+import { HttpException, HttpStatus } from '@nestjs/common'
+
+export class ErrorHandler extends Error {
+  constructor({
+    type,
+    message,
+  }: {
+    type: keyof typeof HttpStatus
+    message: string
+  }) {
+    super(`${type} :: ${message}`)
+  }
+  public static handleNotFoundError(message: string) {
+    throw new HttpException(message, HttpStatus.NOT_FOUND)
+  }
+  public static handleUnauthorizedError(message: string) {
+    throw new HttpException(message, HttpStatus.UNAUTHORIZED)
+  }
+  public static handleBadRequestError(message: string) {
+    throw new HttpException(message, HttpStatus.BAD_REQUEST)
+  }
+  public static createSigantureError(message: string) {
+    const name = message.split(' :: ')[0]
+    if (name) {
+      throw new HttpException(message, HttpStatus[name])
+    } else {
+      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+}
+```
+
+básicamente esta clase nos permite crear una excepción con un mensaje y un tipo de error, que hereda de la clase Error.
+La clase error solo quiere que le pasemos un string, nosotros le metemos en el satring el type y el message para usarlo a nuestro antojo, las clases son estáticas no necesitamos instanciarlas, y la forma de usarlas es la siguiente.
+
+```typescript
+// user.service.ts
+create(user: User): Observable<{
+    user: User;
+    token: string;
+  }> {
+    // Comprobar si el usuario existe en la base de datos
+    try {
+      // TODO validación de campos
+      return this.authService.hashPassword(user.password).pipe(
+        // TODO validar todos los campos, que existen y son válidos
+        switchMap((passwordHash: string) => {
+          // console.log('#### userExists: ', userExists);
+          // if (!userExists) {
+          const newUser = new UserEntity();
+          if (!newUser) {
+            console.log('############### entra');
+            throw new ErrorHandler({
+              type: 'BAD_REQUEST',
+              message: 'user not created, something went wrong 1',
+            });
+          }
+          newUser.name = user.name;
+          newUser.email = user.email;
+          newUser.password = passwordHash;
+
+          if (process.env.CONTROL === 'prod' || process.env.CONTROL === 'dev') {
+            newUser.role = UserRole.USER;
+          }
+          if (user.email == 'admin@admin.com') {
+            newUser.role = UserRole.ADMIN;
+            console.log('#### ADMIN REGISTER ####', newUser);
+          }
+
+          return from(this.userRepository.save(newUser)).pipe(
+            switchMap((createdUser: User) => {
+              if (createdUser) {
+                const { password, ...result } = createdUser;
+
+                return this.authService.generateJWT(createdUser).pipe(
+                  map((token: string) => ({
+                    user: result,
+                    token: token,
+                  })),
+                  catchError((err) => {
+                    throw new ErrorHandler({
+                      type: 'BAD_REQUEST',
+                      message: 'user not created, something went wrong 2',
+                    });
+                  }),
+                );
+              }
+            }),
+            catchError((err) => {
+              throw ErrorHandler.createSigantureError(err.message);
+            }),
+          );
+        }),
+      );
+    } catch (err) {
+      throw err;
+    }
+  }
+```
+
+el create signature es para controlar los errores que se salen de nuestro alcance dentro de los maps, se ponen a nivel de bloque debajo de cada return
+
+**2a parte: All Exceptions Filter**
+Por último al crear, nuestro filtro de errores de la siguiente manera:
+
+```typescript
+// all-exceptions.filter.ts
+import { ArgumentsHost, Catch, HttpException, HttpStatus } from '@nestjs/common'
+import { BaseExceptionFilter } from '@nestjs/core'
+
+@Catch()
+export class AllExceptionsFilter extends BaseExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp()
+    const response = ctx.getResponse()
+    const request = ctx.getRequest()
+
+    if (exception instanceof HttpException) {
+      response.status(exception.getStatus()).json({
+        statusCode: exception.getStatus(),
+        message: exception.message,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      })
+    } else {
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Internal Server Error',
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      })
+    }
+  }
+}
+```
+
+Diferenciará entre los errores http, que hemos manejado con en error handler y el resto de errores, pero además le añade más información a la estructura (timestamp y path)
+
+Para aplicar este hay que añadirlo en el app.module.ts
+
+```typescript
+ providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
+```
+
+## Task 19: Validaciones Asíncronas con NestJs
+
+**Antes de empezar**
+
+```bash
+
+git flow feature start async-validations
+```
+
+Nos vamos al bootstrap de nuestra app, para usar el método usGlobalsPipes.
+
+```typescript
+// main.ts
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, { cors: true });
+  // Validaciones con pipe
+  app.useGlobalPipes(new ValidationPipe());
+```
+
+Co eso estaría ahora vamos a crear nuestros DTO´s, recordar que tenmos el `user.interface.ts`, pero esto no es demasiado profesional porque estamos indicando una interfaz genérica que nos sirve para todo tipo de entradas y salidas para los CRUD´s, veámos esa interfaz como está ahora mismo:
+
+```typescript
+// user.interface.ts
+import { BlogEntry } from '../../blog/model/blog-entry.interface'
+
+export interface User {
+  id?: number
+  name?: string
+  email?: string
+  password?: string
+  role?: UserRole
+  profileImage?: string
+  blogEntries?: BlogEntry[]
+}
+
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+export interface File {
+  profileImage: string
+}
+```
+
+Como vemos cada uno de los parámetros del User tiene el signo `?` que indica que ese puede no estar presente, esto no es demasiado estricto y podríamos crear un usuario con simplemente uno de sus campos.
+
+**Validaciones con DTO´s**
+
+Antes de nada debemos instalar una librería en la que se apoya el ValidationPipe()
+
+```bash
+npm i --save class-validator
+```
+
+[documentación class validator](https://github.com/typestack/class-validator)
+
+esta otra librería es para hacer transformaciones de objetos planos en clases y viceversa, yo no lo voy a usar en esta ocasión, pero te dejo enlace por aquí si quieres probarlo.
+
+[documentación class transformer](https://github.com/typestack/class-transformer)
+
+**Class Validator** esta librerías usan @ para validar el tipo como: @IsString
+
+```typescript
+// user.create.dto.ts
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength, Enum } from 'class-validator';
+
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+
+export class UserCreateDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  name: string;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  password: string;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(255)
+  profileImage: string;
+
+  // @IsString()
+  // @enum(UserRole)
+  // role?: string;
+```
+
+**Configuraciones para ver si funciona**
+Hay que decir que dar información acerca de la creación de un usuario al frontend es una vulnerabilidad que debemos evitar:
+No obstante si queremos ver su funcionamiento debemos deshabilitar moemntáneamente nuestro Filtro de errores y configurar algo en el pipe
+
+```typescript
+// app.module.ts
+providers: [
+    AppService,
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: AllExceptionsFilter,
+    // },
+```
+
+```typescript
+//main.ts
+// Validaciones con pipe
+app.useGlobalPipes(
+  new ValidationPipe({
+    disableErrorMessages: false,
+    errorHttpStatusCode: 406,
+  }),
+)
+```
+
+`disableErrorMessages: false`, esto viene por defecto a true, el otro es para que devuelva un 406 en vez de 400 'BAD_REQUEST'
+
+Si enviáramos este body, en el registro de un usuario
+
+```json
+{
+    "name": 1234,
+    "email": "correo@valido.es",
+    "password": "test12345678"
+}
+// recibiríamos esta respuesta
+{
+  "message": [
+    "name must be shorter than or equal to 50 characters",
+    "debe tener al menos 3 caracteres",
+    "name must be a string"
+  ],
+  "error": "Not Acceptable",
+  "statusCode": 406
+}
+```
+
+Podemos volver a dejar todo como estaba, en cuanto al main.ts, esto lo habilitais o deshabilitais si queréis ver los mensajes de validación, y cuando todas las validaciones estén controladas en los DTO´s sería bueno que le pasárais el control al Error Handler
+
+```typescript
+{
+  provide: APP_FILTER,
+  useClass: AllExceptionsFilter,
+},
+```
+
+**login DTO**
+
+```typescript
+import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator'
+
+export class UserLoginDto {
+  @IsEmail()
+  email: string
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  password: string
+}
+
+export interface IUserLoginResponse {
+  access_token: string
+}
+```
+
+**la caché me perjudica en el desarrollo**
+Antes de continuar. tras realizar algunas pruebas y cambiar la configuración del `main.ts` con respecto al `validationPipe`, resulta que no vemos esos cambios. Tras informarme a qué puede ser debido, encontramos que lo más lógico es que `la caché de Nest` esté funcionando, así que, nos proponemos controlar esto para el modo `test` y el modo `dev`
+
+[documentación memory caché](https://www.npmjs.com/package/cache-manager)
+
+```bash
+npm i --save memory-cache
+```
+
+```typescript
+import * as cacheManager from 'cache-manager'
+
+const isDevelopment = process.env.NODE_ENV === 'dev'
+const isProduction = process.env.NODE_ENV === 'prod'
+const isTesting = process.env.NODE_ENV === 'test'
+
+if (isDevelopment || isTesting) {
+  // Deshabilitar la caché en modo de desarrollo y de prueba
+  cacheManager.caching({ store: 'memory', max: 0 })
+} else if (isProduction) {
+  // Configurar la caché para el entorno de producción
+  // Aquí puedes establecer la configuración de caché deseada para producción
+}
+```
+
+**Reto o tareas pendientes**
+Tarea que os dejo a vosotros, y que en la próxima entrega iréis viendo la solución, así os probáis a vosotros mismos si sois capaces de relizarlo, y si mi cometido como desarrollador y comunicador tiene el efecto que espero en vosotros. La tarea es muy sencilla:
+
+1. controlar todos los errores usando nuestro `ErrorHandler` y el `try catch`, en todas las funciones del user, blog y auth.
+2. crear los DTO´s para las validaciones de todas las funciones que faltan: Yo he creado algunos, pero no todos, por lo que sería bueno que intentárais hacer los que podáis y en el próximo vídeo tendréis todos lso DTO´s creados y controles de error.
+
+**Conclusiones**
+
+Hemos aprendido a validar nuestros campos con el `ValidationPipe`, que nos llegan en el body de cada petición, además al mismo tiempo a utilizar los DTO´s para las entradas de datos (Request) y las interfaces para las salidas de datos (Response)
+
+Por otro lado tenemos un control total de los errores devueltos.
+
+y hemos aprendido a cómo gestionar la caché dependiendo del modo en el que estemos.
+
+## 20 Blog Entries we contiue

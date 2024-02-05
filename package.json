@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "cache-manager": "^5.4.0",
+    "class-validator": "^0.14.1"
+  }
+}

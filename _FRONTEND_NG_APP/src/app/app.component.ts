@@ -108,7 +108,7 @@ export class AppComponent implements OnInit {
     if (value !== 'logout') {
       this.router.navigate([value]);
     } else {
-      this.authService.logout();
+      this.authService.advancedLogout();
     }
   }
 }

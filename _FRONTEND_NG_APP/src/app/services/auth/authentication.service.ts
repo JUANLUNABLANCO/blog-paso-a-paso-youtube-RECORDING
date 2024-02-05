@@ -43,10 +43,13 @@ export class AuthenticationService {
   ): Observable<{ user: User; access_token: string }> {
     return this.http.post<any>(`${BASE_URL}/api/users`, user).pipe(
       tap(({ user, access_token }) => {
-        if (user && access_token) {
-          console.log('#### user', user);
-          this.loginAfterRegistration(access_token);
-        }
+        // if (user && access_token) {
+        console.log('#### user', user);
+        this.loginAfterRegistration(access_token);
+        return { user, access_token };
+        // } else {
+        // return throwError(() => 'Error en el registro');
+        // } // el manejador de errores se encarga
       })
     );
   }
@@ -125,7 +128,22 @@ export class AuthenticationService {
       return of(null);
     }
   }
-  logout() {
+  advancedLogout(): Observable<any> {
+    return this.http
+      .post<User>(
+        `${BASE_URL}/api/users/logout`,
+        {},
+        { withCredentials: true } // esto es enviando el token en la petición
+      )
+      .pipe(
+        tap((message) => {
+          this.logout();
+          console.log('# AuthService.logout: ', message);
+          return message;
+        })
+      );
+  }
+  private logout() {
     // TODO si tuviéramos un backend, yo personalmente, avisaría al backend a través de una petición http GET para que ajuste sus cosas y resetee al usuario de la request, el jwt, etc. por seguridad.
     localStorage.removeItem(JWT_NAME);
     // comunicar el estado del usuario no autenticado
