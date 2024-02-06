@@ -1,16 +1,24 @@
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class UserLoginDto {
-  @IsEmail({}, { message: 'email incorrecto' })
+  @IsEmail({}, { message: 'email debe ser válido' })
+  @IsNotEmpty({ message: 'email es requerido' })
   email: string;
 
-  @IsString({ message: 'password incorrecto' })
+  @IsString({ message: 'password debe ser un string' })
   @MinLength(3, {
     message: 'password incorrecto debes tener mas de 3 caracteres',
   })
   @MaxLength(50, {
     message: 'password incorrecto debe ser menor de 50 caracteres',
   })
+  @IsNotEmpty({ message: 'password es requerida' })
   password: string;
 }
 

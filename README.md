@@ -1556,7 +1556,18 @@ Para aplicar este hay que añadirlo en el app.module.ts
   ],
 ```
 
-## Task 19: Validaciones Asíncronas con NestJs
+## Task 19: Validaciones con NestJs
+
+**Aceptance Criteria**
+
+1. Usar Validation Pipe
+2. Usar Validaciones con DTOs
+3. Usar Validaciones con Decorators de class validator library y class transformer
+4. Usar Validaciones con Clases de DTO´s para las requests
+5. Usar Validaciones con Interfaces para las responses
+6. Manejar todos los errores de validación de forma correcta
+7. Utilizar Error Handler para el resto de funciones
+8. Manejar la caché para que no interfiera en neustras peticiones en `dev` o `test` Mode.
 
 **Antes de empezar**
 
@@ -1565,7 +1576,7 @@ Para aplicar este hay que añadirlo en el app.module.ts
 git flow feature start async-validations
 ```
 
-Nos vamos al bootstrap de nuestra app, para usar el método usGlobalsPipes.
+Nos vamos al bootstrap de nuestra app, para usar el método useGlobalsPipes.
 
 ```typescript
 // main.ts
@@ -1770,4 +1781,8 @@ Por otro lado tenemos un control total de los errores devueltos.
 
 y hemos aprendido a cómo gestionar la caché dependiendo del modo en el que estemos.
 
+// WARNING te faltan los errores y el resto de DTO´s
+
 ## 20 Blog Entries we contiue
+
+https://app.asana.com/0/1204934367072674/1205421367853549/f
