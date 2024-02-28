@@ -81,6 +81,7 @@ export class UserController {
       }),
     );
   }
+  @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get('logout/:userId')
   logout(@Param('userId') userId: string): Observable<IUserLogoutResponse> {
     console.log('#### logout id: ', Number(userId));
@@ -132,11 +133,11 @@ export class UserController {
   //   return this.userService.updatePassword(Number(id), user);
   // }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
   uploadFile(@UploadedFile() file, @Request() req): Observable<File> {
-    const user: IUser = req.user.user;
+    const user: IUser = req.user;
 
     console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL')); // aquí si funciona
     console.log('#### file name: ', file.filename);
@@ -172,8 +173,9 @@ export class UserController {
   // findAll(): Observable<User[]> {
   //   return this.userService.findAll();
   // }
-  @hasRoles(UserRole.ADMIN)
+
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRole.ADMIN)
   @Get()
   index(
     @Query('page') page = 1,
@@ -201,8 +203,8 @@ export class UserController {
       );
     }
   }
-  @hasRoles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRole.ADMIN)
   @Put(':id/role')
   updateRoleOfUser(
     @Param('id') id: string,
@@ -216,8 +218,8 @@ export class UserController {
       return of({ error: `Role '${user.role}' not allowed` });
     }
   }
-  @hasRoles(UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(UserRole.ADMIN)
   @Delete(':id')
   deleteOne(@Param('id') id: string): Observable<any> {
     return this.userService.deleteOne(Number(id));

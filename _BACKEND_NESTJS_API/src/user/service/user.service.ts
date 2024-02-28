@@ -312,7 +312,7 @@ export class UserService {
       blogEntries: result.blogEntries,
     };
   }
-  checkEmailExist(user: IUser): Observable<boolean> {
+  checkEmailExists(user: IUser): Observable<boolean> {
     try {
       return from(
         this.userRepository
