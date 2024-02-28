@@ -1,22 +1,26 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthenticationService } from '../../services/auth/authentication.service';
+import { map, take, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { LoggingService } from '../../core/services/logging.service';
+// TODO @URLS
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   formLogin: FormGroup;
   userId!: number;
+  userIdSubscription: Subscription | undefined;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthenticationService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -31,16 +35,22 @@ export class LoginComponent implements OnInit {
         ],
       ],
     });
-
-    this.authService.userId$
-      .pipe(
-        map((userId: number | null) => {
-          if (userId) this.userId = userId;
-        })
-      )
-      .subscribe();
+    // WARNING ¿De verdad queremos subscribirnos al que hay en ese momento al entrar al login?
+    // eso impedirá que otro usuario pueda loguearse mientras estamos logueados, lo que impide cambiar de usuario
+    // prueba las dos formas
+    // Suscribirse al userId$
+    // this.userIdSubscription = this.authService.userId$
+    //   .pipe(
+    //     map((userId: number | null) => {
+    //       if (userId !== null) {
+    //         console.log('#### Login #### userId$: ', userId);
+    //         this.userId = userId;
+    //       }
+    //     }),
+    //   )
+    //   .subscribe();
   }
-
+  // # getters
   get emailField() {
     return this.formLogin.get('email');
   }
@@ -52,15 +62,35 @@ export class LoginComponent implements OnInit {
     if (this.formLogin.invalid) {
       return;
     }
-    // TODO manejo de errores por consola, dentro del subscribe y uso del tap y redirección al perfil del usuario
-    this.authService.login(this.formLogin.value).subscribe({
-      next: (token) => {
-        if (token) {
-          const userId = this.authService.getBehaviorUserId();
-          if (userId) this.userId = userId;
-          this.router.navigate(['users', this.userId]);
-        }
-      },
-    });
+    // DOIT refactorized this code to use the service and control the error
+    this.authService
+      .login(form.value)
+      .pipe(
+        tap((token) => {
+          if (token) {
+            LoggingService.consoleLog(`## token: ${token}`);
+            // Suscribirse al userId$
+            this.userIdSubscription = this.authService.userId$
+              .pipe(
+                take(1),
+                tap((userId: number | null) => {
+                  if (userId !== null) {
+                    this.userId = userId;
+                    this.router.navigate(['users', this.userId]);
+                  }
+                }),
+              )
+              .subscribe();
+          }
+        }),
+      )
+      .subscribe();
+  }
+
+  ngOnDestroy() {
+    // Desuscribirse para evitar fugas de memoria
+    if (this.userIdSubscription) {
+      this.userIdSubscription.unsubscribe();
+    }
   }
 }

@@ -2,7 +2,6 @@ export interface LoginForm {
   email: string;
   password: string;
 }
-
 export interface RegisterForm {
   name: string;
   email: string;
@@ -16,9 +15,10 @@ export interface JWT {
     typ: string;
   };
   payload: {
-    sub: string;
-    exp: number;
-    iat: number;
+    sub: string; // Sujeto (subject)
+    exp: number; // Fecha de expiración (timestamp)
+    iat: number; // Fecha de emisión (timestamp)
+    // Otras claims (reclamaciones) según tus necesidades
   };
   signature: string;
 }
@@ -26,7 +26,7 @@ export interface JWT {
 export interface JWTDecoded {
   user: {
     id: number;
-    name: string;
+    name: string,
     email: string;
-  };
+  }
 }

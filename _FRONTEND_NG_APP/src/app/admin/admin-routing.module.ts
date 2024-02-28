@@ -3,11 +3,12 @@ import { RouterModule, Routes } from '@angular/router';
 import { OverviewComponent } from './components/overview/overview.component';
 
 const routes: Routes = [
-  { 
-    path: '', 
-    pathMatch: 'full', 
-    component: OverviewComponent 
-  },
+  {
+    path: '',
+    pathMatch: 'full',
+    component: OverviewComponent,
+    // TODO canAvtivate: ['AuthGuard', 'AdminGuard']
+  }
 ];
 
 @NgModule({

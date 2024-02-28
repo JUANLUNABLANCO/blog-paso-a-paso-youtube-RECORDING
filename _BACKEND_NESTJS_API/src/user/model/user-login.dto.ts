@@ -25,3 +25,6 @@ export class UserLoginDto {
 export interface IUserLoginResponse {
   access_token: string;
 }
+export interface IUserLogoutResponse {
+  access_token: string;
+}

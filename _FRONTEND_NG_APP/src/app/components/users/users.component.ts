@@ -1,10 +1,9 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { UsersPaginated } from '../../interfaces/user.interface';
+import { UsersService } from '../../services/users/users.service';
+import { map } from 'rxjs/operators';
 import { PageEvent } from '@angular/material/paginator';
-import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, catchError, map, throwError } from 'rxjs';
-import { UsersPaginated } from 'src/app/interfaces/user.interface';
-import { UsersService } from 'src/app/services/users/users.service';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-users',
@@ -14,7 +13,7 @@ import { UsersService } from 'src/app/services/users/users.service';
 export class UsersComponent implements OnInit {
   // tabla
   dataSource: UsersPaginated;
-  displayedColumns: string[] = ['id', 'name', 'email', 'role'];
+  displayedColumns = ['id', 'name', 'email', 'role'];
 
   // paginator
   pageEvent: PageEvent;
@@ -23,13 +22,13 @@ export class UsersComponent implements OnInit {
   // filtering
   filterValue: string;
 
-  // control errores
-  errMessage!: string;
+  // control de errores
+  // public errorMessage!: string;
 
   constructor(
-    private userService: UsersService,
+    private usersService: UsersService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -37,50 +36,59 @@ export class UsersComponent implements OnInit {
   }
 
   initDataSource() {
-    this.userService
-      .findAll()
+    this.usersService
+      .getUsersPaginated()
       .pipe(
-        map((usersPaginated: UsersPaginated) => {
-          this.dataSource = usersPaginated;
-          // console.log('### DATA SOURCE: ', this.dataSource);
-          return usersPaginated;
-        })
+        // TODO control de errores suscribe({next, error, complete})
+        map(
+          (usersPaginated: UsersPaginated) =>
+            (this.dataSource = usersPaginated),
+        ),
       )
       .subscribe();
   }
+
   onPaginateChange(event: PageEvent) {
-    let page = event.pageIndex + 1;
+    let page = event.pageIndex;
     const size = event.pageSize;
 
-    if (this.filterValue == null || this.filterValue == '') {
-      this.userService
-        .findAll(page, size)
+    if (this.filterValue == null) {
+      page = page + 1;
+      this.usersService
+        .getUsersPaginated(page, size)
         .pipe(
-          map((usersPaginated: UsersPaginated) => {
-            this.dataSource = usersPaginated;
-            return usersPaginated;
-          })
+          map(
+            (usersPaginated: UsersPaginated) =>
+              (this.dataSource = usersPaginated),
+          ),
         )
         .subscribe();
     } else {
-      this.userService
+      this.usersService
         .paginateByName(page, size, this.filterValue)
         .pipe(
-          map((usersPaginated: UsersPaginated) => {
-            this.dataSource = usersPaginated;
-            return usersPaginated;
-          })
+          map(
+            (usersPaginated: UsersPaginated) =>
+              (this.dataSource = usersPaginated),
+          ),
         )
         .subscribe();
     }
   }
-  findByName(name: string) {
-    this.userService
-      .paginateByName(0, 10, name)
-      .pipe(map((usersPaginated) => (this.dataSource = usersPaginated)))
-      .subscribe();
+
+  navigateToProfile(id) {
+    this.router.navigate(['./' + id], { relativeTo: this.activatedRoute });
   }
-  navigateToProfile(id: number) {
-    this.router.navigate(['/users/' + id], { relativeTo: this.activatedRoute });
+
+  findByName(name: string) {
+    this.usersService
+      .paginateByName(0, 10, name)
+      .pipe(
+        map(
+          (usersPaginated: UsersPaginated) =>
+            (this.dataSource = usersPaginated),
+        ),
+      )
+      .subscribe();
   }
 }

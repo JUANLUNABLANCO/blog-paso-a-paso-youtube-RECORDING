@@ -5,7 +5,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   providedIn: 'root',
 })
 export class NotificationService {
-  constructor(public snackBar: MatSnackBar, private zone: NgZone) {}
+  constructor(
+    public snackBar: MatSnackBar,
+    private zone: NgZone,
+  ) {}
 
   showSuccess(message: string): void {
     // Had an issue with the snackbar being ran outside of angular's zone.
@@ -19,6 +22,8 @@ export class NotificationService {
 
   showError(message: string): void {
     this.zone.run(() => {
+      // The second parameter is the text in the button.
+      // In the third, we send in the css class for the snack bar.
       this.snackBar.open(message, 'Close', {
         duration: 5000,
         panelClass: ['bg-error'],

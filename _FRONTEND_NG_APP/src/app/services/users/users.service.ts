@@ -1,14 +1,13 @@
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpParams,
-} from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { from, Observable, of, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
+import { User } from '../../interfaces/user.interface';
 
-import { User, UsersPaginated } from '../../interfaces/user.interface';
+import { Observable, from, throwError } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+
+import { UsersPaginated } from '../../interfaces/user.interface';
+
+import { environment } from 'src/environments/environment';
 
 const BASE_URL = environment.API_URL;
 
@@ -18,14 +17,25 @@ const BASE_URL = environment.API_URL;
 export class UsersService {
   constructor(private http: HttpClient) {}
 
-  userExist(email: string): Observable<boolean> {
+  checkEmailExist(email: string): Observable<boolean> {
+    // WARNING esto solo lo podrá hacer el ADMIN
     return from(
       this.http.post<any>(`${BASE_URL}/api/users/check-email-exists`, {
         email: email.toLowerCase(),
-      })
+      }),
     );
   }
-  findAll(page = 1, limit = 10): Observable<UsersPaginated> {
+  checkUserNameExist(userName: string): Observable<boolean> {
+    // WARNING esto lo solicita la app en el registro, para comprobarlo antes de enviar el formulario
+    return from(
+      this.http
+        .post<any>(`${BASE_URL}/api/users/check-username-exists`, {
+          userName: userName,
+        })
+        .pipe(map((response) => !!response)),
+    );
+  }
+  getUsersPaginated(page = 1, limit = 10): Observable<UsersPaginated> {
     let params = new HttpParams();
 
     params = params.append('page', Number(page));
@@ -37,33 +47,34 @@ export class UsersService {
         map((usersPaginated: UsersPaginated) => {
           console.log('### usuarios paginados: ', usersPaginated);
           return usersPaginated;
-        })
+        }),
       );
   }
   paginateByName(
     page: number,
     size: number,
-    name: string
+    name: string,
   ): Observable<UsersPaginated> {
     let params = new HttpParams();
+
     params = params.append('page', String(page));
     params = params.append('limit', String(size));
     params = params.append('name', name);
 
-    return this.http
-      .get<UsersPaginated>(`${BASE_URL}/api/users`, { params })
-      .pipe(map((userData: UsersPaginated) => userData));
+    return this.http.get(`${BASE_URL}/api/users`, { params }).pipe(
+      map((userData: UsersPaginated) => userData),
+      catchError((err) => throwError(() => new Error(err))),
+    );
   }
-  findOne(id: number): Observable<User> {
-    console.log('## ID: ', id);
-    return this.http
-      .get(`${BASE_URL}/api/users/${id}`)
-      .pipe(map((user: User) => user));
+  getUserById(id: number): Observable<User> {
+    return this.http.get(`${BASE_URL}/api/users/${id}`).pipe(
+      map((user: User) => user),
+      // catchError((err) => throwError(() => new Error(err))), // no hace falta, lo recoge el componente, en donde lo vamos a modificar gracias al interceptor
+    ); // el motivo de este pipe(map()) es para convertir los datos que nos llegan de tipo any a User, directamente el http devuelve un Observable<any>
   }
-
-  updateOne(user: User): Observable<User> {
+  updateUser(user): Observable<User> {
     return this.http
-      .put<User>(`${BASE_URL}/api/users/${user.id}`, user)
+      .put(`${BASE_URL}/api/users/${user.id}`, user)
       .pipe(map((user: User) => user));
   }
   uploadProfileImage(formData: FormData): Observable<any> {

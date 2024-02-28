@@ -1,0 +1,66 @@
+#wrap {
+  display: block;
+}
+
+#box1,
+#box2,
+#box3,
+#box4 {
+  display: block;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+#box1 {
+  text-align: center;
+  border: 1px solid gray;
+  height: 250px;
+  overflow: auto;
+}
+
+#progressbar {
+  text-align: center;
+  height: 20px;
+  padding: 10px;
+}
+
+#box1 span {
+  margin-left: 10px;
+}
+
+#box2 span {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#box2 #selectButton {
+  background-color: rgb(148, 90, 147);
+}
+
+#box2 #uploadButton {
+  background-color: rgb(43, 157, 43);
+}
+
+#box3 {
+  color: red;
+}
+
+#box4 ul {
+  list-style: none;
+}
+
+#box4 ul li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#box4 ul li a {
+  text-decoration: none;
+  color: white;
+  margin-right: 20px;
+}

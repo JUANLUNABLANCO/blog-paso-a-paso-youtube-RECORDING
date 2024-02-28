@@ -7,14 +7,14 @@
     >
       <mat-icon>menu</mat-icon>
     </button>
-    <span>Status Code 666</span>
+    <span class="titlePage">Status Code 666</span>
     <span class="example-spacer"></span>
     <button
       *ngIf="userIsAdmin()"
       mat-flat-button
       class="link-button"
       routerLink="users"
-      aria-label="Example icon-button with heart icon"
+      aria-label="Example icon-button with share icon"
     >
       Users
     </button>
@@ -23,7 +23,7 @@
       mat-flat-button
       class="link-button"
       routerLink="admin"
-      aria-label="Example icon-button with heart icon"
+      aria-label="Example icon-button with share icon"
     >
       Admin
     </button>
@@ -35,12 +35,14 @@
         placeholder="Acceso"
         (selectionChange)="navigateTo($event.value)"
       >
-        <mat-option
-          *ngFor="let entry of userNavigationEntries"
-          [value]="entry.link"
-        >
-          {{ entry.name }}
-        </mat-option>
+        <ng-container *ngIf="userNavigationEntries">
+          <mat-option
+            *ngFor="let entry of userNavigationEntries"
+            [value]="entry.link"
+          >
+            {{ entry.name }}
+          </mat-option>
+        </ng-container>
       </mat-select>
     </mat-form-field>
   </mat-toolbar-row>

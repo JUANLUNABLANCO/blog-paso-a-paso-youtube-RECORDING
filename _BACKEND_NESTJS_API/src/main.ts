@@ -21,7 +21,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       disableErrorMessages:
-        process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'test'
+        process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'test'
           ? false
           : true,
       errorHttpStatusCode: 406,

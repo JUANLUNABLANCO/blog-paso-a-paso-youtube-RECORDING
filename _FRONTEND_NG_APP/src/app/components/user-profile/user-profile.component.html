@@ -2,12 +2,10 @@
   <mat-card class="card">
     <mat-card-header>
       <mat-card-title-group>
-        <mat-card-title data-test-id="nameField">
-          Name: {{ user.name }} | id: {{ user.id }}
+        <mat-card-title data-test-id="userNameField">
+          User Name: {{ user.userName }} | id: {{ user.id }}
         </mat-card-title>
-        <mat-card-subtitle>
-          {{ user.role }}
-        </mat-card-subtitle>
+        <mat-card-subtitle> Role: {{ user.role }} </mat-card-subtitle>
         <div mat-card-avatar>
           <img
             src="{{ baseUrl }}/api/users/profile-image/{{ user.profileImage }}"
@@ -25,9 +23,7 @@
         </div>
       </mat-card-title-group>
     </mat-card-header>
-    <mat-card-content>
-      {{ user.email }}
-    </mat-card-content>
+    <mat-card-content> Email: {{ user.email }} </mat-card-content>
   </mat-card>
 </div>
 <ng-template #notUser> No hay usuario con ese id: {{ userId }} </ng-template>

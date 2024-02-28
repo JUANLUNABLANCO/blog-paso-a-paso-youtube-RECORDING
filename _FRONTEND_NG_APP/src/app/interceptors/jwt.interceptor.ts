@@ -11,19 +11,18 @@ import { JWT_NAME } from '../services/auth/authentication.service';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-  constructor() {}
-
   intercept(
     request: HttpRequest<unknown>,
-    next: HttpHandler
+    next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
     const token = localStorage.getItem(JWT_NAME);
 
     if (token) {
-      const reqCloned = request.clone({
-        headers: request.headers.set('Authorization', `Bearer ${token}`),
+      const cloneReq = request.clone({
+        headers: request.headers.set('Authorization', 'Bearer ' + token),
       });
-      return next.handle(reqCloned);
+      console.log('## CLONE REQUEST', cloneReq);
+      return next.handle(cloneReq);
     } else {
       return next.handle(request);
     }

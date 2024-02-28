@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -9,31 +9,32 @@ import {
 import { Router } from '@angular/router';
 
 import { AuthenticationService } from '../../services/auth/authentication.service';
-import { UsersService } from 'src/app/services/users/users.service';
-import { User } from '../../interfaces/user.interface';
-import { Observable, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { UsersService } from '../../services/users/users.service';
+import { Observable, from, of } from 'rxjs';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { CustomValidators } from '../../utils/custom-validators';
+import { LoggingService } from '../../core/services/logging.service';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   formRegister: FormGroup;
+  userId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthenticationService,
-    private userService: UsersService,
-    private router: Router
+    private usersService: UsersService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
     this.formRegister = this.fb.group(
       {
-        name: [
+        userName: [
           null,
           [
             Validators.required,
@@ -44,7 +45,7 @@ export class RegisterComponent {
         email: [
           null,
           [Validators.required, Validators.email],
-          [this.userExist.bind(this)],
+          [this.emailExist.bind(this)],
         ],
         password: [
           null,
@@ -65,12 +66,12 @@ export class RegisterComponent {
       },
       {
         validators: CustomValidators.passwordsMatch,
-      }
+      },
     );
   }
 
-  get nameField() {
-    return this.formRegister.get('name');
+  get userNameField() {
+    return this.formRegister.get('userName');
   }
   get emailField() {
     return this.formRegister.get('email');
@@ -87,36 +88,62 @@ export class RegisterComponent {
     if (this.emailField) this.emailField.updateValueAndValidity();
   }
 
-  userExist(control: FormControl): Observable<ValidationErrors | null> {
-    return from(this.userService.userExist(control.value)).pipe(
+  emailExist(control: FormControl): Observable<ValidationErrors | null> {
+    return from(this.usersService.checkEmailExist(control.value)).pipe(
       map((userExist) => {
         if (userExist) {
           return { emailIsUsed: true };
         } else {
           return null;
         }
-      })
+      }),
     );
+  }
+  userNameExist(control: FormControl): Observable<ValidationErrors | null> {
+    if (control.value) {
+      LoggingService.consoleLog(`#### check: ${control.value}`);
+      return from(this.usersService.checkUserNameExist(control.value)).pipe(
+        map((userExist) => {
+          if (userExist) {
+            return { userNameIsUsed: true };
+          } else {
+            return null;
+          }
+        }),
+      );
+    }
+    return of(null);
   }
   onSubmit(form: FormGroup) {
     if (this.formRegister.invalid) {
-      this.formRegister.markAllAsTouched();
       return;
     }
-    // {
-    //    name: form.value.name,
-    //    email: 'pollo01@gmail.com',
-    //    password: form.value.password,
-    //  }
+
+    LoggingService.consoleLog(
+      `LoggingService: formRegister ${JSON.stringify(form.value)}`,
+    );
+
     this.authService
       .registerAndLogin(form.value)
       .pipe(
-        map(({ user, access_token }) => {
+        tap(({ user, access_token }) => {
+          console.log(access_token);
           if (user && access_token) {
-            console.log('## resp: ', user, access_token);
-            this.router.navigate([`/users/${user.id}`]);
+            this.authService.setBehaviorUserId(user.id!);
           }
-        })
+        }),
+        switchMap(({ user, access_token }) => {
+          if (user && access_token) {
+            return this.authService.userId$.pipe(take(1));
+          }
+          return of(null);
+        }),
+        tap((userId) => {
+          if (userId !== null) {
+            this.userId = userId;
+            this.router.navigate(['users', this.userId]);
+          }
+        }),
       )
       .subscribe();
   }

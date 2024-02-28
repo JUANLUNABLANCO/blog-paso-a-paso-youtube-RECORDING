@@ -7,7 +7,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from './core/all-exceptions.filter';
+import { AllExceptionsFilter } from './core/errors/all-exceptions.filter';
 
 @Module({
   imports: [

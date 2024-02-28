@@ -8,13 +8,14 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { BlogEntry } from 'src/blog/model/blog-entry.interface';
+import { UserRole } from './user.interface';
 
 export class UserCreateDto {
   @IsString({ message: 'Name: Debe ser un string' })
   @MinLength(3, { message: 'Name: Debe tener al menos 3 caracteres' })
   @MaxLength(50, { message: 'Name: Debe tener menos de 50 caracteres' })
   @IsNotEmpty({ message: 'Name: Es requerido' })
-  name: string;
+  userName: string;
 
   @IsEmail({}, { message: 'Email: Debe ser un email válido' })
   @IsNotEmpty({ message: 'Email: Es requerido' })
@@ -36,9 +37,9 @@ export class UserCreateDto {
 
 export interface IUserCreateResponse {
   id: number;
-  name: string;
+  userName: string;
   email: string;
-  role: string;
+  role: UserRole;
   profileImage: string | null;
   blogEntries: BlogEntry[];
 }
