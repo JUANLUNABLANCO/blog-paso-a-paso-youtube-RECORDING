@@ -1,13 +1,13 @@
 import { UserEntity } from 'src/user/model/user.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
   BeforeUpdate,
+  Column,
+  Entity,
   ManyToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity('blog_entry') // definimos el nombre que tendrá la tabla.
+@Entity('blog_entry')
 export class BlogEntryEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,29 +15,19 @@ export class BlogEntryEntity {
   @Column()
   title: string;
 
-  @Column({ unique: true })
+  @Column()
   slug: string;
 
-  @Column({
-    default: '',
-  })
+  @Column({ default: '' })
   description: string;
 
-  @Column({
-    default: '',
-  })
+  @Column({ default: '' })
   body: string;
 
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
   @BeforeUpdate()
@@ -45,22 +35,16 @@ export class BlogEntryEntity {
     this.updatedAt = new Date();
   }
 
-  @Column({
-    default: 0,
-  })
+  @Column({ default: 0 })
   likes: number;
 
-  @Column({
-    default: '',
-  })
+  @Column({ nullable: true })
   headerImage: string;
 
-  @Column()
+  @Column({ nullable: true })
   publishedDate: Date;
 
-  @Column({
-    default: false,
-  })
+  @Column({ default: false })
   isPublished: boolean;
 
   @ManyToOne((type) => UserEntity, (user) => user.blogEntries)

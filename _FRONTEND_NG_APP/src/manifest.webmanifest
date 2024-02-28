@@ -1,6 +1,6 @@
 {
-  "name": "FRONTEND_NG_APP",
-  "short_name": "FRONTEND_NG_APP",
+  "name": "frontend",
+  "short_name": "frontend",
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
   "display": "standalone",

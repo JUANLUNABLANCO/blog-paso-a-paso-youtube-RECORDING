@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
 import {
   HttpRequest,
   HttpHandler,
@@ -6,27 +7,35 @@ import {
   HttpInterceptor,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { LoggingService } from '../../services/logging.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Injectable()
 export class ServerErrorInterceptor implements HttpInterceptor {
-  constructor() {}
+  constructor(
+    private logger: LoggingService,
+    private notifier: NotificationService,
+  ) {}
 
   intercept(
     request: HttpRequest<unknown>,
-    next: HttpHandler
+    next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        console.log('########## ERROR type: ', typeof error);
-        let errorMessage: any;
+        let errorMessage = '';
         if (error.error instanceof ErrorEvent) {
           errorMessage = `Message: ${error.error.message}`;
-          return throwError(() => errorMessage);
         } else {
-          return throwError(() => error);
+          // return throwError(() => errorMessage);
+          errorMessage = `Text: ${error.statusText}, Code: ${error.status}, message: ${error.message}`;
         }
-      })
+        // de esto se encarga el `global handler error`
+        // this.notifier.showError(errorMessage);
+        // this.logger.logError(errorMessage);
+        return throwError(() => errorMessage);
+      }),
     );
   }
 }

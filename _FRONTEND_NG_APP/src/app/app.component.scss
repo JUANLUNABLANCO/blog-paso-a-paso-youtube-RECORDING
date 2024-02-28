@@ -1,3 +1,16 @@
 .example-spacer {
   flex: 1 1 auto;
 }
+.link-button {
+  // padding: 0 50px;
+  margin-left: 10px;
+  border: 2px solid rgba(17, 18, 19, 0.063);
+}
+.titlePage {
+  visibility: hidden;
+}
+@media (min-width: 1024px) {
+  .titlePage {
+    visibility: visible;
+  }
+}

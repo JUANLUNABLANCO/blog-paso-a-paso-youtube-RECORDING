@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "FRONTEND_NG_APP": {
+    "frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -37,12 +37,12 @@
             "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
-            "production": {
+            "prod": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -58,7 +58,7 @@
                 }
               ]
             },
-            "development": {
+            "dev": {
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
@@ -72,7 +72,7 @@
                 }
               ]
             },
-            "test-local": {
+            "local": {
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
@@ -82,12 +82,26 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.test-local.ts"
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
+            },
+            "test": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.test.ts"
                 }
               ]
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "local"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -95,22 +109,25 @@
             "proxyConfig": "src/proxy.conf.json"
           },
           "configurations": {
-            "production": {
-              "browserTarget": "FRONTEND_NG_APP:build:production"
+            "prod": {
+              "browserTarget": "frontend:build:prod"
             },
             "development": {
-              "browserTarget": "FRONTEND_NG_APP:build:development"
+              "browserTarget": "frontend:build:dev"
             },
-            "test-local": {
-              "browserTarget": "FRONTEND_NG_APP:build:test-local"
+            "test": {
+              "browserTarget": "frontend:build:test"
+            },
+            "local": {
+              "browserTarget": "frontend:build:local"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "local"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "FRONTEND_NG_APP:build"
+            "browserTarget": "frontend:build"
           }
         },
         "test": {
@@ -130,8 +147,17 @@
             ],
             "scripts": []
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
         }
       }
     }
+  },
+  "cli": {
+    "schematicCollections": ["@angular-eslint/schematics"]
   }
 }

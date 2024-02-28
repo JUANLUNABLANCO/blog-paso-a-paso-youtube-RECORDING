@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
+import { environment } from '../environments/environment';
 import { AuthenticationService } from './services/auth/authentication.service';
-import { UserNavigationEntries } from './core/interfaces/user-navigation-entries.interface';
 import { map } from 'rxjs';
+import { UserNavigationEntries } from './core/interfaces/user-navigation-entries.interface';
 
 @Component({
   selector: 'app-root',
@@ -11,13 +11,13 @@ import { map } from 'rxjs';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  title = 'FRONTEND_NG_APP';
+  title = 'frontend';
   isLogged = false;
   private userId: number | null = null;
 
   userNavigationEntries: UserNavigationEntries[] = [
     {
-      name: 'login',
+      name: 'Login',
       link: 'login',
     },
     {
@@ -28,33 +28,36 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
   ) {
-    console.log('environment CONTROL: ', environment.CONTROL);
-    console.log('environment API_URL: ', environment.API_URL);
+    console.log('Enviroment Control: ', environment.CONTROL);
+    console.log('Enviroment API_URL: ', environment.API_URL);
   }
 
   ngOnInit(): void {
-    this.authService.userId$
-      .pipe(
-        map((userId: number | null) => {
-          this.userId = userId;
-          this.updateUserId(userId);
-        })
-      )
-      .subscribe();
     this.authService.isLogged$.subscribe((isLogged) => {
+      // Actualizar la navegación del usuario y la autenticación
       this.updateUserNavigationEntries(isLogged);
       this.updateUserAuthentication(isLogged);
+      // Si el usuario está autenticado, redirigir al perfil
+      if (isLogged) {
+        this.authService.fetchAndSetUserIdFromToken().subscribe((userId) => {
+          if (userId) {
+            this.userId = userId;
+            this.router.navigate(['/users', userId]);
+          }
+        });
+      }
     });
   }
-  private updateUserId(userId: number | null) {
+  private updateUserId(userId: number | null): void {
+    // this.userNavigationEntries[3].link = userId ? `users/${userId}` : '';
     if (this.authService.isAuthenticated()) {
       const profileEntry = this.userNavigationEntries.find(
-        (entry) => entry.name === 'Profile'
+        (entry) => entry.name === 'Profile',
       );
       if (profileEntry) {
-        profileEntry.link = userId ? `users/${userId}` : ``;
+        profileEntry.link = userId ? `users/${userId}` : '';
       }
     }
   }
@@ -75,7 +78,6 @@ export class AppComponent implements OnInit {
           link: 'update-profile',
         },
       ];
-      console.log('#### menu tras el login: ', this.userNavigationEntries);
     } else {
       this.userNavigationEntries = [
         {
@@ -89,26 +91,31 @@ export class AppComponent implements OnInit {
       ];
     }
   }
+
   private updateUserAuthentication(isLogged: boolean): void {
     if (!isLogged) {
       this.isLogged = false;
       this.clearUserData();
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login']); // Redirigir al usuario a una ruta predeterminada después de cerrar sesión
     } else {
       this.isLogged = true;
     }
   }
+
   private clearUserData(): void {
     this.updateUserId(null);
   }
   userIsAdmin(): boolean {
     return this.authService.userIsAdmin();
   }
+
+  // DOIT refactorized to use the service and control the error
   navigateTo(value: string) {
     if (value !== 'logout') {
       this.router.navigate([value]);
     } else {
-      this.authService.logout();
+      console.log('### logout ! iniciado', this.userId);
+      this.authService.advancedLogout(this.userId).subscribe();
     }
   }
 }

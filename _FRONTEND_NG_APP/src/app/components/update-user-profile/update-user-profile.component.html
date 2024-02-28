@@ -1,6 +1,7 @@
 <form [formGroup]="updateProfileForm" (ngSubmit)="updateProfile()">
   <mat-card class="container">
     <div style="width: 80%">
+      <!-- Imagen  -->
       <mat-card>
         <mat-card-content>
           <img
@@ -12,6 +13,7 @@
               updateProfileForm.get('profileImage')?.value;
               else notImageProfile
             "
+            class="avatar"
           />
           <ng-template #notImageProfile>
             <img
@@ -20,7 +22,7 @@
               alt="an avatar image for profile"
             />
           </ng-template>
-          <ul>
+          <ul class="no-style-type">
             <li>
               <mat-progress-bar [value]="file.progress"></mat-progress-bar>
             </li>
@@ -39,22 +41,33 @@
             style="display: none"
           />
         </mat-card-actions>
+
+        <!-- <app-upload-files></app-upload-files> -->
       </mat-card>
+      <!-- imagen  -->
+    </div>
+    <div class="container" style="width: 80%">
       <mat-form-field>
+        <mat-label>Id</mat-label>
         <input matInput placeholder="id" formControlName="id" />
       </mat-form-field>
       <mat-form-field>
+        <mat-label>Name</mat-label>
         <input
           matInput
-          placeholder="name"
-          formControlName="name"
-          data-test-id="nameField"
+          placeholder="user name"
+          formControlName="userName"
+          data-test-id="userNameField"
         />
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="email" formControlName="email" />
+        <mat-label>Email</mat-label
+        ><input matInput placeholder="email" formControlName="email" />
       </mat-form-field>
-
+      <mat-form-field>
+        <mat-label>Role</mat-label
+        ><input matInput placeholder="role" formControlName="role" />
+      </mat-form-field>
       <button
         mat-flat-button
         color="primary"

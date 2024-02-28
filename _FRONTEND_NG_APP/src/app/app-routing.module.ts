@@ -5,10 +5,10 @@ import { LoginComponent } from './components/login/login.component';
 import { UsersComponent } from './components/users/users.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { UpdateUserProfileComponent } from './components/update-user-profile/update-user-profile.component';
-import { AuthGuard } from './guards/auth.guard';
 import { ErrorTestComponent } from './core/errors/component-test/error.test.component';
-import { AdminGuard } from './guards/userIsAdmin.guard';
 import { PreserveUserGuard } from './guards/userIsUser.guard';
+import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/userIsAdmin.guard';
 
 const routes: Routes = [
   {
@@ -31,23 +31,24 @@ const routes: Routes = [
       {
         path: '',
         component: UsersComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AdminGuard], // User Is Admin
       },
       {
         path: ':id',
         component: UserProfileComponent,
-        canActivate: [PreserveUserGuard],
+        canActivate: [PreserveUserGuard], // User Is User
       },
     ],
   },
   {
     path: 'update-profile',
     component: UpdateUserProfileComponent,
-    canActivate: [PreserveUserGuard],
+    canActivate: [PreserveUserGuard], // User Is User
   },
   {
     path: 'error-test',
     component: ErrorTestComponent,
+    // canActivate: [AuthGuard], // descomenta para probar error de athorizacion 401
   },
   {
     path: '',

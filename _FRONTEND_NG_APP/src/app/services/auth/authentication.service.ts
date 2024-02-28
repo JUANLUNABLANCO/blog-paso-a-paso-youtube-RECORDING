@@ -1,16 +1,13 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {
-  JWT,
-  JWTDecoded,
-  LoginForm,
-  RegisterForm,
-} from '../../interfaces/auth.interface';
-import { environment } from '../../../environments/environment';
-import { of, Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { LoginForm, RegisterForm } from '../../interfaces/auth.interface';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { User, UserRole } from 'src/app/interfaces/user.interface';
+
+import { environment } from 'src/environments/environment';
+import { Router } from '@angular/router';
 
 const BASE_URL = environment.API_URL;
 export const JWT_NAME = 'access_token';
@@ -29,31 +26,42 @@ export class AuthenticationService {
   >(null);
   userId$: Observable<number | null> = this.userIdSubject.asObservable();
 
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {}
-
-  // register(registerForm: RegisterForm) {
-  //   // TODO if(registerForm.valid) { ...
-  //   // TODO controla los posibles errores después del map con catchError( throwError(() => new Error(err)))
-  //   return this.http
-  //     .post<any>(`${BASE_URL}/api/users`, registerForm)
-  //     .pipe(map((user) => user));
-  // }
+  constructor(
+    private http: HttpClient,
+    private jwtHelper: JwtHelperService,
+    private router: Router,
+  ) {
+    this.initializeAuthentication();
+  }
+  private initializeAuthentication(): void {
+    this.fetchAndSetUserIdFromToken().subscribe((userId) => {
+      if (userId !== null) {
+        console.log('el usuario está autenticado: ', userId);
+        this.isLoggedSubject.next(true);
+      } else {
+        console.log('el usuario no está autenticado', userId);
+        this.isLoggedSubject.next(false);
+        this.cleanLocalStorage();
+      }
+    });
+  }
+  // TODO comprobar si inicialmente existe un token en el localStorage, si es así asumirlo como login, deberás implemnetar el OnInit
+  // login tras el registro
   registerAndLogin(
-    user: RegisterForm
+    user: RegisterForm,
   ): Observable<{ user: User; access_token: string }> {
+    console.log('### REGISTER AND LOGIN: ', user);
     return this.http.post<any>(`${BASE_URL}/api/users`, user).pipe(
       tap(({ user, access_token }) => {
-        if (user && access_token) {
-          console.log('#### user', user);
-          this.loginAfterRegistration(access_token);
-        }
-      })
+        // Lógica de registro exitoso
+        console.log('#### user', user);
+        this.loginAfterRegistration(access_token); // Autenticar al usuario después del registro
+        return { user, access_token };
+      }),
     );
   }
-
   login(loginForm: LoginForm) {
-    // TODO if(loginForm.valid) { ...
-    // TODO controla los posibles errores después del map con catchError( throwError(() => new Error(err)))
+    // TODO cors desde el backend y api url en environment
     return this.http
       .post<any>(`${BASE_URL}/api/users/login`, {
         email: loginForm.email,
@@ -61,42 +69,38 @@ export class AuthenticationService {
       })
       .pipe(
         map((token) => {
-          if (token) {
-            localStorage.setItem(JWT_NAME, token.access_token);
-            console.log('# AuthenticationService.login: ', token);
-            // obtener su id y subscribirse a los cambios
-            this.fetchAndSetUserIdFromToken().subscribe();
-            // comunicar estado del usuario autenticado
-            this.isLoggedSubject.next(true);
-            return token;
-          } else {
-            console.log('#### Ocurrió un error');
-          }
-        })
+          localStorage.setItem(JWT_NAME, token.access_token);
+          // obtener su id y subscribirse a los cambios
+          this.fetchAndSetUserIdFromToken().subscribe();
+          // comunicar estado del usuario autenticado
+          this.isLoggedSubject.next(true);
+          return token;
+        }),
       );
   }
-  private loginAfterRegistration(token: string): void {
-    if (token) {
-      // anotar el token en el localstorage
-      localStorage.setItem(JWT_NAME, token);
-      // setear el id en el behavior subject
-      this.fetchAndSetUserIdFromToken().subscribe();
-      // comunicar el estado del suario autenticado
-      this.isLoggedSubject.next(true);
-    }
+  private loginAfterRegistration(token): void {
+    // console.log('#### loginAfterRegistration', token);
+    localStorage.setItem(JWT_NAME, token);
+    // obtener su id y subscribirse a los cambios
+    this.fetchAndSetUserIdFromToken().subscribe();
+    // comunicar estado del usuario autenticado
+    this.isLoggedSubject.next(true);
   }
-
+  private cleanLocalStorage(): void {
+    localStorage.removeItem(JWT_NAME);
+  }
   isAuthenticated(): boolean {
+    // podrías setear el id o el isLogged aquí ¿es necesario?, ya se encargan login, logout y getUserId
     const token = this.getToken();
     return !this.jwtHelper.isTokenExpired(token);
   }
-  userIsAdmin(): boolean {
+  userIsAdmin(): any {
+    // or boolean?
     if (!this.isAuthenticated()) return false;
     const token = this.getToken();
     if (token) {
       return this.getUserRoleFromToken(token) === UserRole.ADMIN ? true : false;
     }
-    return false;
   }
   userIsUser(userIdFromParams: number): boolean {
     if (!userIdFromParams || !this.isAuthenticated()) return false;
@@ -125,14 +129,33 @@ export class AuthenticationService {
       return of(null);
     }
   }
+  advancedLogout(userId: number | null): Observable<any> {
+    if (userId) {
+      console.log('### advancedLogout(), userId: ', userId);
+      return this.http.get(`${BASE_URL}/api/users/logout/${userId}`).pipe(
+        tap((access_token) => {
+          console.log('## LOGOUT:');
+          this.logout();
+          console.log('# AuthService.logout: ', access_token);
+          return access_token;
+        }),
+      );
+    } else {
+      return of('No hay usuario Logueado');
+    }
+  }
   logout() {
+    // cualquier lógica necesaria de logout, reseteo de variables, subjectBehavior, etc
     // TODO si tuviéramos un backend, yo personalmente, avisaría al backend a través de una petición http GET para que ajuste sus cosas y resetee al usuario de la request, el jwt, etc. por seguridad.
     localStorage.removeItem(JWT_NAME);
-    // comunicar el estado del usuario no autenticado
+    // comunicar estado del usuario autenticado
     this.isLoggedSubject.next(false);
     // destruir el id
     this.setBehaviorUserId(null);
+    // devolverlo al '/'
+    this.router.navigate(['/login']);
   }
+  // para manejo del bahavior Subject $userId
   setBehaviorUserId(userId: number | null): void {
     this.userIdSubject.next(userId);
   }
@@ -142,23 +165,26 @@ export class AuthenticationService {
   private getToken(): string | null {
     return localStorage.getItem(JWT_NAME);
   }
-  private getUserRoleFromToken(jwt: string): string | null {
-    try {
-      const decoded = this.jwtHelper.decodeToken(jwt);
-      return decoded?.user?.role || null;
-    } catch (error) {
-      console.log('Error decoding JWT: ', error);
-      return null;
-    }
-  }
+  // 2. Obtener id a través del token
   private getUserIdFromToken(jwt: string): number | null {
     try {
       const decoded = this.jwtHelper.decodeToken(jwt);
       return decoded?.user?.id || null;
     } catch (error) {
+      console.error('Error decoding JWT:', error);
       return null;
     }
   }
+  private getUserRoleFromToken(jwt: string): string {
+    try {
+      const decoded = this.jwtHelper.decodeToken(jwt);
+      return decoded?.user?.role || null;
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+      return null;
+    }
+  }
+  // 3. actualizar el id del usuario
   private updateUserId(token: string | null): void {
     const userId = token ? this.getUserIdFromToken(token) : null;
     this.setBehaviorUserId(userId);

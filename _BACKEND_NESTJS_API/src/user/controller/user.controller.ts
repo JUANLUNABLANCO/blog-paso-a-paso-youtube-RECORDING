@@ -15,12 +15,12 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { Observable, of, from } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { Pagination } from 'nestjs-typeorm-paginate';
 // mine
 import { ConfigService } from '@nestjs/config';
-import { User, UserRole, File } from '../model/user.interface';
+import { IUser, UserRole, File } from '../model/user.interface';
 import { hasRoles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -30,6 +30,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path = require('path');
+import { IUserCreateResponse, UserCreateDto } from '../model/user-create.dto';
+import {
+  IUserLoginResponse,
+  IUserLogoutResponse,
+  UserLoginDto,
+} from '../model/user-login.dto';
+import { AuthService } from 'src/auth/services/auth.service';
 
 export const storage = {
   storage: diskStorage({
@@ -46,13 +53,14 @@ export const storage = {
 export class UserController {
   constructor(
     private userService: UserService,
+    private authService: AuthService,
     private configService: ConfigService,
   ) {}
 
   @Post()
-  create(@Body() user: User): Observable<
+  create(@Body() user: UserCreateDto): Observable<
     | {
-        user: User;
+        user: IUserCreateResponse;
         access_token: string;
       }
     | { error: any }
@@ -65,7 +73,7 @@ export class UserController {
     );
   }
   @Post('login')
-  login(@Body() user: User): Observable<{ access_token: any }> {
+  login(@Body() user: UserLoginDto): Observable<IUserLoginResponse> {
     console.log('## USER CONTROLLER: IN LOGIN ', user);
     return this.userService.login(user).pipe(
       map((jwt: string) => {
@@ -73,50 +81,62 @@ export class UserController {
       }),
     );
   }
-
-  // TODO logout
+  @Get('logout/:userId')
+  logout(@Param('userId') userId: string): Observable<IUserLogoutResponse> {
+    console.log('#### logout id: ', Number(userId));
+    return this.authService.generateInvalidJWT(Number(userId)).pipe(
+      map((jwt: string) => {
+        return { access_token: jwt };
+      }),
+    );
+  }
 
   // TODO user is user or user is Admin
   // @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
-  findOne(@Param() params): Observable<User> {
-    return this.userService.findOne(params.id);
+  findOneById(@Param() params): Observable<IUser> {
+    return this.userService.findOneById(params.id);
   }
-
+  // WARNING solo el propio usuario o el admin podrán hacer esta solicitud
+  // @UseGuards(JwtAuthGuard, UserIsUserGuardOrAdmin)
   @Post('email')
-  findOneByEmail(@Body() user: User): Observable<User> {
+  findOneByEmail(@Body() user: IUser): Observable<IUser> {
     return this.userService.findOneByEmail(user);
   }
-
+  // TODO findOneByUserName
   @Post('check-email-exists')
-  emailExist(@Body() user: User): Observable<boolean> {
+  checkEmailExist(@Body() user: IUser): Observable<boolean> {
     user.email = user.email.toLowerCase();
-    return this.userService.checkEmailExist(user);
+    return this.userService.checkEmailExists(user);
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(':id')
-  updateOne(@Param('id') id: string, @Body() user: User): Observable<any> {
+  updateOne(@Param('id') id: string, @Body() user: IUser): Observable<any> {
     console.log('### USER: ', user);
     // solo permitimos el cambio de nombre y de email
     delete user.role;
+    delete user.id; // WARNING este debe de caparse porque sinó podrá actualizar su id
     delete user.password;
     delete user.email;
     return this.userService.updateOne(Number(id), user);
   }
 
-  @UseGuards(JwtAuthGuard, UserIsUserGuard)
-  @Put(':id/change-password')
-  updatePassword(@Param('id') id: string, @Body() user: User): Observable<any> {
-    // TODO condiciones especiales, forgot password?, etc.
-    return this.userService.updatePassword(Number(id), user);
-  }
+  // @UseGuards(JwtAuthGuard, UserIsUserGuard)
+  // @Put(':id/change-password')
+  // updatePassword(
+  //   @Param('id') id: string,
+  //   @Body() user: IUser,
+  // ): Observable<any> {
+  //   // TODO condiciones especiales, forgot password?, etc.
+  //   return this.userService.updatePassword(Number(id), user);
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
   uploadFile(@UploadedFile() file, @Request() req): Observable<File> {
-    const user: User = req.user.user;
+    const user: IUser = req.user.user;
 
     console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL')); // aquí si funciona
     console.log('#### file name: ', file.filename);
@@ -124,8 +144,8 @@ export class UserController {
     return this.userService
       .updateOne(user.id, { profileImage: file.filename })
       .pipe(
-        tap((user: User) => console.log(user)),
-        map((user: User) => ({ profileImage: user.profileImage })),
+        tap((user: IUser) => console.log(user)),
+        map((user: IUser) => ({ profileImage: user.profileImage })),
       );
   }
 
@@ -136,7 +156,7 @@ export class UserController {
   ): Observable<unknown> {
     console.log(
       'ruta file',
-      path.join(process.cwd(), 'uploads/profileImages', imageName),
+      path.join(process.cwd(), 'uploads/profileImages/', imageName),
     );
     return of(
       resp.sendFile(
@@ -158,26 +178,26 @@ export class UserController {
   index(
     @Query('page') page = 1,
     @Query('limit') limit = 10,
-    @Query('name') name: string,
-  ): Observable<Pagination<User>> {
+    @Query('userName') userName: string,
+  ): Observable<Pagination<IUser>> {
     limit = limit > 100 ? 100 : limit;
 
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/users`;
     // console.log('## route', route);
-    if (name === null || name === undefined) {
+    if (userName === null || userName === undefined) {
       return this.userService.paginate({
         page: Number(page),
         limit: Number(limit),
         route: route,
       });
     } else {
-      return this.userService.paginateFilterByName(
+      return this.userService.paginateFilterByUserName(
         {
           page: Number(page),
           limit: Number(limit),
           route: route,
         },
-        { name },
+        { userName },
       );
     }
   }
@@ -186,7 +206,7 @@ export class UserController {
   @Put(':id/role')
   updateRoleOfUser(
     @Param('id') id: string,
-    @Body() user: User,
+    @Body() user: IUser,
   ): Observable<any> {
     const roles = Object.values(UserRole);
     // console.log('## roles keys', roles);

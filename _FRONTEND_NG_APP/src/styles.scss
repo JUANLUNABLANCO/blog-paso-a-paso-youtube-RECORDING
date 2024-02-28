@@ -6,7 +6,7 @@ body {
 }
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 .borderred {
@@ -16,6 +16,11 @@ body {
 .error {
   color: red;
 }
+// .bg-error {
+//   background-color: rgb(156, 53, 53);
+//   border-radius: 10px;
+//   color: whitesmoke;
+// }
 
 .mat-mdc-snack-bar-container {
   &.bg-error {

@@ -1,12 +1,13 @@
-<h1>Todos los usuarios paginados</h1>
+<h1>Todos los Usuarios</h1>
+
 <mat-form-field>
-  <mat-label>Filtering By Name</mat-label>
+  <mat-label>Filetring By name</mat-label>
   <input
     type="text"
     matInput
     [(ngModel)]="filterValue"
     (input)="findByName(filterValue)"
-    placeholder="Search by name"
+    placeholder="Search name"
     data-test-id="searchNameField"
   />
 </mat-form-field>
@@ -17,21 +18,25 @@
     class="mat-elevation-z8"
     data-test-id="usersTable"
   >
-    <!-- id column -->
+    <!-- Id Column -->
     <ng-container matColumnDef="id">
-      <mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header> ID </mat-header-cell>
       <mat-cell *matCellDef="let row"> {{ row.id }} </mat-cell>
     </ng-container>
 
-    <!-- name column -->
+    <!-- Name Column -->
     <ng-container matColumnDef="name">
-      <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Name
+      </mat-header-cell>
       <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
     </ng-container>
 
-    <!-- email column -->
+    <!-- Email Column -->
     <ng-container matColumnDef="email">
-      <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        email
+      </mat-header-cell>
       <mat-cell *matCellDef="let row"> {{ row.email }} </mat-cell>
     </ng-container>
 
@@ -43,6 +48,7 @@
       <mat-cell *matCellDef="let row"> {{ row.role }} </mat-cell>
     </ng-container>
 
+    <!-- definition structure table-->
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
     <mat-row
       *matRowDef="let row; columns: displayedColumns"
@@ -58,6 +64,6 @@
   >
   </mat-paginator>
 </div>
-<h2 *ngIf="!dataSource" style="text-align: center">
-  No tienes Acceso a la base de datos, autentícate!
-</h2>
+<!-- <h2 *ngIf="!dataSource" style="text-align: center">
+  No tienes Acceso a la base de datos!
+</h2> -->
