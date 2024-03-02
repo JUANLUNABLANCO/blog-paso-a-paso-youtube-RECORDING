@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-context('Create User', () => {
+context('Create User sin interfaz frontend', () => {
   it('endpoint: http://localhost:3000/api/users POST --> create(). Crear varios usuarios con diferentes roles y ver si siempre devuelve role="user" ', () => {
     cy.task('queryDb', 'DELETE from user_entity').then((results) => {
       cy.log(results)
