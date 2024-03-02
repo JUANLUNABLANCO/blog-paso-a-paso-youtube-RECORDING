@@ -7,6 +7,7 @@ import { User } from '../../interfaces/user.interface';
 import { UsersService } from '../../services/users/users.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { AuthenticationService } from 'src/app/services/auth/authentication.service';
 
 const BASE_URL = `${environment.API_URL}`;
 
@@ -25,6 +26,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   constructor(
     private activatedRoute: ActivatedRoute,
     private usersService: UsersService,
+    private authService: AuthenticationService,
   ) {}
 
   ngOnInit(): void {
@@ -33,7 +35,16 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       this.userId = parseInt(params['id']);
       this.usersService
         .getUserById(this.userId)
-        .pipe(map((user: User) => (this.user = user)))
+        .pipe(
+          map((user: User) => {
+            if (user) {
+              this.user = user;
+            } else {
+              console.log('#### Hacemos logout directamente');
+              this.authService.logout();
+            }
+          }),
+        )
         .subscribe();
     });
   }

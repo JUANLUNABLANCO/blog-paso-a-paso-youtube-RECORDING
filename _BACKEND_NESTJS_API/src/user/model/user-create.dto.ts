@@ -11,10 +11,10 @@ import { BlogEntry } from 'src/blog/model/blog-entry.interface';
 import { UserRole } from './user.interface';
 
 export class UserCreateDto {
-  @IsString({ message: 'Name: Debe ser un string' })
-  @MinLength(3, { message: 'Name: Debe tener al menos 3 caracteres' })
-  @MaxLength(50, { message: 'Name: Debe tener menos de 50 caracteres' })
-  @IsNotEmpty({ message: 'Name: Es requerido' })
+  @IsString({ message: 'userName: Debe ser un string' })
+  @MinLength(3, { message: 'userName: Debe tener al menos 3 caracteres' })
+  @MaxLength(50, { message: 'userName: Debe tener menos de 50 caracteres' })
+  @IsNotEmpty({ message: 'userName: Es requerido' })
   userName: string;
 
   @IsEmail({}, { message: 'Email: Debe ser un email válido' })

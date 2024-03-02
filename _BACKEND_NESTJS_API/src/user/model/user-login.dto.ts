@@ -26,5 +26,5 @@ export interface IUserLoginResponse {
   access_token: string;
 }
 export interface IUserLogoutResponse {
-  access_token: string;
+  message: string;
 }

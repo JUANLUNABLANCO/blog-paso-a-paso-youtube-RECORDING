@@ -5,7 +5,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { UserService } from 'src/user/service/user.service';
 import { IUser } from 'src/user/model/user.interface';
 
@@ -21,18 +21,22 @@ export class UserIsUserGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const params = request.params;
     const user: IUser = request.user;
-    // console.log('## user: ', user);
+    console.log('## user: ', user);
+    if (user) {
+      return this.userService.findOneById(user.id).pipe(
+        map((user: IUser) => {
+          let hasPermission = false;
+          // console.log('## USER IS USER GUARD: ', user.id, params.id);
 
-    return this.userService.findOneById(user.id).pipe(
-      map((user: IUser) => {
-        let hasPermission = false;
-        // console.log('## USER IS USER GUARD: ', user.id, params.id);
-
-        if (user.id === Number(params.id)) {
-          hasPermission = true;
-        }
-        return user && hasPermission;
-      }),
-    );
+          if (user) {
+            if (user.id === Number(params.id)) {
+              hasPermission = true;
+            }
+            return user && hasPermission;
+          }
+        }),
+      );
+    }
+    return of(false);
   }
 }

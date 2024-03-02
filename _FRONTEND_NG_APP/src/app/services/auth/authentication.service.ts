@@ -62,6 +62,7 @@ export class AuthenticationService {
   }
   login(loginForm: LoginForm) {
     // TODO cors desde el backend y api url en environment
+    console.log('login form: ', loginForm);
     return this.http
       .post<any>(`${BASE_URL}/api/users/login`, {
         email: loginForm.email,
@@ -133,11 +134,11 @@ export class AuthenticationService {
     if (userId) {
       console.log('### advancedLogout(), userId: ', userId);
       return this.http.get(`${BASE_URL}/api/users/logout/${userId}`).pipe(
-        tap((access_token) => {
-          console.log('## LOGOUT:');
+        tap((message) => {
+          console.log('## LOGOUT:', message);
           this.logout();
-          console.log('# AuthService.logout: ', access_token);
-          return access_token;
+          console.log('# AuthService.logout: ', message);
+          return message;
         }),
       );
     } else {
@@ -153,7 +154,7 @@ export class AuthenticationService {
     // destruir el id
     this.setBehaviorUserId(null);
     // devolverlo al '/'
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
   // para manejo del bahavior Subject $userId
   setBehaviorUserId(userId: number | null): void {

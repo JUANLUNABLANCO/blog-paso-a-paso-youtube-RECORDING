@@ -81,19 +81,20 @@ export class UserController {
       }),
     );
   }
-  @UseGuards(JwtAuthGuard, UserIsUserGuard)
+  // @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get('logout/:userId')
   logout(@Param('userId') userId: string): Observable<IUserLogoutResponse> {
     console.log('#### logout id: ', Number(userId));
     return this.authService.generateInvalidJWT(Number(userId)).pipe(
       map((jwt: string) => {
-        return { access_token: jwt };
+        console.log('#### logout invalid jwt: ', jwt);
+        return { message: `user with id ${userId} is logout` };
       }),
     );
   }
 
   // TODO user is user or user is Admin
-  // @UseGuards(JwtAuthGuard, UserIsUserGuard)
+  @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
   findOneById(@Param() params): Observable<IUser> {
     return this.userService.findOneById(params.id);

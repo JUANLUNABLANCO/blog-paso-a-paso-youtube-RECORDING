@@ -52,12 +52,12 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: '/login',
+    redirectTo: '/',
     pathMatch: 'full',
   },
   {
     path: '**',
-    redirectTo: '/login',
+    redirectTo: '/',
     pathMatch: 'full',
   },
 ];

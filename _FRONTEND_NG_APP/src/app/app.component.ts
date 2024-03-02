@@ -96,7 +96,7 @@ export class AppComponent implements OnInit {
     if (!isLogged) {
       this.isLogged = false;
       this.clearUserData();
-      this.router.navigate(['/login']); // Redirigir al usuario a una ruta predeterminada después de cerrar sesión
+      // this.router.navigate(['/']); // Redirigir al usuario a una ruta predeterminada después de cerrar sesión
     } else {
       this.isLogged = true;
     }
