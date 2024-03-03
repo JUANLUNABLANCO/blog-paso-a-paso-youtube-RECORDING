@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogEntryEntity } from './model/blog-entry.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
-import { BlogController } from './controller/blog.controller';
+import { BlogEntriesController } from './controller/blog-entries.controller';
 import { BlogService } from './service/blog.service';
 
 @Module({
@@ -12,7 +12,7 @@ import { BlogService } from './service/blog.service';
     AuthModule,
     UserModule,
   ],
-  controllers: [BlogController],
+  controllers: [BlogEntriesController],
   providers: [BlogService],
 })
 export class BlogModule {}

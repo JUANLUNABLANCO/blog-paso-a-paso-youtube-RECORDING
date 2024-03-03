@@ -18,9 +18,10 @@ import { UserIsAuthorGuard } from '../guards/user-is-author.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/user/model/user.interface';
+import { Pagination } from 'nestjs-typeorm-paginate';
 
-@Controller('blogs')
-export class BlogController {
+@Controller('blog-entries')
+export class BlogEntriesController {
   constructor(private blogService: BlogService) {}
 
   @UseGuards(JwtAuthGuard)
@@ -31,13 +32,43 @@ export class BlogController {
     return this.blogService.create(user, blogEntry);
   }
 
+  // @Get()
+  // findBlogEntries(@Query('userId') userId: number): Observable<BlogEntry[]> {
+  //   if (userId === null) {
+  //     return this.blogService.findAll();
+  //   } else {
+  //     return this.blogService.findByUser(userId);
+  //   }
+  // }
   @Get()
-  findBlogEntries(@Query('userId') userId: number): Observable<BlogEntry[]> {
-    if (userId === null) {
-      return this.blogService.findAll();
-    } else {
-      return this.blogService.findByUser(userId);
-    }
+  index(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ): Observable<Pagination<BlogEntry>> {
+    limit = limit > 100 ? 100 : limit;
+    const route = `${process.env.API_URL}:${process.env.API_PORT}/api/blog-entries`;
+    return this.blogService.paginateAll({
+      limit: Number(limit),
+      page: Number(page),
+      route: route,
+    });
+  }
+  @Get('user/:authorId')
+  indexByAuthor(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Param('authorId') authorId: number,
+  ): Observable<Pagination<BlogEntry>> {
+    limit = limit > 100 ? 100 : limit;
+    const route = `${process.env.API_URL}:${process.env.API_PORT}/api/blog-entries/user/${authorId}`;
+    return this.blogService.paginateByUser(
+      {
+        limit: Number(limit),
+        page: Number(page),
+        route: route,
+      },
+      Number(authorId),
+    );
   }
   @Get(':id')
   findOne(@Param('id') id: number): Observable<BlogEntry> {
