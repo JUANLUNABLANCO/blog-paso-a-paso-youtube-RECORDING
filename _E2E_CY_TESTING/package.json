@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "cypress:open": "npx cypress open"
+    "cypress:open:local": "npx cypress open",
+    "cypress:run:cicd": "npx cypress run",
+    "cypress:report": "node run-reporter.js"
   },
   "keywords": [],
   "author": "",
