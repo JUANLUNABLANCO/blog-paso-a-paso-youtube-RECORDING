@@ -15,13 +15,16 @@ context('Login User', () => {
       body: {
         userName: 'test',
         email: 'test@gmail.com',
-        password: 'Test_12345678',
+        password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     }).then(() => {
       cy.visit('http://localhost:4200/login')
       localStorage.clear() // limpiamos por si acaso quedan restos de otras pruebas
-      cy.login('test@gmail.com', 'Test_12345678').then(() => {
+      cy.loginByInterfaz(
+        'test@gmail.com',
+        Cypress.env('DEFAULT_PASSWORD'),
+      ).then(() => {
         cy.window()
           .its('localStorage')
           .invoke('getItem', Cypress.env('JWT_NAME'))
@@ -48,7 +51,7 @@ context('Login User', () => {
       body: {
         userName: 'test',
         email: 'test@gmail.com',
-        password: 'Test_12345678',
+        password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     }).then(() => {
@@ -59,7 +62,7 @@ context('Login User', () => {
         form: false,
         body: {
           email: 'test@gmail.com',
-          password: 'Test_12345678',
+          password: Cypress.env('DEFAULT_PASSWORD'),
         },
       }).then((resp) => {
         // observa como ahora en cypress el token no está por ningún lado, si no visitamos la página y hacemos click, porque internamente en nuestra app, el comportamiento está desde angular n odesde cypress
@@ -88,7 +91,7 @@ context('Login User', () => {
       body: {
         userName: 'test',
         email: 'test@gmail.com',
-        password: 'Test_12345678',
+        password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     })
@@ -101,7 +104,7 @@ context('Login User', () => {
       'loginRequest',
     )
     // Enviamos credenciales incorrectas al formulario de inicio de sesión, a través del comando login
-    cy.login('test@gmail.com', 'wrong_password')
+    cy.loginByInterfaz('test@gmail.com', 'wrong_password')
     // Esperamos a que se complete la solicitud de inicio de sesión
     cy.wait('@loginRequest').then((interception) => {
       // cy.log('## DATA: ', JSON.stringify(interception.response))

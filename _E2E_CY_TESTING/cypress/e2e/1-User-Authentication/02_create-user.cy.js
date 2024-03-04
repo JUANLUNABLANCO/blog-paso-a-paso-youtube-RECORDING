@@ -12,7 +12,7 @@ context('Create User', () => {
       body: {
         userName: 'test1',
         email: 'test1@gmail.com',
-        password: 'Test_12345678',
+        password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     }).then((resp) => {
@@ -35,7 +35,7 @@ context('Create User', () => {
       body: {
         // Aquí puedes enviar datos incompletos o incorrectos, nos falta el userName
         email: 'test1@gmail.com',
-        password: 'Test_12345678',
+        password: Cypress.env('DEFAULT_PASSWORD'),
       },
     }).then((resp) => {
       // Verificamos que la respuesta tenga el formato esperado
@@ -65,9 +65,9 @@ context('Create User', () => {
     const userData = {
       userName: 'test',
       email: 'test@gmail.com',
-      password: 'Test_12345678',
+      password: Cypress.env('DEFAULT_PASSWORD'),
     }
-    cy.registerUser(userData)
+    cy.registerUserByInterfaz(userData)
 
     // Esperamos a que se complete la solicitud de registro
     cy.wait('@registerRequest').then((interception) => {

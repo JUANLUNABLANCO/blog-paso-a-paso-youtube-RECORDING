@@ -14,9 +14,9 @@ context('Create User Using frontned ng interface', () => {
     const userData = {
       userName: 'test2',
       email: 'test2@gmail.com',
-      password: 'Test_12345678',
+      password: Cypress.env('DEFAULT_PASSWORD'),
     }
-    cy.registerUser(userData)
+    cy.registerUserByInterfaz(userData)
     // cy.wait('@registerRequest').its('response.statusCode').should('eq', 201)
     cy.wait('@registerRequest').then((interception) => {
       expect(interception.response.statusCode).to.eq(201)
@@ -53,7 +53,7 @@ context('Login User Using frontend ng interface', () => {
       'loginRequest',
     )
     // login
-    cy.login('test2@gmail.com', 'Test_12345678')
+    cy.loginByInterfaz('test2@gmail.com', Cypress.env('DEFAULT_PASSWORD'))
 
     // Espera a que se complete la solicitud de inicio de sesión
     cy.wait('@loginRequest').then((interception) => {
@@ -82,7 +82,7 @@ context('Login User Using frontend ng interface', () => {
       body: {
         // Aquí puedes enviar datos incompletos o incorrectos, nos falta el userName
         email: 'test2@gmail.com',
-        password: 'Test_12345678',
+        password: Cypress.env('DEFAULT_PASSWORD'),
       },
     }).then((resp) => {
       expect(resp.status).to.eq(406) // recurso creado

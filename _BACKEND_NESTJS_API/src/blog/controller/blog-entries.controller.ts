@@ -10,7 +10,7 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { BlogService } from '../service/blog.service';
+import { BlogEntriesService } from '../service/blog-entries.service';
 import { BlogEntry } from '../model/blog-entry.interface';
 import { Observable } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -22,7 +22,7 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('blog-entries')
 export class BlogEntriesController {
-  constructor(private blogService: BlogService) {}
+  constructor(private blogService: BlogEntriesService) {}
 
   @UseGuards(JwtAuthGuard)
   // TODO USERISAUTHORGUARD

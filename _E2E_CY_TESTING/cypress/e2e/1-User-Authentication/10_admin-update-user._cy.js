@@ -32,14 +32,14 @@ context(
             body: user,
           }).then((resp) => {
             expect(resp.status).to.eq(201) // recurso creado
-            expect(resp.body).to.have.property('role', 'user')
+            expect(resp.body.user).to.have.property('role', 'user')
             // console.log('## DATA: ', resp.body)
           })
         })
 
         // ## 3
         cy.visit('http://localhost:4200/register')
-        cy.get('[data-test-id="nameField"]').type('test2')
+        cy.get('[data-test-id="userNameField"]').type('test2')
         cy.get('[data-test-id="emailField"]').type('test2@gmail.com')
         cy.get('[data-test-id="passwordField"]').type('test12345678')
         cy.get('[data-test-id="confirmPasswordField"]').type('test12345678')
@@ -62,49 +62,50 @@ context(
       },
     )
 
+    // WARNING no está desarrollado aún
     // Tenemos interfaz para actualizar el nombre del usuario, vamos a realizar el correspondiente test
-    it('1. Obtener el token del usuario y el id, 2. Ir a la vista de actualización del usuario, 3. update profile name, 4. comprobar actualización', () => {
-      // los pasos son los siguientes:
-      // # 1. Obtener token e id
-      // # 3. dirigirnos al usuario en cuetión para comprobar el cambio, para ello necesitamos su id, lo sacaremos del token registrado en el localStorage
-      Cypress.env('token', localStorage.getItem(Cypress.env('JWT_NAME')))
+    // it('1. Obtener el token del usuario y el id, 2. Ir a la vista de actualización del usuario, 3. update profile name, 4. comprobar actualización', () => {
+    //   // los pasos son los siguientes:
+    //   // # 1. Obtener token e id
+    //   // # 3. dirigirnos al usuario en cuetión para comprobar el cambio, para ello necesitamos su id, lo sacaremos del token registrado en el localStorage
+    //   Cypress.env('token', localStorage.getItem(Cypress.env('JWT_NAME')))
 
-      const token = Cypress.env('token')
+    //   const token = Cypress.env('token')
 
-      console.log('## token: ', token)
+    //   console.log('## token: ', token)
 
-      // DECODIFICADOR JWT
-      const decodeJWT = (token) => {
-        const base64Url = token.split('.')[1]
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-        const jsonPayload = decodeURIComponent(
-          window
-            .atob(base64)
-            .split('')
-            .map(function (c) {
-              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-            })
-            .join(''),
-        )
-        return JSON.parse(jsonPayload)
-      }
-      // DECODIFICADOR JWT
+    //   // DECODIFICADOR JWT
+    //   const decodeJWT = (token) => {
+    //     const base64Url = token.split('.')[1]
+    //     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    //     const jsonPayload = decodeURIComponent(
+    //       window
+    //         .atob(base64)
+    //         .split('')
+    //         .map(function (c) {
+    //           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    //         })
+    //         .join(''),
+    //     )
+    //     return JSON.parse(jsonPayload)
+    //   }
+    //   // DECODIFICADOR JWT
 
-      const payload = decodeJWT(token)
-      const idUser = payload.user.id
+    //   const payload = decodeJWT(token)
+    //   const idUser = payload.user.id
 
-      // # 2. dirigirnos a la vista que actualiza el usuario desde ng
-      cy.visit('http://localhost:4200/update-profile')
+    //   // # 2. dirigirnos a la vista que actualiza el usuario desde ng
+    //   cy.visit('http://localhost:4200/update-profile')
 
-      // # 3. Rellenar el formulario con un nombre nuevo y enviarlo
-      cy.get('[data-test-id="nameField"]').type('updatedName')
-      cy.get('[data-test-id="submitButton"]').click()
+    //   // # 3. Rellenar el formulario con un nombre nuevo y enviarlo
+    //   cy.get('[data-test-id="userNameField"]').type('updatedName')
+    //   cy.get('[data-test-id="submitButton"]').click()
 
-      // # 4. comprobaciones
-      cy.visit(`http://localhost:4200/users/${idUser}`)
-      cy.get('[data-test-id="nameField"]').should(($data) => {
-        expect($data).to.contain('updatedName')
-      })
-    })
+    //   // # 4. comprobaciones
+    //   cy.visit(`http://localhost:4200/users/${idUser}`)
+    //   cy.get('[data-test-id="userNameField"]').should(($data) => {
+    //     expect($data).to.contain('updatedName')
+    //   })
+    // })
   },
 )

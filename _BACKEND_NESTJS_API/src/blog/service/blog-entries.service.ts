@@ -15,7 +15,7 @@ import {
 } from 'nestjs-typeorm-paginate';
 
 @Injectable()
-export class BlogService {
+export class BlogEntriesService {
   constructor(
     @InjectRepository(BlogEntryEntity)
     private readonly blogRepository: Repository<BlogEntryEntity>,

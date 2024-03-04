@@ -4,22 +4,22 @@ context('Register Component', () => {
   const userData1 = {
     userName: 'test1',
     email: 'test1@gmail.com',
-    password: 'Test_12345678',
+    password: Cypress.env('DEFAULT_PASSWORD'),
   }
   const userData2 = {
     userName: 'test2',
     email: 'test2@gmail.com',
-    password: 'Test_12345678',
+    password: Cypress.env('DEFAULT_PASSWORD'),
   }
   // user test
   it('desde la interfaz "http://localhost:4200/register", creando usuario "test1"', () => {
     cy.task('queryDb', 'DELETE from user_entity') // limpiar db
 
-    cy.registerUser(userData1) // registrar usuario 1
+    cy.registerUserByInterfaz(userData1) // registrar usuario 1
   })
   // user test2
   it('desde la interfaz "http://localhost:4200/register", creando usuario "test2"', () => {
-    cy.registerUser(userData2) // registrar usuario 2
+    cy.registerUserByInterfaz(userData2) // registrar usuario 2
   })
   // probando la validación del campo email
   it('desde la interfaz "http://localhost:4200/register", creando usuario "test22". Comprobamos validación asíncrona', () => {
@@ -35,8 +35,12 @@ context('Register Component', () => {
     //   .wait(2000) // este mensaje podría cambiar y sobre todo si tenemos idiomas en la página, con lo anterior va sobrado
     // corregimos datos
     cy.get('[data-test-id="emailField"]').clear().type('test22@gmail.com')
-    cy.get('[data-test-id="passwordField"]').type('Test_12345678')
-    cy.get('[data-test-id="confirmPasswordField"]').type('Test_12345678')
+    cy.get('[data-test-id="passwordField"]').type(
+      Cypress.env('DEFAULT_PASSWORD'),
+    )
+    cy.get('[data-test-id="confirmPasswordField"]').type(
+      Cypress.env('DEFAULT_PASSWORD'),
+    )
     cy.get('[data-test-id="submitButton"]')
       .should('not.be.disabled')
       .click()
@@ -57,7 +61,9 @@ context('Login Component', () => {
   // user test
   it('desde la interfaz "http://localhost:4200/login", hagamos login con nuestro usuario "test22@gmail.com"', () => {
     cy.get('[data-test-id="emailField"]').type('test22@gmail.com')
-    cy.get('[data-test-id="passwordField"]').type('Test_12345678')
+    cy.get('[data-test-id="passwordField"]').type(
+      Cypress.env('DEFAULT_PASSWORD'),
+    )
 
     cy.get('[data-test-id="submitButton"]')
       .should('not.be.disabled')

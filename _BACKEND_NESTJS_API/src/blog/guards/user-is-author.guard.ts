@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/service/user.service';
-import { BlogService } from '../service/blog.service';
+import { BlogEntriesService } from '../service/blog-entries.service';
 import { Observable, map, switchMap } from 'rxjs';
 import { IUser } from 'src/user/model/user.interface';
 import { BlogEntry } from '../model/blog-entry.interface';
@@ -9,7 +9,7 @@ import { BlogEntry } from '../model/blog-entry.interface';
 export class UserIsAuthorGuard implements CanActivate {
   constructor(
     private userService: UserService,
-    private blogService: BlogService,
+    private blogService: BlogEntriesService,
   ) {}
 
   canActivate(context: ExecutionContext): Observable<boolean> {

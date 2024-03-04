@@ -1,10 +1,10 @@
 export interface User {
-  id?: number;
-  name?: string;
-  email?: string;
-  password?: string;
-  role?: UserRole;
-  profileImage?: string;
+  id?: number
+  userName?: string
+  email?: string
+  password?: string
+  role?: UserRole
+  profileImage?: string
 }
 export enum UserRole {
   ADMIN = 'admin',
