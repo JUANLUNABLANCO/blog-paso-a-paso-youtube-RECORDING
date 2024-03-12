@@ -29,7 +29,7 @@ import { UserIsUserGuard } from '../../auth/guards/userIsUser.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import path = require('path');
+import * as path from 'path';
 import { IUserCreateResponse, UserCreateDto } from '../model/user-create.dto';
 import {
   IUserLoginResponse,
@@ -38,17 +38,16 @@ import {
 } from '../model/user-login.dto';
 import { AuthService } from 'src/auth/services/auth.service';
 
-export const storage = {
-  storage: diskStorage({
-    destination: './uploads/profileImages',
-    filename: (req, file, cb) => {
-      const filename: string =
-        path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
-      const extension: string = path.parse(file.originalname).ext;
-      cb(null, `${filename}${extension}`);
-    },
-  }),
-};
+export const storage = diskStorage({
+  destination: './uploads/profileImages',
+  filename: (req, file, cb) => {
+    const filename: string =
+      file.originalname.replace(/\s/g, '').split('.')[0] + uuidv4();
+    const extension: string = path.extname(file.originalname);
+    console.log(`fileName and extension: ${filename}${extension}`);
+    cb(null, `${filename}${extension}`);
+  },
+});
 @Controller('users')
 export class UserController {
   constructor(

@@ -9,19 +9,38 @@ import {
   Param,
   Put,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  Response,
 } from '@nestjs/common';
 import { BlogEntriesService } from '../service/blog-entries.service';
 import { BlogEntry } from '../model/blog-entry.interface';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserIsAuthorGuard } from '../guards/user-is-author.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/user/model/user.interface';
 import { Pagination } from 'nestjs-typeorm-paginate';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UserIsUserGuard } from 'src/auth/guards/userIsUser.guard';
+import * as path from 'path';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { IImage } from '../model/image.interface';
 
+export const storage = diskStorage({
+  destination: './uploads/blogEntriesImages',
+  filename: (req, file, cb) => {
+    const filename: string =
+      file.originalname.replace(/\s/g, '').split('.')[0] + uuidv4();
+    const extension: string = path.extname(file.originalname);
+    cb(null, `${filename}${extension}`);
+  },
+});
 @Controller('blog-entries')
 export class BlogEntriesController {
+  configService: any;
   constructor(private blogService: BlogEntriesService) {}
 
   @UseGuards(JwtAuthGuard)
@@ -87,5 +106,28 @@ export class BlogEntriesController {
   @hasRoles(UserRole.ADMIN)
   deleteOne(@Param('id') id: number): Observable<any> {
     return this.blogService.deleteOne(Number(id));
+  }
+  // @UseGuards(JwtAuthGuard, UserIsUserGuard)
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file', { storage }))
+  uploadFile(@UploadedFile() file, @Request() req): Observable<IImage> {
+    console.log('#### file name: ', file.filename);
+    return of(file);
+  }
+
+  @Get('header-image/:imageName')
+  findHeaderImage(
+    @Param('imageName') imageName,
+    @Response() resp,
+  ): Observable<unknown> {
+    console.log(
+      'ruta file',
+      path.join(process.cwd(), 'uploads/blogEntriesImages/', imageName),
+    );
+    return of(
+      resp.sendFile(
+        path.join(process.cwd(), 'uploads/blogEntriesImages', imageName),
+      ),
+    );
   }
 }
