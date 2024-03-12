@@ -80,7 +80,7 @@ context('Create User sin interfaz frontend', () => {
       failOnStatusCode: false,
       body: {
         userName: 'userAdmin',
-        email: 'admin@admin.com', // debe ser unico y lo convierte a minusculas
+        email: Cypress.env('ADMIN_EMAIL'), // debe ser unico y lo convierte a minusculas
         password: 'test12345678',
       },
     }).then((resp) => {

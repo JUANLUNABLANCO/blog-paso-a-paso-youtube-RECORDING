@@ -1786,3 +1786,9 @@ y hemos aprendido a cómo gestionar la caché dependiendo del modo en el que est
 ## 20 Blog Entries we contiue
 
 https://app.asana.com/0/1204934367072674/1205421367853549/f
+
+## 21
+
+## 22 Blog Entries Index by Author
+
+## 23 Blog Entries Upload an Image

@@ -14,25 +14,25 @@ context('Login User', () => {
       form: false,
       body: {
         userName: 'test',
-        email: 'test@gmail.com',
+        email: Cypress.env('DEFAULT_EMAIL'),
         password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     }).then(() => {
-      cy.visit('http://localhost:4200/login')
       localStorage.clear() // limpiamos por si acaso quedan restos de otras pruebas
+      // cy.visit('http://localhost:4200/#/login')
       cy.loginByInterfaz(
-        'test@gmail.com',
+        Cypress.env('DEFAULT_EMAIL'),
         Cypress.env('DEFAULT_PASSWORD'),
       ).then(() => {
-        cy.window()
-          .its('localStorage')
+        // cy.window()
+        //   .its('localStorage')
+        //   .invoke('getItem', Cypress.env('JWT_NAME'))
+        //   .should('exist')
+        // OTRA forma de hacerlo
+        cy.wrap(localStorage)
           .invoke('getItem', Cypress.env('JWT_NAME'))
           .should('exist')
-        // OTRA forma de hacerlo
-        // cy.wrap(localStorage)
-        //   .invoke('getItem', 'access_token')
-        //   .should('exist')
       })
     })
   })
@@ -43,6 +43,7 @@ context('Login User', () => {
     cy.task('queryDb', 'DELETE from user_entity').then((results) => {
       cy.log(results)
     })
+    localStorage.clear() // limpiamos por si acaso quedan restos de otras pruebas
     // crear usuario
     cy.request({
       method: 'POST',
@@ -50,18 +51,19 @@ context('Login User', () => {
       form: false,
       body: {
         userName: 'test',
-        email: 'test@gmail.com',
+        email: Cypress.env('DEFAULT_EMAIL'),
         password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     }).then(() => {
+      localStorage.clear() // limpiamos por si acaso quedan restos de otras pruebas
       // ahora enviaremos una petición de login
       cy.request({
         method: 'POST',
         url: 'http://127.0.0.1:3000/api/users/login',
         form: false,
         body: {
-          email: 'test@gmail.com',
+          email: Cypress.env('DEFAULT_EMAIL'),
           password: Cypress.env('DEFAULT_PASSWORD'),
         },
       }).then((resp) => {
@@ -70,7 +72,10 @@ context('Login User', () => {
         // Comprobar si el access_token existe y no está vacío
         expect(resp.body).to.have.property(Cypress.env('JWT_NAME')).that.is.not
           .empty
-        localStorage.setItem(Cypress.env('JWT_NAME'), resp.body) // por esto lo grabamos nosotros
+        localStorage.setItem(
+          Cypress.env('JWT_NAME'),
+          resp.body[Cypress.env('JWT_NAME')],
+        ) // por esto lo grabamos nosotros
         cy.wrap(localStorage)
           .invoke('getItem', Cypress.env('JWT_NAME'))
           .should('exist')
@@ -90,13 +95,13 @@ context('Login User', () => {
       form: false,
       body: {
         userName: 'test',
-        email: 'test@gmail.com',
+        email: Cypress.env('DEFAULT_EMAIL'),
         password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     })
     // Visitamos la página de inicio de sesión
-    cy.visit('http://localhost:4200/login')
+    cy.visit('http://localhost:4200/#/login')
     // Limpiamos cualquier token que pueda estar en el localStorage
     localStorage.clear()
     // Interceptamos la solicitud de inicio de sesión y capturamos su respuesta
@@ -104,7 +109,7 @@ context('Login User', () => {
       'loginRequest',
     )
     // Enviamos credenciales incorrectas al formulario de inicio de sesión, a través del comando login
-    cy.loginByInterfaz('test@gmail.com', 'wrong_password')
+    cy.loginByInterfaz(Cypress.env('DEFAULT_EMAIL'), 'wrong_password')
     // Esperamos a que se complete la solicitud de inicio de sesión
     cy.wait('@loginRequest').then((interception) => {
       // cy.log('## DATA: ', JSON.stringify(interception.response))

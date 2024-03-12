@@ -112,7 +112,7 @@
             "prod": {
               "browserTarget": "frontend:build:prod"
             },
-            "development": {
+            "dev": {
               "browserTarget": "frontend:build:dev"
             },
             "test": {

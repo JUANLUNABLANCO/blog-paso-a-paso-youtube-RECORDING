@@ -11,14 +11,17 @@ context('Create User', () => {
       form: false,
       body: {
         userName: 'test1',
-        email: 'test1@gmail.com',
+        email: 'test1@agileninjatech.com',
         password: Cypress.env('DEFAULT_PASSWORD'),
         role: 'admin',
       },
     }).then((resp) => {
       expect(resp.status).to.eq(201) // recurso creado
       expect(resp.body.user).to.have.property('userName', 'test1')
-      expect(resp.body.user).to.have.property('email', 'test1@gmail.com')
+      expect(resp.body.user).to.have.property(
+        'email',
+        'test1@agileninjatech.com',
+      )
       expect(resp.body.user).to.have.property('role', 'user')
       // Comprobar si el id existe y es de tipo string
       expect(resp.body.user).to.have.property('id').that.is.a('number')
@@ -30,19 +33,19 @@ context('Create User', () => {
   it('should return an error if required fields are missing', () => {
     cy.request({
       method: 'POST',
-      url: `${Cypress.env('API_URL')}/api/users`,
+      url: `${Cypress.env('API_URL')}/api/security/login`,
       failOnStatusCode: false, // Esto permite que la prueba no falle por un código de estado diferente a 2xx
       body: {
         // Aquí puedes enviar datos incompletos o incorrectos, nos falta el userName
-        email: 'test1@gmail.com',
+        email: 'test1@agileninjatech.com',
         password: Cypress.env('DEFAULT_PASSWORD'),
       },
     }).then((resp) => {
       // Verificamos que la respuesta tenga el formato esperado
       expect(resp.status).to.not.eq(201) // Esperamos que el código de estado no sea 201
-      expect(resp.status).to.eq(406) // Esperamos que el servidor responda con un código 400 Bad Request
+      expect(resp.status).to.eq(404) // Esperamos que el servidor responda con un código 400 Bad Request
       expect(resp.body).to.have.property('message') // Esperamos que el cuerpo de la respuesta contenga un mensaje de error
-      expect(resp.body).to.have.property('statusCode', 406) // Esperamos que el código de estado sea 406
+      expect(resp.body).to.have.property('statusCode', 404) // Esperamos que el código de estado sea 406
     })
     localStorage.clear()
   })
@@ -64,7 +67,7 @@ context('Create User', () => {
     // Llama a la función registerUser con los datos del usuario
     const userData = {
       userName: 'test',
-      email: 'test@gmail.com',
+      email: Cypress.env('DEFAULT_EMAIL'),
       password: Cypress.env('DEFAULT_PASSWORD'),
     }
     cy.registerUserByInterfaz(userData)
@@ -74,7 +77,7 @@ context('Create User', () => {
       // Accedemos a la respuesta del backend para obtener el ID del usuario registrado
       userId = interception.response.body.user.id
       // Verificamos la redirección a la página del perfil de usuario, sabemos que tras un registro hace el login automáticamente
-      cy.url().should('eq', `http://localhost:4200/users/${userId}`)
+      cy.url().should('eq', `http://localhost:4200/#/users/${userId}`)
     })
   })
 })

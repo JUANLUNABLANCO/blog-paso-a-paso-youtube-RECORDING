@@ -209,7 +209,7 @@ export class UserService {
 
   private getRoleAdminOrUser(email: string): UserRole {
     if (process.env.CONTROL === 'local' || process.env.CONTROL === 'test') {
-      if (email == 'admin@admin.com') {
+      if (email == process.env.ADMIN_EMAIL) {
         return UserRole.ADMIN;
       }
     } else if (

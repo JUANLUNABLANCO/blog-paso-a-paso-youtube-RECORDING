@@ -31,7 +31,11 @@ async function bootstrap() {
     }),
   );
   // ***** CORS *****
-  const origins = `${process.env.APP_URL_ORIGIN}:${process.env.APP_PORT_ORIGIN}`; // 'http://127.0.0.1:8080';
+  const origins = [
+    `${process.env.APP_URL_ORIGIN}:${process.env.APP_PORT_ORIGIN}`,
+    'http://localhost:4200',
+    'http://127.0.0.1:4200',
+  ];
   const corsConfig = {
     origin: origins,
     allowedHeaders:
