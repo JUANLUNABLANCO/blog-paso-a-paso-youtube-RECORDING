@@ -13,10 +13,12 @@ import {
   Response,
   UseInterceptors,
   UploadedFile,
+  NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { Pagination } from 'nestjs-typeorm-paginate';
 // mine
 import { ConfigService } from '@nestjs/config';
@@ -37,17 +39,27 @@ import {
   UserLoginDto,
 } from '../model/user-login.dto';
 import { AuthService } from 'src/auth/services/auth.service';
+import { IUserFindResponse } from '../model/user-find.dto';
+import { ErrorHandler } from 'src/core/errors/error.handler';
 
-export const storage = diskStorage({
-  destination: './uploads/profileImages',
-  filename: (req, file, cb) => {
-    const filename: string =
-      file.originalname.replace(/\s/g, '').split('.')[0] + uuidv4();
-    const extension: string = path.extname(file.originalname);
-    console.log(`fileName and extension: ${filename}${extension}`);
-    cb(null, `${filename}${extension}`);
-  },
-});
+export const storage = {
+  storage: diskStorage({
+    destination: './uploads/profileImages', // this.configService.get('UPLOAD_DESTINATION'),
+    filename: (req, file, cb) => {
+      // // console.log(
+      //   `############## fileName and extension: ${file.originalname}`,
+      // );
+      const filename: string =
+        file.originalname.replace(/\s/g, '').split('.')[0] + uuidv4(); // nombre.de.fichero.ext
+      const extension: string = path.extname(file.originalname);
+      // // console.log(
+      //   `############## fileName and extension: ${filename}${extension}`,
+      // );
+      cb(null, `${filename}${extension}`);
+    },
+  }),
+};
+
 @Controller('users')
 export class UserController {
   constructor(
@@ -73,7 +85,7 @@ export class UserController {
   }
   @Post('login')
   login(@Body() user: UserLoginDto): Observable<IUserLoginResponse> {
-    console.log('## USER CONTROLLER: IN LOGIN ', user);
+    // console.log('## USER CONTROLLER: IN LOGIN ', user);
     return this.userService.login(user).pipe(
       map((jwt: string) => {
         return { access_token: jwt };
@@ -83,10 +95,10 @@ export class UserController {
   // @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get('logout/:userId')
   logout(@Param('userId') userId: string): Observable<IUserLogoutResponse> {
-    console.log('#### logout id: ', Number(userId));
+    // // console.log('#### logout id: ', Number(userId));
     return this.authService.generateInvalidJWT(Number(userId)).pipe(
       map((jwt: string) => {
-        console.log('#### logout invalid jwt: ', jwt);
+        // console.log('#### logout invalid jwt: ', jwt);
         return { message: `user with id ${userId} is logout` };
       }),
     );
@@ -98,8 +110,8 @@ export class UserController {
   findOneById(@Param() params): Observable<IUser> {
     return this.userService.findOneById(params.id);
   }
-  // WARNING solo el propio usuario o el admin podrán hacer esta solicitud
-  // @UseGuards(JwtAuthGuard, UserIsUserGuardOrAdmin)
+  // TODO WARNING solo el propio usuario o el admin podrán hacer esta solicitud
+  @UseGuards(JwtAuthGuard)
   @Post('email')
   findOneByEmail(@Body() user: IUser): Observable<IUser> {
     return this.userService.findOneByEmail(user);
@@ -114,7 +126,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(':id')
   updateOne(@Param('id') id: string, @Body() user: IUser): Observable<any> {
-    console.log('### USER: ', user);
+    // console.log('### USER: ', user);
     // solo permitimos el cambio de nombre y de email
     delete user.role;
     delete user.id; // WARNING este debe de caparse porque sinó podrá actualizar su id
@@ -136,18 +148,50 @@ export class UserController {
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
-  uploadFile(@UploadedFile() file, @Request() req): Observable<File> {
-    const user: IUser = req.user;
+  uploadFile(@UploadedFile() file, @Request() req): Observable<IUser> {
+    let user: IUser;
 
-    console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL')); // aquí si funciona
-    console.log('#### file name: ', file.filename);
+    if (req.user) {
+      user = req.user as IUser;
+    } else {
+      // console.log('User is not in request');
+      throw ErrorHandler.handleNotFoundError('User is not in request');
+    }
 
-    return this.userService
-      .updateOne(user.id, { profileImage: file.filename })
-      .pipe(
-        tap((user: IUser) => console.log(user)),
-        map((user: IUser) => ({ profileImage: user.profileImage })),
+    // console.log(`#### req user: ${JSON.stringify(req.user)}`);
+    // console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL'));
+    // console.log('#### file name: ', file.filename);
+    // console.log('#### file path: ', file.path);
+    // console.log('#### file originalname: ', file.originalname);
+    // console.log(`#### user id: ${user ? user.id : 'No hay usuario'}`);
+
+    try {
+      return this.userService.findOneById(user.id).pipe(
+        switchMap((user: IUserFindResponse) => {
+          if (!user) {
+            throw ErrorHandler.handleNotFoundError('User not found');
+          }
+          user.profileImage = file.filename;
+          return this.userService.updateOne(user.id, user).pipe(
+            map((userUpdated: IUser) => {
+              // console.log(`#### User Updated: ${JSON.stringify(userUpdated)}`);
+              return userUpdated;
+            }),
+            catchError((err) => {
+              // console.log('#### err en uploadFile 2: ', err);
+              throw ErrorHandler.createSignatureError(err.message);
+            }),
+          );
+        }),
+        catchError((err) => {
+          // console.log('#### err en uploadFile 1: ', err);
+          throw ErrorHandler.createSignatureError(err.message);
+        }),
       );
+    } catch (error) {
+      // console.error('Error en el acceso a la base de datos:', error);
+      throw ErrorHandler.createSignatureError('Error de base de datos');
+    }
   }
 
   @Get('profile-image/:imageName')
@@ -155,10 +199,10 @@ export class UserController {
     @Param('imageName') imageName,
     @Response() resp,
   ): Observable<unknown> {
-    console.log(
-      'ruta file',
-      path.join(process.cwd(), 'uploads/profileImages/', imageName),
-    );
+    // console.log(
+    //   'ruta file',
+    //   path.join(process.cwd(), 'uploads/profileImages/', imageName),
+    // );
     return of(
       resp.sendFile(
         path.join(process.cwd(), 'uploads/profileImages', imageName),

@@ -111,7 +111,7 @@ export class BlogEntriesController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', { storage }))
   uploadFile(@UploadedFile() file, @Request() req): Observable<IImage> {
-    console.log('#### file name: ', file.filename);
+    // // // // console.log('#### file name: ', file.filename);
     return of(file);
   }
 

@@ -33,7 +33,7 @@ export class BlogEntriesService {
   }
 
   findAll(): Observable<BlogEntry[]> {
-    return from(this.blogRepository.find());
+    return from(this.blogRepository.find({ relations: { author: true } }));
   }
 
   paginateAll(options: IPaginationOptions): Observable<Pagination<BlogEntry>> {

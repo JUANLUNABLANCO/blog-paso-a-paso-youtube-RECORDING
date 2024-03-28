@@ -12,16 +12,16 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
     if (exception instanceof HttpException) {
       response.status(exception.getStatus()).json({
         statusCode: exception.getStatus(),
-        message: exception.message,
         timestamp: new Date().toISOString(),
         path: request.url,
+        message: exception.message,
       });
     } else {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
         timestamp: new Date().toISOString(),
         path: request.url,
+        message: 'Internal server error',
       });
     }
   }

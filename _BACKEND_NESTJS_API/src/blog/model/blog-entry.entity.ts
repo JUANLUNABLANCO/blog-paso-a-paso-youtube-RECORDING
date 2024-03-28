@@ -47,6 +47,9 @@ export class BlogEntryEntity {
   @Column({ default: false })
   isPublished: boolean;
 
-  @ManyToOne((type) => UserEntity, (user) => user.blogEntries)
+  @ManyToOne((type) => UserEntity, (user) => user.blogEntries, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   author: UserEntity;
 }

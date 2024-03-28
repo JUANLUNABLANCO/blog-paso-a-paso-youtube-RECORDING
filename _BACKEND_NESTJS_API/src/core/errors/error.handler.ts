@@ -21,11 +21,18 @@ export class ErrorHandler extends Error {
   }
 
   public static createSignatureError(message: string) {
-    const name = message.split(' :: ')[0];
-    if (name) {
-      throw new HttpException(message, HttpStatus[name]);
-    } else {
-      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    let statusCode = HttpStatus.INTERNAL_SERVER_ERROR; // Por defecto, código de estado de error interno
+    let errorMessage = message; // Por defecto, el mensaje de error comp
+
+    const errorParts = message.split(' :: ');
+    if (errorParts.length === 2) {
+      const typeName = errorParts[0].trim();
+      const customStatus = HttpStatus[typeName as keyof typeof HttpStatus];
+      if (customStatus) {
+        statusCode = customStatus;
+        errorMessage = errorParts[1].trim();
+      }
     }
+    throw new HttpException(errorMessage, statusCode);
   }
 }
