@@ -1787,8 +1787,70 @@ y hemos aprendido a cómo gestionar la caché dependiendo del modo en el que est
 
 https://app.asana.com/0/1204934367072674/1205421367853549/f
 
-## 21
+## 21 Blog Entries: updateOne(), deleteOne()
+
+Acceptance Criteria
+UserIsAuthorGuard()
+UserIsAdminGuard()
+updateOne BlogEntrie if userIsAuthorGuard
+deletOne BlogEntrie if userIsAdminGuard
 
 ## 22 Blog Entries Index by Author
 
+Explainning:
+BlogEntries dos nuevos endpoints getAll() and getAllByAuthor()
+
+Acceptance Criteria:
+
+- Necesitamos crear dos endpoints uno para obtener todos los blog entries
+- Otro para los blog entries de un author
+- ambos deben ser paginados
+- haremos pruebas con postman
+
 ## 23 Blog Entries Upload an Image
+
+We need a upload image for blog entries endpoint, independent of all endpoints something like
+'/api/blogEntries/upload'
+
+Acceptance Criteria:
+
+(PARTE01) —————————————
+New Endpoint to upload image for blog-entry
+New Endpoint to download an image for blog-entry
+save image to the filesystem
+
+(PARTE02) —————————————
+update blog entry
+refactoring manejo de errores
+request to postman collection
+
+## 24 NestJS: User Is User Guard Refactoring
+
+Refactorizar el UserIsUserGuard para que acepte tanto endpoints en los que nos llega un id de usuario, como endpoints en los que no llega y se identifica a través del token
+
+Acceptance Criteria:
+debe aceptar un /:id desde la url o no
+Si viene ese param id comprobará que sea igual al idFromToken y al idFromReq
+Si no viene deberá comprobar que es igual idFromToken al idFromReq
+Controlar los posibles errores, preámbulo de la siguiente tarea
+
+## 25 NestJs: Revisar el manejo de errores genérico
+
+Crear una manera sólida en todo el backend sobre el manejo de errores.
+
+**Rama**
+feature/task-13_errors
+
+// WARNING cuidado ya existía cambiarnos allí y revisarlo si no nos convence eliminamos la rama y volvemos a develop creando una feature nueva
+
+
+
+**Acceptance Criteria**
+
+- Manejo de errores al máximo en NestJs
+- Usar el error Handler en la medida de los posible
+- usar catchError en los maps() y en los switchMaps()
+- usar try cacth en el acceso a bases de datos o librerías externas como decodificación, acceso a ficheros, etc
+- Usar funciones controladas como notFoundError(), notAccessPermitedError(), ...
+- Si no tenemos una exception controlada usaremos createSignatureError()
+- si es un try catch { ... } usar errorHandler en su interior igualmente
