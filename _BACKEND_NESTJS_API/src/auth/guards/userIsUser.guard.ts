@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   Inject,
   forwardRef,
+  HttpException,
 } from '@nestjs/common';
 import { Observable, catchError, map, of } from 'rxjs';
 import { UserService } from 'src/user/service/user.service';
@@ -47,6 +48,8 @@ export class UserIsUserGuard implements CanActivate {
         idFromToken = jwtDecoded.user?.id;
       }
     } catch (error) {
+      // TODO mirar el uso de ErrorHandler, si es necesario o no...
+      // throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
       throw ErrorHandler.createSignatureError('Invalid token');
     }
     // id to check

@@ -1839,11 +1839,124 @@ Controlar los posibles errores, preámbulo de la siguiente tarea
 Crear una manera sólida en todo el backend sobre el manejo de errores.
 
 **Rama**
-feature/task-13_errors
+feature/task-25_errors
 
-// WARNING cuidado ya existía cambiarnos allí y revisarlo si no nos convence eliminamos la rama y volvemos a develop creando una feature nueva
+```typescript
+  // TODO user is user or user is Admin
+  // @UseGuards(JwtAuthGuard, UserIsUserGuard)
+  @Get(':id')
+  findOneById(@Param() params): Observable<IUser> {
+    // throw new Error('Esto es un error ...'); // no se controla, lanza un mensaje de error en consola pero la app se paraliza, necesitas un bloque try {} catch() para interceptarlo
+    // vamos a la documentación: https://docs.nestjs.com/exception-filters
+    // Nos dice que si no tenemos una exception controlada, por nosotros la capa de excepciones se encarga de proveer al menos una respuesta para las excepciones de tipo Http (HttpExceptions) y si no es una de tipo HttpException enviará la siguiente respuesta
+    // {
+    //   "statusCode": 500,
+    //   "message": "Internal server error",
+    // }
+    // Si vemos la respuesta cuando enviamos un error no interceptado y que además no es de tipo HttpException, pues es el json de arriba
+
+    // el filtro global de excepciones de NestJs (global exceptions filter) soporta la librería http-errors, muy popular, cada thrown exception contiene un `statusCode` y un `message`
+
+    // si usamos este HttpException, podemos controlar el mensaje y el código de error
+    // throw new HttpException('Esto es un error de tipo HttpException', 404);
+    // o lo que es lo mismo usando la librería http-errors
+    // throw new HttpException('Esto es un error de tipo HttpException', HttpStatus.BAD_REQUEST);
+    // si vemos la respuesta en postman observamos el statusCode no solo ne el json sino como error devuelto en el tipo de respuesta
+
+    // Podemos crear el objeto que nosotros necesitemos para la respuesta, ya que el primer parámetro o es un string o puede ser un objeto
+    // throw new HttpException(
+    //   { error: true, statusCode: 501, serverTime: new Date(), "message": 'This is a custom object'},
+    //   400,
+    // );
+
+    // hasta aquí vemos que cualquier error lanzado con HttpException será reconocido por NestJs gracias al Global Exceptions filter
+
+    // en los otros parámetros que tenemos dentro del HttpException vemos, el options? que es un objeto y dentro tenemos el cause
+    // el cual no se serializará aunque lo implementemos en la respuesta
+    // throw new HttpException(
+    //   { error: true, statusCode: 501, serverTime: new Date(), "message": 'This is a custom object'},
+    //   400,
+    // { "cause": error } // el error viene del catch(error) el cual es de tipo Error { name: string, message: string, stack?: string }
+    // );
+
+    // por ejemplo, para fines de logger, podemos usar el { cause } para crear un logger personalizado que de más información a los desarrolladores pero no a los usuarios finales.
+
+    // Existen también subclases de HttpException como:
+    // BadRequestException, UnauthorizedException, ForbiddenException, NotFoundException, etc
+    // throw new ForbiddenException();
+    // throw new ForbiddenException('Esto es un error de tipo ForbiddenException');
+    // mira la respuesta como cambia:
+    // {
+    //   statusCode: 403,
+    //   message: 'Custom Message',
+    //   error: 'Forbidden'
+    // }
+    // throw new ForbiddenException({message: 'custom forbidden exception', statusCode: 403, serverTime: new Date().toISOString()});
+    // throw new NotFoundException('Esto es un error de tipo NotFoundException');
+
+    // Si quieres tener control total de este tipo de excepciones (HttpExceptions) y otras, puedes usar el Global Exceptions Filter que nos provee NestJs y crear un custom exception filter que herede de ahí, y eso es lo que hicimos con el archivo:
+    // all-exceptions.filter.ts
+
+    // VE AL ARCHIVO Y ANALIZA LO QUE HACE
+
+    // @Catch() // si vemos la documentación, solo recoge los HttpException --> @Catch(HttpException)
+    // export class AllExceptionsFilter extends BaseExceptionFilter {
+    //   catch(exception: unknown, host: ArgumentsHost) {
+    //     const ctx = host.switchToHttp();
+    //     const response = ctx.getResponse();
+    //     const request = ctx.getRequest();
+
+    // podemos analizar dentro de exception.cause, exception.message or others
+    // el segundo pqarámetro tiene contextos para diferentes Hosts, como Http, Web Sockets, Rpc, ...
+    // dentro del response y del request podemos obtener ciertoas cosas como el body, los headers, etc.
+
+    // nosotros hemos hecho una diferencia entre errores de tipo HttpException y otro tipo de errores así lo manejamos todos
+    //     if (exception instanceof HttpException) {
+    //       response
+    //          .status(exception.getStatus())
+    //          .json({
+    //            statusCode: exception.getStatus(),
+    //            timestamp: new Date().toISOString(),
+    //            path: request.url,
+    //            message: exception.message,
+    //          });
+    //     } else {
+    // RECORDEMOS que esto era el comportamiento por defecto del filtro de excepciones global de nestjs, pero aquí estamos definiendo el objeto a nuestro propio gusto
+    //       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    //         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    //         timestamp: new Date().toISOString(),
+    //         path: request.url,
+    //         message: 'Internal server error',
+    //       });
+    //     }
+    //   }
+    // }
+
+    // Ahora podemos usar este filter de tres maneras,
+    // 1. a nivel de método @UseFilters(new AllExceptionsFilter()) o @UseFilters(AllExceptionsFilter)
+    // 2. a nivel de servicio usando el decorador @UseFilters(AllExceptionsFilter) antes de la clase
+    // 3. a nivel global en toda la app ya sea desde el amin.ts
+    // app.useGlobalFilters(new AllExceptionsFilter());
+    // o
+    // usando los providers en el app.module.ts
+
+    // de esta manera podríamos no necesitar el try y el catch(), puesto que todos los errores quedan controlados en nuesto
+    // AllExceptionsFilter class
+    // para probar que esto es así volmeos a nuestro controlador y lanzamos un Error
+    // throw new Error()
+    // veremos este tipo de respuesta
+    // {
+    //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    //     timestamp: new Date().toISOString(),
+    //     path: request.url,
+    //     message: 'Internal server error',
+    //   }
+    // pero si queremos controlar cada tipo de error que se genera en aquellos sitios donde sabemos que puede haber un error de tipo Base de datos, o de tipo jwt, o el que sea, es mejor usar el try {} catch(error) para lanzar lo que nosotros necesitemos, aunque esto no es obligatorio como hemos visto...
 
 
+    return this.userService.findOneById(params.id);
+  }
+```
 
 **Acceptance Criteria**
 

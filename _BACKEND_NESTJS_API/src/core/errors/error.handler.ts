@@ -22,7 +22,7 @@ export class ErrorHandler extends Error {
 
   public static createSignatureError(message: string) {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR; // Por defecto, código de estado de error interno
-    let errorMessage = message; // Por defecto, el mensaje de error comp
+    let errorMessage = message; // Por defecto, el mensaje de error completo `500 :: este es un mensaje completo por defecto`
 
     const errorParts = message.split(' :: ');
     if (errorParts.length === 2) {

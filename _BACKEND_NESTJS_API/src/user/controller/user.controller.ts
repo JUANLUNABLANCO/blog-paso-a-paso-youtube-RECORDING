@@ -15,6 +15,10 @@ import {
   UploadedFile,
   NotFoundException,
   InternalServerErrorException,
+  HttpException,
+  HttpStatus,
+  ForbiddenException,
+  UseFilters,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { Observable, of } from 'rxjs';
@@ -41,6 +45,7 @@ import {
 import { AuthService } from 'src/auth/services/auth.service';
 import { IUserFindResponse } from '../model/user-find.dto';
 import { ErrorHandler } from 'src/core/errors/error.handler';
+import { AllExceptionsFilter } from 'src/core/errors/all-exceptions.filter';
 
 export const storage = {
   storage: diskStorage({
@@ -60,6 +65,7 @@ export const storage = {
   }),
 };
 
+// @UseFilters(AllExceptionsFilter)
 @Controller('users')
 export class UserController {
   constructor(
@@ -105,7 +111,6 @@ export class UserController {
   }
 
   // TODO user is user or user is Admin
-  @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
   findOneById(@Param() params): Observable<IUser> {
     return this.userService.findOneById(params.id);

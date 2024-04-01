@@ -10,8 +10,9 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
     const request = ctx.getRequest();
 
     if (exception instanceof HttpException) {
-      response.status(exception.getStatus()).json({
-        statusCode: exception.getStatus(),
+      const status = exception.getStatus();
+      response.status(status).json({
+        statusCode: status,
         timestamp: new Date().toISOString(),
         path: request.url,
         message: exception.message,
@@ -21,7 +22,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         timestamp: new Date().toISOString(),
         path: request.url,
-        message: 'Internal server error',
+        message: 'Internal server error!',
       });
     }
   }
