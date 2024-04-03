@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../model/user.entity';
 import { Repository, Like } from 'typeorm';
@@ -34,10 +39,7 @@ export class UserService {
       switchMap((existingUser: IUser) => {
         if (existingUser) {
           // console.log('#### YA EXISTE EL BICHO ####');
-          throw new ErrorHandler({
-            type: 'BAD_REQUEST',
-            message: 'User already exists',
-          });
+          throw new BadRequestException('User already exists');
         } else {
           return this.createUser(user);
         }
@@ -79,10 +81,7 @@ export class UserService {
     token: string;
   }> {
     if (!createdUser) {
-      throw new ErrorHandler({
-        type: 'BAD_REQUEST',
-        message: 'Failed to create user',
-      });
+      throw new BadRequestException('Fallo al intentar crear al Usuario!');
     }
     const { id, userName, email, role, profileImage, blogEntries } =
       createdUser;
@@ -132,7 +131,7 @@ export class UserService {
         }),
       );
     } catch (err) {
-      throw err;
+      throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
   findOneById(id: number): Observable<IUserFindResponse> {
@@ -146,19 +145,20 @@ export class UserService {
       ).pipe(
         map((user: IUser) => {
           if (!user) {
-            // ErrorHandler.handleNotFoundError('User not found'); // WARNING no queremos provocar un error si no lo encuentra eso que lo decida la función que llama a esta
+            // WARNING NO BORRAR COMENTARIO
+            // COMENTARIO no queremos provocar un error, si no lo encuentra eso que lo decida la función que llama a esta
             return null;
           }
           return this.transformUserToResponse(user);
         }),
         catchError((err) => {
           // console.log('#### err en findOneById 1: ', err);
-          throw new InternalServerErrorException(err.message);
+          throw new InternalServerErrorException('Error en La Base de Datos!');
         }),
       );
     } catch (err) {
       // console.log('#### err en findOneById 2: ', err);
-      throw new InternalServerErrorException(err.message);
+      throw new InternalServerErrorException('Error en La Base de Datos!');
     }
   }
   findOneByEmail(user: IUser): Observable<IUserFindResponse> {
@@ -199,7 +199,7 @@ export class UserService {
         }),
       );
     } catch (err) {
-      throw err;
+      throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
   private transformUserToResponse(user: IUser): IUserFindResponse {
@@ -232,7 +232,7 @@ export class UserService {
           }),
       );
     } catch (err) {
-      throw err;
+      throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
   // TODO check-userName-exists
@@ -248,7 +248,7 @@ export class UserService {
         }),
       );
     } catch (err) {
-      throw err;
+      throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
   // TODO add relations : ['blogEntries']
@@ -370,10 +370,7 @@ export class UserService {
                     const { password, ...result } = user;
                     return result;
                   } else {
-                    // ANTES throw new UnauthorizedException('Wrong Credentials !!');
-                    ErrorHandler.handleUnauthorizedError(
-                      'Wrong Credentials !!',
-                    );
+                    throw new UnauthorizedException('Wrong Credentials!');
                   }
                 }),
               );
@@ -381,7 +378,7 @@ export class UserService {
         ),
       );
     } catch (err) {
-      throw err;
+      throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
   private findByEmail(email: string): Observable<IUser> {
@@ -402,16 +399,16 @@ export class UserService {
           })
           .then((user: IUser) => {
             if (!user) {
-              // WARNING al ser un método privado que se usa en varias partes por ejemplo en el login, en el profile
+              // WARNING NO BORRAR EL COMENTARIO
+              // COMENTARIO al ser un método privado que se usa en varias partes por ejemplo en el login, en el profile
               // es mejor delegar la respuesta del error al método que lo llama, uno pondrá 'usuario not found' y otro 'wrong credentials'
-              // throw new NotFoundException('User not found !!');
             } else {
               return user;
             }
           }),
       );
     } catch (err) {
-      throw err;
+      throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
 }

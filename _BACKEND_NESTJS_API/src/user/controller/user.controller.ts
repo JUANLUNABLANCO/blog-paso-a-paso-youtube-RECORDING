@@ -19,6 +19,7 @@ import {
   HttpStatus,
   ForbiddenException,
   UseFilters,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { Observable, of } from 'rxjs';
@@ -111,6 +112,7 @@ export class UserController {
   }
 
   // TODO user is user or user is Admin
+  @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
   findOneById(@Param() params): Observable<IUser> {
     return this.userService.findOneById(params.id);
@@ -160,7 +162,7 @@ export class UserController {
       user = req.user as IUser;
     } else {
       // console.log('User is not in request');
-      throw ErrorHandler.handleNotFoundError('User is not in request');
+      throw new NotFoundException('User is not in request');
     }
 
     // console.log(`#### req user: ${JSON.stringify(req.user)}`);
@@ -174,7 +176,7 @@ export class UserController {
       return this.userService.findOneById(user.id).pipe(
         switchMap((user: IUserFindResponse) => {
           if (!user) {
-            throw ErrorHandler.handleNotFoundError('User not found');
+            throw new NotFoundException('User not found');
           }
           user.profileImage = file.filename;
           return this.userService.updateOne(user.id, user).pipe(
@@ -184,18 +186,20 @@ export class UserController {
             }),
             catchError((err) => {
               // console.log('#### err en uploadFile 2: ', err);
-              throw ErrorHandler.createSignatureError(err.message);
+              throw new BadRequestException(
+                'El Usuario no ha podido ser actualizado!',
+              );
             }),
           );
         }),
         catchError((err) => {
           // console.log('#### err en uploadFile 1: ', err);
-          throw ErrorHandler.createSignatureError(err.message);
+          throw new InternalServerErrorException('Error de Base de datos!');
         }),
       );
     } catch (error) {
       // console.error('Error en el acceso a la base de datos:', error);
-      throw ErrorHandler.createSignatureError('Error de base de datos');
+      throw new InternalServerErrorException('Error de Base de datos!');
     }
   }
 
