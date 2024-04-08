@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { caching } from 'cache-manager';
+import { AllExceptionsFilter } from './core/errors/all-exceptions.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   // ############ cache
@@ -30,6 +31,8 @@ async function bootstrap() {
       stopAtFirstError: true,
     }),
   );
+  // **** EXCEPTION FILTERS *****
+  app.useGlobalFilters(new AllExceptionsFilter());
   // ***** CORS *****
   const origins = [
     `${process.env.APP_URL_ORIGIN}:${process.env.APP_PORT_ORIGIN}`,

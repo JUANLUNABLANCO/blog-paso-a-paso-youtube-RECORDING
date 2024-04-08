@@ -27,10 +27,10 @@ import { AllExceptionsFilter } from './core/errors/all-exceptions.filter';
   ],
   controllers: [AppController],
   providers: [
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: AllExceptionsFilter,
+    // }, // colocado en el main.ts
     AppService,
   ],
 })

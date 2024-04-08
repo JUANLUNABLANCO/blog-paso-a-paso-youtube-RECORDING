@@ -4,6 +4,10 @@ import {
   ExecutionContext,
   Inject,
   forwardRef,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Observable, catchError, map, of } from 'rxjs';
 import { UserService } from 'src/user/service/user.service';
@@ -47,7 +51,8 @@ export class UserIsUserGuard implements CanActivate {
         idFromToken = jwtDecoded.user?.id;
       }
     } catch (error) {
-      throw ErrorHandler.createSignatureError('Invalid token');
+      // TODO mirar el uso de ErrorHandler, si es necesario o no...
+      throw new HttpException('Invalid token!', HttpStatus.UNAUTHORIZED);
     }
     // id to check
     let idToCheck: number;
@@ -57,36 +62,32 @@ export class UserIsUserGuard implements CanActivate {
       idFromParams === idFromToken &&
       idFromParams === idFromRequest
     ) {
-      console.log('#### Id from Params exists: ' + idFromParams);
+      // console.log('#### Id from Params exists: ' + idFromParams);
       idToCheck = idFromParams;
     } else if (
       !idFromParams &&
       idFromRequest &&
       idFromToken === idFromRequest
     ) {
-      console.log('#### Id from Params not exists: ');
+      // console.log('#### Id from Params not exists: ');
       idToCheck = idFromToken || idFromRequest;
     } else {
       return of(false);
     }
-    try {
-      return this.userService.findOneById(idToCheck).pipe(
-        map((userFromDB: IUser) => {
-          let hasPermission = false;
-          if (userFromDB) {
-            console.log('#### userFromDB: ', userFromDB);
-            hasPermission = true;
-          }
-          return user && hasPermission;
-        }),
-        catchError((err) => {
-          console.log('#### error: usuario no encontrado');
-          throw ErrorHandler.handleNotFoundError('User not found');
-        }),
-      );
-    } catch (error) {
-      console.log('#### error: BD error');
-      throw ErrorHandler.createSignatureError('Error de base de datos');
-    }
+
+    return this.userService.findOneById(idToCheck).pipe(
+      map((userFromDB: IUser) => {
+        let hasPermission = false;
+        if (userFromDB) {
+          console.log('#### userFromDB: ', userFromDB);
+          hasPermission = true;
+        }
+        return user && hasPermission;
+      }),
+      catchError((err) => {
+        // console.log('#### error: usuario no encontrado');
+        throw new NotFoundException('User not found');
+      }),
+    );
   }
 }

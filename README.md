@@ -1838,19 +1838,488 @@ Controlar los posibles errores, preámbulo de la siguiente tarea
 
 Crear una manera sólida en todo el backend sobre el manejo de errores.
 
-**Rama**
-feature/task-13_errors
-
-// WARNING cuidado ya existía cambiarnos allí y revisarlo si no nos convence eliminamos la rama y volvemos a develop creando una feature nueva
-
-
-
 **Acceptance Criteria**
 
-- Manejo de errores al máximo en NestJs
-- Usar el error Handler en la medida de los posible
-- usar catchError en los maps() y en los switchMaps()
-- usar try cacth en el acceso a bases de datos o librerías externas como decodificación, acceso a ficheros, etc
-- Usar funciones controladas como notFoundError(), notAccessPermitedError(), ...
-- Si no tenemos una exception controlada usaremos createSignatureError()
-- si es un try catch { ... } usar errorHandler en su interior igualmente
+**Parte 01**
+Manejo de errores al máximo en NestJs
+Usar ExceptionFilter para manejo a nivel global de toda la app
+
+**Parte 02**
+Analizar el uso de error Handler
+Analizar el uso del try {} catch() {}
+Analizar el uso de catchError()
+En resumen ...
+
+### PARTE 01
+
+**Rama**
+feature/task-25_errors
+
+```typescript
+  // TODO user is user or user is Admin
+  // @UseGuards(JwtAuthGuard, UserIsUserGuard)
+  @Get(':id')
+  findOneById(@Param() params): Observable<IUser> {
+    // throw new Error('Esto es un error ...'); // no se controla, lanza un mensaje de error en consola pero la app se paraliza, necesitas un bloque try {} catch() para interceptarlo
+    // vamos a la documentación: https://docs.nestjs.com/exception-filters
+    // Nos dice que si no tenemos una exception controlada, por nosotros la capa de excepciones se encarga de proveer al menos una respuesta para las excepciones de tipo Http (HttpExceptions) y si no es una de tipo HttpException enviará la siguiente respuesta
+    // {
+    //   "statusCode": 500,
+    //   "message": "Internal server error",
+    // }
+    // Si vemos la respuesta cuando enviamos un error no interceptado y que además no es de tipo HttpException, pues es el json de arriba
+
+    // el filtro global de excepciones de NestJs (global exceptions filter) soporta la librería http-errors, muy popular, cada thrown exception contiene un `statusCode` y un `message`
+
+    // si usamos este HttpException, podemos controlar el mensaje y el código de error
+    // throw new HttpException('Esto es un error de tipo HttpException', 404);
+    // o lo que es lo mismo usando la librería http-errors
+    // throw new HttpException('Esto es un error de tipo HttpException', HttpStatus.BAD_REQUEST);
+    // si vemos la respuesta en postman observamos el statusCode no solo ne el json sino como error devuelto en el tipo de respuesta
+
+    // Podemos crear el objeto que nosotros necesitemos para la respuesta, ya que el primer parámetro o es un string o puede ser un objeto
+    // throw new HttpException(
+    //   { error: true, statusCode: 501, serverTime: new Date(), "message": 'This is a custom object'},
+    //   400,
+    // );
+
+    // hasta aquí vemos que cualquier error lanzado con HttpException será reconocido por NestJs gracias al Global Exceptions filter
+
+    // en los otros parámetros que tenemos dentro del HttpException vemos, el options? que es un objeto y dentro tenemos el cause
+    // el cual no se serializará aunque lo implementemos en la respuesta
+    // throw new HttpException(
+    //   { error: true, statusCode: 501, serverTime: new Date(), "message": 'This is a custom object'},
+    //   400,
+    // { "cause": error } // el error viene del catch(error) el cual es de tipo Error { name: string, message: string, stack?: string }
+    // );
+
+    // por ejemplo, para fines de logger, podemos usar el { cause } para crear un logger personalizado que de más información a los desarrolladores pero no a los usuarios finales.
+
+    // Existen también subclases de HttpException como:
+    // BadRequestException, UnauthorizedException, ForbiddenException, NotFoundException, etc
+    // throw new ForbiddenException();
+    // throw new ForbiddenException('Esto es un error de tipo ForbiddenException');
+    // mira la respuesta como cambia:
+    // {
+    //   statusCode: 403,
+    //   message: 'Custom Message',
+    //   error: 'Forbidden'
+    // }
+    // throw new ForbiddenException({message: 'custom forbidden exception', statusCode: 403, serverTime: new Date().toISOString()});
+    // throw new NotFoundException('Esto es un error de tipo NotFoundException');
+
+    // Si quieres tener control total de este tipo de excepciones (HttpExceptions) y otras, puedes usar el Global Exceptions Filter que nos provee NestJs y crear un custom exception filter que herede de ahí, y eso es lo que hicimos con el archivo:
+    // all-exceptions.filter.ts
+
+    // VE AL ARCHIVO Y ANALIZA LO QUE HACE
+
+    // @Catch() // si vemos la documentación, solo recoge los HttpException --> @Catch(HttpException)
+    // export class AllExceptionsFilter extends BaseExceptionFilter {
+    //   catch(exception: unknown, host: ArgumentsHost) {
+    //     const ctx = host.switchToHttp();
+    //     const response = ctx.getResponse();
+    //     const request = ctx.getRequest();
+
+    // podemos analizar dentro de exception.cause, exception.message or others
+    // el segundo pqarámetro tiene contextos para diferentes Hosts, como Http, Web Sockets, Rpc, ...
+    // dentro del response y del request podemos obtener ciertoas cosas como el body, los headers, etc.
+
+    // nosotros hemos hecho una diferencia entre errores de tipo HttpException y otro tipo de errores así lo manejamos todos
+    //     if (exception instanceof HttpException) {
+    //       response
+    //          .status(exception.getStatus())
+    //          .json({
+    //            statusCode: exception.getStatus(),
+    //            timestamp: new Date().toISOString(),
+    //            path: request.url,
+    //            message: exception.message,
+    //          });
+    //     } else {
+    // RECORDEMOS que esto era el comportamiento por defecto del filtro de excepciones global de nestjs, pero aquí estamos definiendo el objeto a nuestro propio gusto
+    //       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    //         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    //         timestamp: new Date().toISOString(),
+    //         path: request.url,
+    //         message: 'Internal server error',
+    //       });
+    //     }
+    //   }
+    // }
+
+    // Ahora podemos usar este filter de tres maneras,
+    // 1. a nivel de método @UseFilters(new AllExceptionsFilter()) o @UseFilters(AllExceptionsFilter)
+    // 2. a nivel de servicio usando el decorador @UseFilters(AllExceptionsFilter) antes de la clase
+    // 3. a nivel global en toda la app ya sea desde el amin.ts
+    // app.useGlobalFilters(new AllExceptionsFilter());
+    // o
+    // usando los providers en el app.module.ts
+
+    // de esta manera podríamos no necesitar el try y el catch(), puesto que todos los errores quedan controlados en nuesto
+    // AllExceptionsFilter class
+    // para probar que esto es así volmeos a nuestro controlador y lanzamos un Error
+    // throw new Error()
+    // veremos este tipo de respuesta
+    // {
+    //     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    //     timestamp: new Date().toISOString(),
+    //     path: request.url,
+    //     message: 'Internal server error',
+    //   }
+    // pero si queremos controlar cada tipo de error que se genera en aquellos sitios donde sabemos que puede haber un error de tipo Base de datos, o de tipo jwt, o el que sea, es mejor usar el try {} catch(error) para lanzar lo que nosotros necesitemos, aunque esto no es obligatorio como hemos visto...
+
+
+    return this.userService.findOneById(params.id);
+  }
+```
+
+### PARTE 02
+
+Analicemos el uso de errorHandler a través de errores como try catch, veámos el siguiente código en `UserIsUserGuard.ts`
+
+```typescript
+// imports ...
+@Injectable()
+export class UserIsUserGuard implements CanActivate {
+  constructor(
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
+  ) {}
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest()
+    const params = request.params
+
+    // ID from request
+    const user: IUser = request.user ? request.user : null
+    const idFromRequest = user?.id ? user.id : null
+
+    // console.log('#### User From request: ', user, params);
+    // ID from params
+    let idFromParams = null
+
+    // console.log('#### existe params.id' + params.id);
+    idFromParams = params?.id ? Number(params.id) : null
+
+    const token = request.headers.authorization
+      ? request.headers.authorization.split(' ')[1]
+      : null
+
+    // ID from token
+    let idFromToken = null
+
+    try {
+      // hagamos que falle el token para ver como funciona el errorHandler
+      if (token) {
+        const jwtDecoded = decode(token, { json: true })
+        idFromToken = jwtDecoded.user?.id
+      }
+    } catch (error) {
+      // TODO mirar el uso de ErrorHandler, si es necesario o no...
+      // throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+      throw ErrorHandler.createSignatureError('Invalid token')
+    }
+    // id to check
+    let idToCheck: number
+    if (
+      idFromRequest &&
+      idFromParams &&
+      idFromParams === idFromToken &&
+      idFromParams === idFromRequest
+    ) {
+      console.log('#### Id from Params exists: ' + idFromParams)
+      idToCheck = idFromParams
+    } else if (
+      !idFromParams &&
+      idFromRequest &&
+      idFromToken === idFromRequest
+    ) {
+      console.log('#### Id from Params not exists: ')
+      idToCheck = idFromToken || idFromRequest
+    } else {
+      return of(false)
+    }
+    try {
+      return this.userService.findOneById(idToCheck).pipe(
+        map((userFromDB: IUser) => {
+          let hasPermission = false
+          if (userFromDB) {
+            console.log('#### userFromDB: ', userFromDB)
+            hasPermission = true
+          }
+          return user && hasPermission
+        }),
+        catchError((err) => {
+          console.log('#### error: usuario no encontrado')
+          throw ErrorHandler.handleNotFoundError('User not found')
+        }),
+      )
+    } catch (error) {
+      console.log('#### error: BD error')
+      throw ErrorHandler.createSignatureError('Error de base de datos')
+    }
+  }
+}
+```
+
+En especial esta parte primero:
+
+```typescript
+try {
+  // hagamos que falle el token para ver como funciona el errorHandler
+  if (token) {
+    const jwtDecoded = decode(token, { json: true })
+    idFromToken = jwtDecoded.user?.id
+  }
+} catch (error) {
+  // TODO mirar el uso de ErrorHandler, si es necesario o no...
+  //// @@@@@@@@@@@@ ahora tenemos esto
+  throw ErrorHandler.createSignatureError('Invalid token')
+  //// @@@@@@ y vamos a probar esto otro
+  //// @@@@@@ throw new HttpException('Invalid token!', HttpStatus.UNAUTHORIZED);
+}
+```
+
+En postman cualquier endpoint que necesite del token para el UserIsUserGuard, modifiquémoslo...
+Pero antes observamos que tenemos el `jwtAuthGuard`, el cual valida también el payload
+
+```typescript
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get('JWT_SECRET'),
+    });
+  }
+
+  async validate(payload: any): Promise<any> {
+    // console.log('### payload: ', payload);
+    const user = { ...payload.user };
+    if (!user) {
+      //// @@@@@@ y a quí vemos que está usando thow new UnauthorizedException lo cual devolverá este objeto basado en el AllFilterExceptions.ts
+      //// @@@@@@  {
+      //// @@@@@@     "statusCode": 401,
+      //// @@@@@@     "timestamp": "2024-04-02T17:56:38.364Z",
+      //// @@@@@@     "path": "/api/users/3",
+      //// @@@@@@     "message": "Invalid token"
+      //// @@@@@@  }
+      throw new UnauthorizedException();
+    }
+    return user;
+  }
+```
+
+Debemos modificar el findUserById del controlador momentáneamente para que no pase por este guard
+
+```typescript
+@UseGuards(UserIsUserGuard)
+  @Get(':id')
+  findOneById(@Param() params): Observable<IUser> {
+```
+
+Hemos deshabilitado el JwtAuthGuard, así que ahora vamos a probar el `UserIsUserGuard`
+
+1. La prueba con `throw new HttpException('Invalid token!', HttpStatus.UNAUTHORIZED);`
+   respuesta:
+
+```json
+{
+  "statusCode": 401,
+  "timestamp": "2024-04-02T18:06:19.605Z",
+  "path": "/api/users/3",
+  "message": "Invalid token!"
+}
+```
+
+2. La prueba con `throw ErrorHandler.createSignatureError('Invalid token');`
+   respuesta:
+
+```json
+{
+  "statusCode": 401,
+  "timestamp": "2024-04-02T18:06:19.605Z",
+  "path": "/api/users/3",
+  "message": "Invalid token!"
+}
+```
+
+3. throw new UnauthorizedException();
+   respuesta:
+
+```json
+{
+  "statusCode": 401,
+  "timestamp": "2024-04-02T18:06:19.605Z",
+  "path": "/api/users/3",
+  "message": "Unauthorized"
+}
+```
+
+4. La respuesta con `throw ErrorHandler.handleUnauthorizedError('Invalid token!');`
+
+```json
+{
+  "statusCode": 401,
+  "timestamp": "2024-04-02T18:11:16.920Z",
+  "path": "/api/users/3",
+  "message": "Invalid token!"
+}
+```
+
+5. Por último deshabilitemos el try - catch, para ver si hay alguna diferencia
+   respuesta:
+
+```json
+{
+  "statusCode": 500,
+  "timestamp": "2024-04-02T18:14:11.242Z",
+  "path": "/api/users/3",
+  "message": "Internal server error!"
+}
+```
+
+No es una respuesta adecuada, poruqe no tenemos información referente al error, pero este está siendo manejado, y la app sigue funcionando, gracias a nuestro filter de errores
+
+Como vemos los 5 funcionan perfectamente, entonces, ¿Para qué necesitamos el errorHandler?
+
+Vamos a analizarlo
+
+En primer lugar esta parte ...
+
+```typescript
+public static createSignatureError(message: string) {
+    let statusCode = HttpStatus.INTERNAL_SERVER_ERROR; // Por defecto, código de estado de error interno
+    let errorMessage = message; // Por defecto, el mensaje de error completo `500 :: este es un mensaje completo por defecto`
+
+    const errorParts = message.split(' :: ');
+    if (errorParts.length === 2) {
+      const typeName = errorParts[0].trim();
+      const customStatus = HttpStatus[typeName as keyof typeof HttpStatus];
+      if (customStatus) {
+        statusCode = customStatus;
+        errorMessage = errorParts[1].trim();
+      }
+    }
+    throw new HttpException(errorMessage, statusCode);
+  }
+```
+
+vamos a probarla, que antes no lo hicimos
+
+```typescript
+throw ErrorHandler.createSignatureError(
+  'UNAUTHORIZED :: FUNCIONA Invalid token!',
+)
+```
+
+repuesta:
+
+```json
+{
+  "statusCode": 401,
+  "timestamp": "2024-04-02T18:22:05.271Z",
+  "path": "/api/users/3",
+  "message": "FUNCIONA Invalid token!"
+}
+```
+
+Como vemos funciona pero es bastante engorroso y no nos aporta nada nuevo,
+Ni siquiera las funciones estáticas que hemos creado nos aportan nada nuevo,
+
+```typescript
+public static handleNotFoundError(message: string) {
+    throw new HttpException(message, HttpStatus.NOT_FOUND);
+  }
+  public static handleUnauthorizedError(message: string) {
+    throw new HttpException(message, HttpStatus.UNAUTHORIZED);
+  }
+  public static handleBadRequestError(message: string) {
+    throw new HttpException(message, HttpStatus.BAD_REQUEST);
+  }
+```
+
+En definitiva es un puñado de código que no aporta nada nuevo, engorroso y que hace lo mismo pero de peor manera que nuestro `all-exceptions.filter.ts` y encima debes acordarte exactamente de la palabra que vas a usar para el mensaje, `UNhauthorized` o `UNAUTHORIZED` o `Unauthorized` o `UNAUTHORIZED :: FUNCIONA Invalid token!` lo que puede llevar a equivocaiones mientras se desarrolla
+
+Por tanto conclusión en esta primera parte del análisis
+
+1. Eliminaremos esta clase sin remordimientos y usaremos nuestro filter con los exceptions correspondientes, solo cabe recordar que en el `all-exceptions.filter.ts` debemos usar uno de estos:
+
+- throw new HttpException('mensaje', <código de error>)
+- o las subclases heredadas de este, sin el código:
+  NotFoundException('mensaje'), UnhautorizedException('mensaje'), ...
+
+2. El try catch en sitios de ruptura del código, está bien usarlo, para que no nos devuelva un simple 'Internal Server error'
+
+3. Vamos a analizar que pasa con los `catchError()` de `rxjs`
+
+En esta zona del código tenemos...
+
+Antes debes habilitar el `@UseGuards(JwtAuthGuard, UserIsUserGuard)` JwtAuthGuard, debido a que el JwtAuthGuard es el que valida el token, y el UserIsUserGuard es el que valida que el usuario que se está autenticando es el mismo que se está intentando acceder
+
+```typescript
+//// @@@@@@ Un bloque try catch para las respuestas del servicio
+try {
+  return this.userService.findOneById(idToCheck).pipe(
+    map((userFromDB: IUser) => {
+      let hasPermission = false
+      if (userFromDB) {
+        console.log('#### userFromDB: ', userFromDB)
+        hasPermission = true
+      }
+      return user && hasPermission
+    }),
+    catchError((err) => {
+      console.log('#### error: usuario no encontrado')
+      throw ErrorHandler.handleNotFoundError('User not found')
+    }),
+  )
+} catch (error) {
+  console.log('#### error: BD error')
+  throw ErrorHandler.createSignatureError('Error de base de datos')
+}
+```
+
+Pero si vemos el bloque try - catch que envuelve al servicio no es necesario, ya que el servicio se encarga de los errores a la base de datos, como podemos observar en esta parte del código
+
+```typescript
+} catch (err) {
+      // console.log('#### err en findOneById 2: ', err);
+      throw new InternalServerErrorException(err.message);
+    }
+```
+
+lo que si podemos hacer es modificar esto dentro del servicio
+
+```typescript
+} catch (err) {
+      // console.log('#### err en findOneById 2: ', err);
+      //// @@@@@@ esto de aquí, que da demasiada información al usuario ...
+      throw new InternalServerErrorException(err.message);
+      //// @@@@@@ por esto otro, más acertado
+      new HttpException(
+        'Error en La Base de Datos!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+}
+```
+
+Conclusiones:
+
+- 1. try catch, es necesario para controlar mejor los errores en bloques de código donde podemos atrevrnos a pensar que puede haber un error, ya sea de base de datos o de alguna librería como en la decodificaión del jwt. así que lo mantenemos
+- 2. el catchError() de rxjs, es necesario para controlar mejor los errores en bloques de código donde tenemos un pipe()
+
+- 3. Eliminaremos todos los controles de errores en los controladores, ya que esto se realiza en el servicio, a no ser que el propio controlador tenga una lógica enrevesada (señal que hay que refactorizar algo), y en todos los casos, se debería realizar en el servicio, y no en el controlador.
+
+- 4. Ahora tenemos un control absoluto de los errores, en un vídeo postrior veremos como dar información a los dearrolladores sin serializar esa información hacia el frontned en el json de respuesta gracias al objeto { options } del propio filter y su parámetro `cause`, que nos permite obtener el error original, y no el error serializado.
+
+- 5. En futuros vídeos, cuando la app esté más avanzada y estemos llevando código a producción indagaremos en esta cuestión:
+     `Exploración de herramientas de monitoreo de errores y registros para identificar y solucionar problemas en producción de manera más eficiente.`
+
+Espero hayas encontrado este vídeo útil, si es así me ayudaría mucho que dieras un like, compartieras para llegar a más desarrolladores y así me ayudarías enormemente para poder seguir aportando con más vídeos. Por otro lado puedes comentar, que te ha parecido, y si tienes alguna inquietud relacionada con estas cuestiones.
+
+Y si entras en mi cuenta de OnlyFans puedes subscribirte por 1000€ al mes, ...
+
+https://www.onlyfans.com/user/nacho_la_tiene_mas_larga_que_tu_digo_codifica_mejor_que_tu
+
+Gracias por estar ahí y te espero pronto en el próximo vídeo, se acercan cosas interesantes los DTO´s llevados a su máxima expresión.
