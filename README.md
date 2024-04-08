@@ -2323,3 +2323,354 @@ Y si entras en mi cuenta de OnlyFans puedes subscribirte por 1000€ al mes, ...
 https://www.onlyfans.com/user/nacho_la_tiene_mas_larga_que_tu_digo_codifica_mejor_que_tu
 
 Gracias por estar ahí y te espero pronto en el próximo vídeo, se acercan cosas interesantes los DTO´s llevados a su máxima expresión.
+
+## 26 Angular: ¿Qué es y cómo usar los DTO´s profesionalmente?
+
+### PARTE 01
+
+- [1. Ejemplo básico del uso de un DTO en Angular](#1-ejemplo-básico-del-uso-de-un-dto-en-angular)
+- [2. Ejemplo medio del uso de DTO´s en Angular](#2-ejemplo-medio-del-uso-de-dto´s-en-angular)
+- [3. Ejemplo más avanzado del uso de DTO´s en Angular](#3-ejemplo-más-avanzado-del-uso-de-dto´s-en-angular)
+
+#### 1. Ejemplo básico del uso de un DTO en Angular
+
+1. Definición del DTO en Angular:
+
+```typescript
+// product.dto.ts
+export class ProductDto {
+  id: number
+  name: string
+  price: number
+}
+```
+
+2. Servicio para interactuar con el backend:
+
+```typescript
+// product.service.ts
+import { HttpClient } from '@angular/common/http'
+import { Injectable } from '@angular/core'
+import { Observable } from 'rxjs'
+import { ProductDto } from './product.dto'
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ProductService {
+  private baseUrl = 'api/products'
+
+  constructor(private http: HttpClient) {}
+
+  getAllProducts(): Observable<ProductDto[]> {
+    return this.http.get<ProductDto[]>(this.baseUrl)
+  }
+
+  getProductById(id: number): Observable<ProductDto> {
+    return this.http.get<ProductDto>(`${this.baseUrl}/${id}`)
+  }
+
+  createProduct(product: ProductDto): Observable<ProductDto> {
+    return this.http.post<ProductDto>(this.baseUrl, product)
+  }
+
+  updateProduct(id: number, product: ProductDto): Observable<ProductDto> {
+    return this.http.put<ProductDto>(`${this.baseUrl}/${id}`, product)
+  }
+
+  deleteProduct(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`)
+  }
+}
+```
+
+3. Componente para mostrar y manipular los productos:
+
+```typescript
+// product.component.ts
+import { Component, OnInit } from '@angular/core'
+import { ProductDto } from './product.dto'
+import { ProductService } from './product.service'
+
+@Component({
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css'],
+})
+export class ProductComponent implements OnInit {
+  products: ProductDto[]
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit(): void {
+    this.getAllProducts()
+  }
+
+  getAllProducts(): void {
+    this.productService.getAllProducts().subscribe((products) => {
+      this.products = products
+    })
+  }
+
+  createProduct(product: ProductDto): void {
+    this.productService.createProduct(product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  updateProduct(id: number, product: ProductDto): void {
+    this.productService.updateProduct(id, product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  deleteProduct(id: number): void {
+    this.productService.deleteProduct(id).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+}
+```
+
+#### 2. Ejemplo medio del uso de DTO´s en Angular
+
+```typescript
+export class ProductDto {
+  id?: number
+  name: string
+  price: number
+}
+
+// Ejemplo de uso
+const product1: ProductDto = {
+  name: 'Producto 1',
+  price: 10.99,
+}
+
+const product2: ProductDto = {
+  id: 1,
+  name: 'Producto 2',
+  price: 20.99,
+}
+```
+
+Que no difiere mucho de esto otro
+
+```typescript
+export interface IProduct {
+  id?: number
+  name: string
+  price: number
+}
+```
+
+1. **Clase (DTO)**:
+
+   - Una clase en TypeScript es una estructura que puede contener propiedades y métodos.
+   - Se puede instanciar una clase para crear objetos.
+   - Puede tener propiedades con modificadores de acceso como `public`, `private`, `protected`.
+   - Permite definir propiedades opcionales utilizando el operador `?`.
+   - Puede tener métodos para realizar operaciones en los datos.
+   - Se pueden implementar interfaces.
+
+2. **Interfaz**:
+
+   - Una interfaz en TypeScript es una estructura que define la forma de un objeto.
+   - No se puede instanciar directamente. Solo define la estructura del objeto.
+   - No puede contener implementaciones de métodos.
+   - Se utiliza principalmente para definir la forma de los datos y para establecer contratos entre diferentes partes del código.
+   - Se puede implementar en una clase.
+
+3. Definición de los DTOs:
+
+```typescript
+// create-product.dto.ts
+export class CreateProductDTO {
+  name: string
+  price: number
+}
+
+// update-product.dto.ts
+export class UpdateProductDTO {
+  id: number
+  name: string
+  price: number
+}
+
+// read-product.dto.ts
+export class ReadProductDTO {
+  id: number
+  name: string
+  price: number
+}
+```
+
+2. Servicio para interactuar con el backend:
+
+```typescript
+// product.service.ts
+import { HttpClient } from '@angular/common/http'
+import { Injectable } from '@angular/core'
+import { Observable } from 'rxjs'
+import {
+  CreateProductDTO,
+  UpdateProductDTO,
+  ReadProductDTO,
+} from './product.dto'
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ProductService {
+  private baseUrl = 'api/products'
+
+  constructor(private http: HttpClient) {}
+
+  getAllProducts(): Observable<ReadProductDTO[]> {
+    return this.http.get<ReadProductDTO[]>(this.baseUrl)
+  }
+
+  getProductById(id: number): Observable<ReadProductDTO> {
+    return this.http.get<ReadProductDTO>(`${this.baseUrl}/${id}`)
+  }
+
+  createProduct(product: CreateProductDTO): Observable<ReadProductDTO> {
+    return this.http.post<ReadProductDTO>(this.baseUrl, product)
+  }
+
+  updateProduct(product: UpdateProductDTO): Observable<ReadProductDTO> {
+    return this.http.put<ReadProductDTO>(
+      `${this.baseUrl}/${product.id}`,
+      product,
+    )
+  }
+
+  deleteProduct(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`)
+  }
+}
+```
+
+3. Componente para mostrar y manipular los productos:
+
+```typescript
+// product.component.ts
+import { Component, OnInit } from '@angular/core'
+import { ProductService } from './product.service'
+import {
+  CreateProductDTO,
+  UpdateProductDTO,
+  ReadProductDTO,
+} from './product.dto'
+
+@Component({
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css'],
+})
+export class ProductComponent implements OnInit {
+  products: ReadProductDTO[]
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit(): void {
+    this.getAllProducts()
+  }
+
+  getAllProducts(): void {
+    this.productService.getAllProducts().subscribe((products) => {
+      this.products = products
+    })
+  }
+
+  createProduct(product: CreateProductDTO): void {
+    this.productService.createProduct(product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  updateProduct(product: UpdateProductDTO): void {
+    this.productService.updateProduct(product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  deleteProduct(id: number): void {
+    this.productService.deleteProduct(id).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+}
+```
+
+#### 3. Ejemplo más avanzado del uso de DTO´s en Angular
+
+```typescript
+// create-product.dto.ts
+export class CreateProductDTO {
+  name: string
+  price: number
+  // slug: string
+  // totalPrice: number
+  private readonly IVA: 21
+
+  constructor(name: string, price: number) {
+    this.name = this.validateAndTransformName(name)
+    this.price = price
+    this.slug = this.slug()
+    this.totalPrice = this.totalPrice()
+  }
+
+  private validateAndTransformName(name: string): string {
+    // Regla: Nombre debe tener más de 5 letras y menos de 50
+    let validatedName = name.trim().toLowerCase()
+    validatedName =
+      validatedName.charAt(0).toUpperCase() + validatedName.slice(1)
+    validatedName = validatedName.replace(/\s+/g, '-')
+    validatedName = validatedName.replace(/[^\w\s-]/g, '') // Elimina signos de puntuación
+    if (validatedName.length < 5 || validatedName.length > 50) {
+      throw new Error(
+        'El nombre del producto debe tener entre 5 y 50 caracteres.',
+      )
+    }
+    return validatedName
+  }
+
+  get slug(): string {
+    return this.name.replace(/\s+/g, '-')
+  }
+
+  get totalPrice(): number {
+    // Calcula el precio total con un 21% de IVA
+    return this.price * 1.21
+  }
+}
+
+// update-product.dto.ts
+export class UpdateProductDTO {
+  name?: string
+  price?: number
+  private readonly IVA: 21
+
+  constructor(name?: string, price?: number) {
+    if (name) {
+      this.name = this.validateAndTransformName(name)
+      this.slug = this.slug()
+    }
+    if (price) {
+      this.price = price
+      totalPrice = this.totalPrice()
+    }
+
+  }
+
+  ...
+}
+
+// read-product.dto.ts
+export class ReadProductDTO {
+  id: number
+  name: string
+  price: number
+}
+```
