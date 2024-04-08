@@ -402,6 +402,8 @@ export class UserService {
               // WARNING NO BORRAR EL COMENTARIO
               // COMENTARIO al ser un método privado que se usa en varias partes por ejemplo en el login, en el profile
               // es mejor delegar la respuesta del error al método que lo llama, uno pondrá 'usuario not found' y otro 'wrong credentials'
+              // TODO prueba este return null añadido
+              return null;
             } else {
               return user;
             }
