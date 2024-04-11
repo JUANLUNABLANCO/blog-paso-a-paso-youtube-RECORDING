@@ -1,6 +1,13 @@
 import { BlogEntry } from 'src/blog/model/blog-entry.interface';
 
-export interface IUser {
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+
+export interface IUserBase {
   id?: number;
   userName?: string;
   email?: string;
@@ -8,13 +15,6 @@ export interface IUser {
   role?: UserRole;
   profileImage?: string;
   blogEntries?: BlogEntry[];
-}
-
-export enum UserRole {
-  ADMIN = 'admin',
-  CHIEFEDITOR = 'chiefeditor',
-  EDITOR = 'editor',
-  USER = 'user',
 }
 
 export interface File {

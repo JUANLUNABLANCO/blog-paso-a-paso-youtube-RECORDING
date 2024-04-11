@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../model/user.entity';
 import { Repository, Like } from 'typeorm';
 
-import { Observable, from, of } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 
 import { AuthService } from '../../auth/services/auth.service';
@@ -18,10 +18,9 @@ import {
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
 import { ErrorHandler } from 'src/core/errors/error.handler';
-import { IUser, UserRole } from '../model/user.interface';
-import { UserCreateDto, IUserCreateResponse } from '../model/user-create.dto';
-import { UserLoginDto } from '../model/user-login.dto';
-import { IUserFindResponse } from '../model/user-find.dto';
+import { IUserBase, UserRole } from '../model/user.interface';
+import { UserCreateDto, UserReadDto } from '../model/user.dto';
+import { UserLoginDto } from '../model/auth.dto';
 
 @Injectable()
 export class UserService {
@@ -32,11 +31,11 @@ export class UserService {
   ) {}
   // TODO debe enviar un mensaje de error ususario ya existe
   create(user: UserCreateDto): Observable<{
-    user: IUserCreateResponse;
+    user: UserReadDto;
     token: string;
   }> {
     return this.findOneByEmail(user).pipe(
-      switchMap((existingUser: IUser) => {
+      switchMap((existingUser: UserReadDto) => {
         if (existingUser) {
           // console.log('#### YA EXISTE EL BICHO ####');
           throw new BadRequestException('User already exists');
@@ -47,7 +46,7 @@ export class UserService {
     );
   }
   private createUser(user: UserCreateDto): Observable<{
-    user: IUserCreateResponse;
+    user: UserReadDto;
     token: string;
   }> {
     return this.authService
@@ -60,7 +59,7 @@ export class UserService {
     user: UserCreateDto,
     passwordHash: string,
   ): Observable<{
-    user: IUserCreateResponse;
+    user: UserReadDto;
     token: string;
   }> {
     const newUser = new UserEntity();
@@ -70,14 +69,14 @@ export class UserService {
     newUser.role = this.getRoleAdminOrUser(user.email);
 
     return from(this.userRepository.save(newUser)).pipe(
-      switchMap((createdUser: IUser) => {
-        delete createdUser.password;
+      switchMap((createdUser: UserReadDto) => {
+        // delete createdUser.password;
         return this.generateToken(createdUser);
       }),
     );
   }
-  private generateToken(createdUser: IUser): Observable<{
-    user: IUserCreateResponse;
+  private generateToken(createdUser: IUserBase): Observable<{
+    user: UserReadDto;
     token: string;
   }> {
     if (!createdUser) {
@@ -85,7 +84,7 @@ export class UserService {
     }
     const { id, userName, email, role, profileImage, blogEntries } =
       createdUser;
-    const userResponseDto: IUserCreateResponse = {
+    const userResponseDto: UserReadDto = {
       id,
       userName,
       email,
@@ -134,7 +133,7 @@ export class UserService {
       throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
-  findOneById(id: number): Observable<IUserFindResponse> {
+  findOneById(id: number): Observable<UserReadDto> {
     try {
       // console.log(`#### Aquí llega, findOneById: ${id}`);
       return from(
@@ -143,7 +142,7 @@ export class UserService {
           relations: { blogEntries: true },
         }),
       ).pipe(
-        map((user: IUser) => {
+        map((user: IUserBase) => {
           if (!user) {
             // WARNING NO BORRAR COMENTARIO
             // COMENTARIO no queremos provocar un error, si no lo encuentra eso que lo decida la función que llama a esta
@@ -151,7 +150,7 @@ export class UserService {
           }
           return this.transformUserToResponse(user);
         }),
-        catchError((err) => {
+        catchError(() => {
           // console.log('#### err en findOneById 1: ', err);
           throw new InternalServerErrorException('Error en La Base de Datos!');
         }),
@@ -161,7 +160,7 @@ export class UserService {
       throw new InternalServerErrorException('Error en La Base de Datos!');
     }
   }
-  findOneByEmail(user: IUser): Observable<IUserFindResponse> {
+  findOneByEmail(user: IUserBase): Observable<UserReadDto> {
     try {
       return from(
         this.userRepository.findOne({
@@ -169,7 +168,7 @@ export class UserService {
           relations: { blogEntries: true },
         }),
       ).pipe(
-        map((user: IUser) => {
+        map((user: IUserBase) => {
           if (!user) {
             // ErrorHandler.handleNotFoundError('User not found'); // WARNING no queremos provocar un error si no lo encuentra eso que lo decida la función que llama a esta
             return null;
@@ -182,7 +181,7 @@ export class UserService {
       throw new InternalServerErrorException(err.message);
     }
   }
-  findOneByUserName(user: IUser): Observable<IUserFindResponse> {
+  findOneByUserName(user: IUserBase): Observable<UserReadDto> {
     try {
       return from(
         this.userRepository.findOne({
@@ -190,7 +189,7 @@ export class UserService {
           relations: ['blogEntries'],
         }),
       ).pipe(
-        map((user: IUser) => {
+        map((user: IUserBase) => {
           if (!user) {
             // ErrorHandler.handleNotFoundError('User not found'); // WARNING no queremos provocar un error si no lo encuentra eso que lo decida la función que llama a esta
             return null;
@@ -202,7 +201,7 @@ export class UserService {
       throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
-  private transformUserToResponse(user: IUser): IUserFindResponse {
+  private transformUserToResponse(user: IUserBase): UserReadDto {
     // console.log(`#### Transforming user to response...${JSON.stringify(user)}`);
     const { password, ...result } = user;
     return {
@@ -214,7 +213,7 @@ export class UserService {
       blogEntries: result.blogEntries,
     };
   }
-  checkEmailExists(user: IUser): Observable<boolean> {
+  checkEmailExists(user: IUserBase): Observable<boolean> {
     try {
       return from(
         this.userRepository
@@ -236,15 +235,17 @@ export class UserService {
     }
   }
   // TODO check-userName-exists
-  findAll(): Observable<IUserFindResponse[]> {
+  findAll(): Observable<UserReadDto[]> {
     try {
       return from(
         this.userRepository.find({
           relations: { blogEntries: true },
         }),
       ).pipe(
-        map((users: IUser[]) => {
-          return users.map((user: IUser) => this.transformUserToResponse(user));
+        map((users: IUserBase[]) => {
+          return users.map((user: IUserBase) =>
+            this.transformUserToResponse(user),
+          );
         }),
       );
     } catch (err) {
@@ -252,9 +253,9 @@ export class UserService {
     }
   }
   // TODO add relations : ['blogEntries']
-  paginate(options: IPaginationOptions): Observable<Pagination<IUser>> {
+  paginate(options: IPaginationOptions): Observable<Pagination<IUserBase>> {
     return from(paginate<UserEntity>(this.userRepository, options)).pipe(
-      map((usersPageable: Pagination<IUser>) => {
+      map((usersPageable: Pagination<IUserBase>) => {
         usersPageable.items.forEach((user) => {
           delete user.password;
         });
@@ -265,8 +266,8 @@ export class UserService {
   }
   paginateFilterByUserName(
     options: IPaginationOptions,
-    user: IUser,
-  ): Observable<Pagination<IUser>> {
+    user: IUserBase,
+  ): Observable<Pagination<IUserBase>> {
     // console.log('#### USER: ', user);
     return from(
       this.userRepository.findAndCount({
@@ -296,7 +297,7 @@ export class UserService {
         const totalPages = Math.ceil(totalUsers / Number(options.limit));
         const nextPage = Number(options.page) + 1;
 
-        const usersPageable: Pagination<IUser> = {
+        const usersPageable: Pagination<IUserBase> = {
           items: users,
           links: {
             first: options.route + `?limit=${options.limit}`,
@@ -320,7 +321,7 @@ export class UserService {
       }),
     );
   }
-  updateOne(id: number, user: IUser): Observable<IUser> {
+  updateOne(id: number, user: IUserBase): Observable<IUserBase> {
     // console.log('#### User to update in updateOne(): ', user);
     // No se pueden actualizar desde aquí el email, password, role. Solo username, profileImage and BlogEntries[]
     // delete user.email;
@@ -331,7 +332,7 @@ export class UserService {
     return from(
       this.userRepository.update(Number(id), userWithoutRelations),
     ).pipe(
-      switchMap((resp) => {
+      switchMap(() => {
         // console.log('#### User Just Updated ####' + JSON.stringify(resp));
         return this.findOneById(id); // of(user); //
       }),
@@ -341,22 +342,42 @@ export class UserService {
       }),
     );
   }
-  updateRoleOfUser(id: number, user: IUser): Observable<any> {
+  updateRoleOfUser(id: number, user: IUserBase): Observable<any> {
     delete user.email;
     delete user.password;
     delete user.userName;
 
-    return from(this.userRepository.update(id, user));
+    // return from(this.userRepository.update(id, user));
+    return from(this.userRepository.update(id, user)).pipe(
+      switchMap((resultado: any) => {
+        if (resultado.affected === 0) {
+          throw new InternalServerErrorException(
+            'Error al actualizar el rol del usuario',
+          );
+        } else {
+          return this.findOneById(id);
+        }
+      }),
+    );
   }
   deleteOne(id: number): Observable<any> {
-    return from(this.userRepository.delete(id));
+    return from(this.userRepository.delete(id)).pipe(
+      map((result) => {
+        console.log('#### delete result', result);
+      }),
+      catchError((err) => {
+        console.log('#### err en deleteOne: ', err);
+        throw new InternalServerErrorException(`Error al eliminar el usuario, Un usuario no puede ser eliminado si tiene entradas de blog asociadas.
+          Borra primero sus entradas.`);
+      }),
+    );
   }
-  private validateUser(email: string, password: string): Observable<IUser> {
+  private validateUser(email: string, password: string): Observable<IUserBase> {
     // console.log('#### PASSWORD: ', password);
     try {
       return from(
         this.findByEmail(email.toLowerCase()).pipe(
-          switchMap((user: IUser) => {
+          switchMap((user: IUserBase) => {
             if (!user) {
               ErrorHandler.handleUnauthorizedError('Wrong Credentials !!');
             }
@@ -381,7 +402,7 @@ export class UserService {
       throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
-  private findByEmail(email: string): Observable<IUser> {
+  private findByEmail(email: string): Observable<IUserBase> {
     try {
       return from(
         this.userRepository
@@ -397,7 +418,7 @@ export class UserService {
             relations: ['blogEntries'],
             where: { email: email },
           })
-          .then((user: IUser) => {
+          .then((user: IUserBase) => {
             if (!user) {
               // WARNING NO BORRAR EL COMENTARIO
               // COMENTARIO al ser un método privado que se usa en varias partes por ejemplo en el login, en el profile

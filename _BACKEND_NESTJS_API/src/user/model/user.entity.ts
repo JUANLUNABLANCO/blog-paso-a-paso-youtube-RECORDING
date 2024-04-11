@@ -39,7 +39,7 @@ export class UserEntity {
   }
 
   @OneToMany(
-    (type) => BlogEntryEntity,
+    () => BlogEntryEntity,
     (blogEntryEntity) => blogEntryEntity.author,
     { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }, // NO borraremos físicamente, el update habría que mirarlo
   )

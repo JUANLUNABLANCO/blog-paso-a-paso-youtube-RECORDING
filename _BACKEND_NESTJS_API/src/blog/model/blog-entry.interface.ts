@@ -1,4 +1,4 @@
-import { IUser } from '../../user/model/user.interface';
+import { IUserBase } from '../../user/model/user.interface';
 
 export interface BlogEntry {
   id?: number;
@@ -9,7 +9,7 @@ export interface BlogEntry {
   createdAt?: Date;
   updatedAt?: Date;
   likes?: number;
-  author?: IUser;
+  author?: IUserBase;
   headerImage?: string;
   publishedDate?: Date;
   isPublished?: boolean;

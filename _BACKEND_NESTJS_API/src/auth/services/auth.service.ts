@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Observable, from } from 'rxjs';
-import { IUser } from '../../user/model/user.interface';
+import { IUserBase } from '../../user/model/user.interface';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 
@@ -13,7 +13,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  generateJWT(user: IUser): Observable<string> {
+  generateJWT(user: IUserBase): Observable<string> {
     return from(this.jwtService.signAsync({ user }));
   }
   generateInvalidJWT(id: number): Observable<string> {

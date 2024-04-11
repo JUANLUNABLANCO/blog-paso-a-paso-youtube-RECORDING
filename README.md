@@ -2674,3 +2674,311 @@ export class ReadProductDTO {
   price: number
 }
 ```
+
+### PARTE 02
+
+En este vídeo vamos a seguir profundizando en el uso de los DTO´s.
+Vimos en el vídeo anterior tres ejemplos de código, cada uno de ellos de más complejidad que el anterior, y en los que usando los DTO´s en angular creamos nuestras clases para al final sacarle provecho y poder validar nuestros datos antes de ser creados, ...
+
+Ahora vamos a ver cómo hacemos esto en NestJs, ya que aquí es un poquito diferente, NestJs nos provee de ciertos mecanismos para poder validar ayudándonods de una librería `class-validator` y un pipe `ValidationPipe`
+
+Esto hay dos formas de verlo o implementarlo:
+
+#### 1A Forma: usando interfaces y utility types de typescript
+
+Claro, puedes crear un archivo `user.interface.ts` que contenga las interfaces `IUser`, `IUserCreate`, `IUserUpdate` y `IUserRead` utilizando solo interfaces y utility types de TypeScript. Aquí tienes cómo hacerlo:
+
+```typescript
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+// Enumeración UserRole
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+// Definición de la interfaz IUser
+export interface IUser {
+  id?: number
+  userName?: string
+  email?: string
+  password?: string
+  role?: UserRole
+  profileImage?: string
+  blogEntries?: BlogEntry[]
+}
+
+// Interfaz para crear un usuario, donde solo userName, email y password son obligatorios
+interface IUserCreate extends Omit<IUserBase, 'id' | 'role'> {
+  password: string
+}
+
+// Interfaz para actualizar un usuario, donde solo id y userName son obligatorios
+interface IUserUpdate extends Omit<IUserBase, 'email' | 'role' | 'password'> {
+  id: number
+  userName: string
+}
+
+// Interfaz para leer un usuario, donde solo id, userName y role son obligatorios
+interface IUserRead extends Pick<IUserBase, 'id' | 'userName' | 'role'> {}
+```
+
+Con estas interfaces, tienes definiciones claras y reutilizables que puedes utilizar en tu aplicación NestJS para representar los diferentes estados de los usuarios y sus operaciones correspondientes.
+
+#### 2A Forma: usando DTOs sin más
+
+Para generar los DTOs correspondientes a las operaciones `createUser`, `updateUser` y `readUser` podemos seguir los siguientes pasos:
+
+1. **Para `createUserDto`**:
+   - Asegúrate de aplicar las validaciones necesarias según los requisitos del DTO, usando `class-validator`
+
+```typescript
+import {
+  IsEmail,
+  IsString,
+  MaxLength,
+  MinLength,
+  Matches,
+  IsOptional,
+} from 'class-validator'
+import { UserRole } from './user.interface'
+
+export class CreateUserDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  userName: string
+
+  @IsEmail()
+  email: string
+
+  @IsString()
+  @MinLength(8)
+  @MaxLength(50)
+  password: string
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage: string | null
+}
+```
+
+2. **Para `updateUserDto`**:
+
+```typescript
+import { IsString, MaxLength, MinLength, IsOptional } from 'class-validator'
+
+export class UpdateUserDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  @IsOptional()
+  userName: string
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage: string | null
+}
+```
+
+3. **Para `readUserDto`**:
+   - No necesitas aplicar validaciones ya que es un DTO de solo lectura.
+
+```typescript
+import { UserRole } from './user.interface'
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+export class ReadUserDto {
+  id: number
+  userName: string
+  role: UserRole
+  profileImage: string | null
+  blogEntries: BlogEntry[]
+}
+```
+
+para el resto de casos seguimos usando nuestra Interfaz IUser.
+
+Con estas definiciones de DTO, deberías poder trabajar de manera más segura y estructurada en tus operaciones CRUD en NestJS. Asegúrate de ajustar las validaciones y los requisitos según las necesidades específicas de tu aplicación.
+
+#### 3A Forma: Usando ambas como un PRO
+
+Ahora vamos a organizar el código teniendo en cuenta las siguientes premisas:
+los DTOs serán utilizados para las operaciones de creación y actualización de usuarios, porque necesitan validarse, mientras que las interfaces serán utilizadas para las operaciones de lectura y para definir la estructura de los objetos de un usuario en general, es decir recordáis las ventajas que vimos de los DTOs frente a las interfaces, los DTO´s podían instanciarse, podían usarse para validar datos y para transformaciones, pues eso, aquí le estamos diciendo a Nest que cuando necesitemos comprobar datos (osea validar) pues utilizaremos los DTOs y cuando no sea necesario validar o transformar usaremos interfaces simples pero un poco más allá usando los types.
+
+Aquí está el código organizado según estas premisas:
+
+**user.interface.ts**
+
+```typescript
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+// Enumeración UserRole
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+// Definición de la interfaz IUser
+export interface IUserBase {
+  id?: number
+  userName?: string
+  email?: string
+  password?: string
+  role?: UserRole
+  profileImage?: string
+  blogEntries?: BlogEntry[]
+}
+
+interface IUserCreate extends Omit<IUserBase, 'id' | 'role'> {
+  userName: string
+  email: string
+  password: string
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IUserUpdate
+  extends Omit<IUserBase, 'id' | 'email' | 'role' | 'password'> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IUserRead extends Omit<IUserBase, 'password'> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IUserDelete extends Pick<IUserBase, 'id'> {}
+
+export interface File {
+  profileImage: string
+}
+```
+
+O quitamos las interfaces y usamos solo types
+
+**user-types.ts**
+
+```typescript
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+// Enumeración UserRole
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+// Definición de la interfaz IUser
+export interface IUserBase {
+  id: number
+  userName: string
+  email: string
+  role: UserRole
+  profileImage?: string
+  blogEntries?: BlogEntry[]
+}
+
+// Definición de la interfaz IUserCreate, excluyendo 'id' de IUser
+export type UserCreate = Omit<IUserBase, 'id' | 'role'> & {
+  userName: string
+  email: string
+  password: string
+}
+// Definición de la interfaz IUserUpdate, excluyendo 'id', 'password' y 'email' de IUser
+export type UserUpdate = Omit<IUserBase, 'id' | 'email' | 'role' | 'password'>
+
+// Definición de la interfaz IUserRead, seleccionando campos específicos de IUser
+export type UserRead = Omit<IUserBase, 'password'>
+// IUserDelete
+export type UserDelete = Pick<IUser, 'id'>
+```
+
+**user-create.dto.ts**
+
+```typescript
+import {
+  IsEmail,
+  IsString,
+  MaxLength,
+  MinLength,
+  IsOptional,
+  Matches,
+  IsNotEmpty,
+} from 'class-validator'
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+import { UserRole } from './user.interface'
+
+// DTO para la creación de usuarios
+export class UserCreateDto {
+  @IsString({ message: 'userName: Debe ser un string' })
+  @MinLength(3, { message: 'userName: Debe tener al menos 3 caracteres' })
+  @MaxLength(50, { message: 'userName: Debe tener menos de 50 caracteres' })
+  @IsNotEmpty({ message: 'userName: Es requerido' })
+  userName: string
+
+  @IsEmail({}, { message: 'Email: Debe ser un email válido' })
+  @IsNotEmpty({ message: 'Email: Es requerido' })
+  email: string
+
+  @IsString({ message: 'password: Debe ser un string' })
+  @MinLength(8, { message: 'password: Debe tener al menos 8 caracteres' })
+  @MaxLength(50, { message: 'password: Debe tener menos de 50 caracteres' })
+  @IsNotEmpty({ message: 'Password: Es requerido' })
+  password: string
+
+  @IsOptional()
+  @IsString({ message: 'Profile Image: Debe ser un string' })
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage: string | null
+}
+```
+
+**user-update.dto.ts**
+
+```typescript
+import {
+  IsEmail,
+  IsString,
+  MaxLength,
+  MinLength,
+  IsOptional,
+  Matches,
+  IsNotEmpty,
+} from 'class-validator'
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+import { UserRole } from './user.interface'
+
+// DTO para la actualización de usuarios
+export class UserUpdateDto {
+  @IsOptional()
+  @IsString({ message: 'userName: Debe ser un string' })
+  @MinLength(3, { message: 'userName: Debe tener al menos 3 caracteres' })
+  @MaxLength(50, { message: 'userName: Debe tener menos de 50 caracteres' })
+  userName?: string
+
+  @IsOptional()
+  @IsEmail({}, { message: 'Email: Debe ser un email válido' })
+  email?: string
+
+  @IsOptional()
+  @IsString({ message: 'password: Debe ser un string' })
+  @MinLength(8, { message: 'password: Debe tener al menos 8 caracteres' })
+  @MaxLength(50, { message: 'password: Debe tener menos de 50 caracteres' })
+  password?: string
+
+  @IsOptional()
+  @IsString({ message: 'Profile Image: Debe ser un string' })
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage?: string | null
+}
+```
+
+Con esta estructura, los DTOs se encargarán de manejar las validaciones necesarias para las operaciones de creación y actualización de usuarios, mientras que las interfaces proporcionarán una representación limpia y clara de la estructura de los objetos de usuario para las operaciones de lectura y otras necesidades de la aplicación.

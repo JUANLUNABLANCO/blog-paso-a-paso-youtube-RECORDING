@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Observable, from, map, of, switchMap } from 'rxjs';
 import { BlogEntry } from '../model/blog-entry.interface';
-import { IUser } from 'src/user/model/user.interface';
+import { IUserBase } from 'src/user/model/user.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogEntryEntity } from '../model/blog-entry.entity';
 import { Repository } from 'typeorm';
@@ -22,7 +22,7 @@ export class BlogEntriesService {
     private userService: UserService,
   ) {}
 
-  create(user: IUser, blogEntry: BlogEntry): Observable<BlogEntry> {
+  create(user: IUserBase, blogEntry: BlogEntry): Observable<BlogEntry> {
     blogEntry.author = user;
     return this.generateSlug(blogEntry.title).pipe(
       switchMap((slug: string) => {
