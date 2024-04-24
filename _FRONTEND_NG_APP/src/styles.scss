@@ -54,3 +54,14 @@ body {
 .mat-mdc-snack-bar-container.bg-success .mat-mdc-snack-bar-action {
   color: #70f5ae !important;
 }
+
+// utilities
+
+.gap-10 {
+  margin: 10px;
+  margin-right: 0;
+  margin-bottom: 0px;
+}
+.border-radius-4 {
+  border-radius: 4px;
+}

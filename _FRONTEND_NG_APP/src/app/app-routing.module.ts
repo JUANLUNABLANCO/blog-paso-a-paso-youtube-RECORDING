@@ -9,6 +9,7 @@ import { ErrorTestComponent } from './core/errors/component-test/error.test.comp
 import { PreserveUserGuard } from './guards/userIsUser.guard';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/userIsAdmin.guard';
+import { HomeComponent } from './components/home/home.component';
 
 const routes: Routes = [
   {
@@ -51,13 +52,17 @@ const routes: Routes = [
     // canActivate: [AuthGuard], // descomenta para probar error de athorizacion 401
   },
   {
+    path: 'home',
+    component: HomeComponent,
+  },
+  {
     path: '',
-    redirectTo: '/',
+    redirectTo: '/home',
     pathMatch: 'full',
   },
   {
     path: '**',
-    redirectTo: '/',
+    redirectTo: '/home',
     pathMatch: 'full',
   },
 ];

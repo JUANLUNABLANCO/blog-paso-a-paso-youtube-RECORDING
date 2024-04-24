@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UsersPaginated } from '../../interfaces/user.interface';
+import { IUsersPageable } from '../../interfaces/user.interface';
 import { UsersService } from '../../services/users/users.service';
 import { map } from 'rxjs/operators';
 import { PageEvent } from '@angular/material/paginator';
@@ -12,7 +12,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class UsersComponent implements OnInit {
   // tabla
-  dataSource: UsersPaginated;
+  dataSource: IUsersPageable;
   displayedColumns = ['id', 'name', 'email', 'role'];
 
   // paginator
@@ -41,7 +41,7 @@ export class UsersComponent implements OnInit {
       .pipe(
         // TODO control de errores suscribe({next, error, complete})
         map(
-          (usersPaginated: UsersPaginated) =>
+          (usersPaginated: IUsersPageable) =>
             (this.dataSource = usersPaginated),
         ),
       )
@@ -58,7 +58,7 @@ export class UsersComponent implements OnInit {
         .getUsersPaginated(page, size)
         .pipe(
           map(
-            (usersPaginated: UsersPaginated) =>
+            (usersPaginated: IUsersPageable) =>
               (this.dataSource = usersPaginated),
           ),
         )
@@ -68,7 +68,7 @@ export class UsersComponent implements OnInit {
         .paginateByName(page, size, this.filterValue)
         .pipe(
           map(
-            (usersPaginated: UsersPaginated) =>
+            (usersPaginated: IUsersPageable) =>
               (this.dataSource = usersPaginated),
           ),
         )
@@ -85,7 +85,7 @@ export class UsersComponent implements OnInit {
       .paginateByName(0, 10, name)
       .pipe(
         map(
-          (usersPaginated: UsersPaginated) =>
+          (usersPaginated: IUsersPageable) =>
             (this.dataSource = usersPaginated),
         ),
       )

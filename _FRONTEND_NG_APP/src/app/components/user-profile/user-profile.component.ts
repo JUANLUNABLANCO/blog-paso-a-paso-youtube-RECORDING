@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { Subscription, map, throwError } from 'rxjs';
 
-import { User } from '../../interfaces/user.interface';
+import { IUser } from '../../interfaces/user.interface';
 
 import { UsersService } from '../../services/users/users.service';
 import { ActivatedRoute } from '@angular/router';
@@ -21,7 +21,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
   protected baseUrl: string = BASE_URL;
 
-  user: User = null;
+  user: IUser = null;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -36,7 +36,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       this.usersService
         .getUserById(this.userId)
         .pipe(
-          map((user: User) => {
+          map((user: IUser) => {
             if (user) {
               this.user = user;
             } else {

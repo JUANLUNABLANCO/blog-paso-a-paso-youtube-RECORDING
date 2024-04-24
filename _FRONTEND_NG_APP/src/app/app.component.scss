@@ -9,6 +9,9 @@
 .titlePage {
   visibility: hidden;
 }
+.home-link:hover {
+  cursor: pointer;
+}
 @media (min-width: 1024px) {
   .titlePage {
     visibility: visible;

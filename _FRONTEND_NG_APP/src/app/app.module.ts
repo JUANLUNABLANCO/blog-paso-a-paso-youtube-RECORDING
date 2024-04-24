@@ -37,6 +37,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { ServerErrorInterceptor } from './core/errors/interceptors/server-error.interceptor';
 import { GlobalErrorHandler } from './core/errors/global-error-handler';
 import { UploadFilesComponent } from './core/components/upload-files/upload-files.component';
+import { HomeComponent } from './components/home/home.component';
+import { BlogEntriesComponent } from './components/blog-entries/blog-entries.component';
 
 @NgModule({
   declarations: [
@@ -47,6 +49,8 @@ import { UploadFilesComponent } from './core/components/upload-files/upload-file
     UserProfileComponent,
     UpdateUserProfileComponent,
     UploadFilesComponent,
+    HomeComponent,
+    BlogEntriesComponent,
   ],
   imports: [
     BrowserModule,

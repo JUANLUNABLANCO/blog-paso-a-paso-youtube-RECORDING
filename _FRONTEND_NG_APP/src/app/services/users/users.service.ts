@@ -1,11 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { User } from '../../interfaces/user.interface';
+import { IUser } from '../../interfaces/user.interface';
 
 import { Observable, from, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 
-import { UsersPaginated } from '../../interfaces/user.interface';
+import { IUsersPageable } from '../../interfaces/user.interface';
 
 import { environment } from 'src/environments/environment';
 
@@ -35,16 +35,16 @@ export class UsersService {
         .pipe(map((response) => !!response)),
     );
   }
-  getUsersPaginated(page = 1, limit = 10): Observable<UsersPaginated> {
+  getUsersPaginated(page = 1, limit = 10): Observable<IUsersPageable> {
     let params = new HttpParams();
 
     params = params.append('page', Number(page));
     params = params.append('limit', Number(limit));
 
     return this.http
-      .get<UsersPaginated>(`${BASE_URL}/api/users`, { params })
+      .get<IUsersPageable>(`${BASE_URL}/api/users`, { params })
       .pipe(
-        map((usersPaginated: UsersPaginated) => {
+        map((usersPaginated: IUsersPageable) => {
           console.log('### usuarios paginados: ', usersPaginated);
           return usersPaginated;
         }),
@@ -54,7 +54,7 @@ export class UsersService {
     page: number,
     size: number,
     name: string,
-  ): Observable<UsersPaginated> {
+  ): Observable<IUsersPageable> {
     let params = new HttpParams();
 
     params = params.append('page', String(page));
@@ -62,20 +62,20 @@ export class UsersService {
     params = params.append('name', name);
 
     return this.http.get(`${BASE_URL}/api/users`, { params }).pipe(
-      map((userData: UsersPaginated) => userData),
+      map((userData: IUsersPageable) => userData),
       catchError((err) => throwError(() => new Error(err))),
     );
   }
-  getUserById(id: number): Observable<User> {
+  getUserById(id: number): Observable<IUser> {
     return this.http.get(`${BASE_URL}/api/users/${id}`).pipe(
-      map((user: User) => user),
+      map((user: IUser) => user),
       // catchError((err) => throwError(() => new Error(err))), // no hace falta, lo recoge el componente, en donde lo vamos a modificar gracias al interceptor
     ); // el motivo de este pipe(map()) es para convertir los datos que nos llegan de tipo any a User, directamente el http devuelve un Observable<any>
   }
-  updateUser(user): Observable<User> {
+  updateUser(user): Observable<IUser> {
     return this.http
       .put(`${BASE_URL}/api/users/${user.id}`, user)
-      .pipe(map((user: User) => user));
+      .pipe(map((user: IUser) => user));
   }
   uploadProfileImage(formData: FormData): Observable<any> {
     return this.http.post<FormData>(`${BASE_URL}/api/users/upload`, formData, {

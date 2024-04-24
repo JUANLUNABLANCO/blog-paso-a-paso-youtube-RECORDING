@@ -4,7 +4,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/services/auth/authentication.service';
 import { UsersService } from 'src/app/services/users/users.service';
-import { User } from 'src/app/interfaces/user.interface';
+import { IUser } from 'src/app/interfaces/user.interface';
 import { environment } from 'src/environments/environment';
 import { FileUpload } from 'src/app/core/interfaces/file-upload.interface';
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
@@ -54,7 +54,7 @@ export class UpdateUserProfileComponent implements OnInit {
         switchMap((userId: number | null) => {
           if (userId !== null) {
             return this.usersService.getUserById(userId).pipe(
-              tap((user: User) => {
+              tap((user: IUser) => {
                 this.userId = userId;
                 this.updateProfileForm.patchValue({
                   id: user.id,
@@ -79,7 +79,7 @@ export class UpdateUserProfileComponent implements OnInit {
     this.usersService
       .updateUser(this.updateProfileForm.getRawValue())
       .pipe(
-        tap((user: User) => {
+        tap((user: IUser) => {
           console.log('### User updated: ', user);
           // this.updateProfileForm.patchValue({
           //   id: user.id,

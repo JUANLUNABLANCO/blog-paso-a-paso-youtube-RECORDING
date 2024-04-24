@@ -5,7 +5,7 @@ export enum UserRole {
   USER = 'user',
 }
 
-export interface User {
+export interface IUser {
   id: number;
   userName: string;
   email: string;
@@ -14,8 +14,8 @@ export interface User {
   profileImage?: string;
 }
 
-export interface UsersPaginated {
-  items: User[];
+export interface IUsersPageable {
+  items: IUser[];
   meta: {
     totalItems: number;
     itemCount: number;

@@ -4,7 +4,7 @@ import { map, tap } from 'rxjs/operators';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { LoginForm, RegisterForm } from '../../interfaces/auth.interface';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { User, UserRole } from 'src/app/interfaces/user.interface';
+import { IUser, UserRole } from 'src/app/interfaces/user.interface';
 
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
@@ -49,7 +49,7 @@ export class AuthenticationService {
   // login tras el registro
   registerAndLogin(
     user: RegisterForm,
-  ): Observable<{ user: User; access_token: string }> {
+  ): Observable<{ user: IUser; access_token: string }> {
     console.log('### REGISTER AND LOGIN: ', user);
     return this.http.post<any>(`${BASE_URL}/api/users`, user).pipe(
       tap(({ user, access_token }) => {
