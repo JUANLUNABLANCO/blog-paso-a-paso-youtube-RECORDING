@@ -1,4 +1,4 @@
-import { BlogEntry } from 'src/blog/model/blog-entry.interface';
+import { BlogEntryReadWhithoutAuthorDto } from 'src/blog/model/blog-entry.dto';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -14,7 +14,8 @@ export interface IUserBase {
   password?: string;
   role?: UserRole;
   profileImage?: string;
-  blogEntries?: BlogEntry[];
+  // blogEntries?: IBlogEntry[];
+  blogEntries?: BlogEntryReadWhithoutAuthorDto[];
 }
 
 export interface File {

@@ -45,6 +45,22 @@ export class UserUpdateDto {
   profileImage?: string | null;
 }
 
-export type UserReadDto = Omit<IUserBase, 'password'>;
+// CHANGED ...
+export type UserReadWhithEntriesDto = Required<
+  Pick<
+    IUserBase,
+    'id' | 'userName' | 'email' | 'profileImage' | 'role' | 'blogEntries'
+  >
+>;
 
-export type UserDeleteDto = Pick<IUserBase, 'id'>;
+// este para cuando necesitas recuperar el author de un blogEntry y no quieres que haya recursión infinita
+// NO HACER ESTO
+// export type UserReadWhitoutEntriesDto = Omit<
+//   IUserBase,
+//   'password' | 'blogEntries'
+//   >;
+export type UserReadWhithoutEntriesDto = Required<
+  Pick<IUserBase, 'id' | 'userName' | 'email' | 'profileImage' | 'role'>
+>;
+
+export type UserDeleteDto = Required<Pick<IUserBase, 'id'>>;

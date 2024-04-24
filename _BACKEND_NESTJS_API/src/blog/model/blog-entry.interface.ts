@@ -1,6 +1,7 @@
+import { UserReadWhithoutEntriesDto } from 'src/user/model/user.dto';
 import { IUserBase } from '../../user/model/user.interface';
 
-export interface BlogEntry {
+export interface IBlogEntry {
   id?: number;
   title?: string;
   slug?: string;
@@ -9,7 +10,8 @@ export interface BlogEntry {
   createdAt?: Date;
   updatedAt?: Date;
   likes?: number;
-  author?: IUserBase;
+  // WARNING no queremos que haya recursión infinita IUserBase --> UserReadWhitoutEntriesDto
+  author?: UserReadWhithoutEntriesDto;
   headerImage?: string;
   publishedDate?: Date;
   isPublished?: boolean;

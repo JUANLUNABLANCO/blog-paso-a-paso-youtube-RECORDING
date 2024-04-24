@@ -33,7 +33,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
-import { UserReadDto, UserCreateDto, UserUpdateDto } from '../model/user.dto';
+import {
+  UserReadWhithEntriesDto,
+  UserReadWhithoutEntriesDto,
+  UserCreateDto,
+  UserUpdateDto,
+} from '../model/user.dto';
 import {
   IUserLoginResponse,
   IUserLogoutResponse,
@@ -71,7 +76,8 @@ export class UserController {
   @Post()
   create(@Body() user: UserCreateDto): Observable<
     | {
-        user: UserReadDto;
+        user: UserReadWhithoutEntriesDto; // whit out blogEntries, no tiene de todas formas
+
         access_token: string;
       }
     | { error: any }
@@ -107,13 +113,13 @@ export class UserController {
   // TODO user is user or user is Admin
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
-  findOneById(@Param() params): Observable<UserReadDto> {
+  findOneById(@Param() params): Observable<UserReadWhithEntriesDto> {
     return this.userService.findOneById(params.id);
   }
   // TODO WARNING solo el propio usuario o el admin podrán hacer esta solicitud
   @UseGuards(JwtAuthGuard)
   @Post('email')
-  findOneByEmail(@Body() user: IUserBase): Observable<UserReadDto> {
+  findOneByEmail(@Body() user: IUserBase): Observable<UserReadWhithEntriesDto> {
     return this.userService.findOneByEmail(user);
   }
   // TODO findOneByUserName
@@ -128,7 +134,7 @@ export class UserController {
   updateOne(
     @Param('id') id: string,
     @Body() user: UserUpdateDto,
-  ): Observable<UserReadDto> {
+  ): Observable<UserReadWhithEntriesDto> {
     // console.log('### USER: ', user);
     return this.userService.updateOne(Number(id), user);
   }
@@ -146,32 +152,28 @@ export class UserController {
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
-  uploadFile(@UploadedFile() file, @Request() req): Observable<UserReadDto> {
+  uploadFile(
+    @UploadedFile() file,
+    @Request() req,
+  ): Observable<UserReadWhithEntriesDto> {
     let user: IUserBase;
 
     if (req.user) {
-      user = req.user as UserReadDto;
+      user = req.user as UserReadWhithEntriesDto;
     } else {
       // console.log('User is not in request');
       throw new NotFoundException('User is not in request');
     }
 
-    // console.log(`#### req user: ${JSON.stringify(req.user)}`);
-    // console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL'));
-    // console.log('#### file name: ', file.filename);
-    // console.log('#### file path: ', file.path);
-    // console.log('#### file originalname: ', file.originalname);
-    // console.log(`#### user id: ${user ? user.id : 'No hay usuario'}`);
-
     try {
       return this.userService.findOneById(user.id).pipe(
-        switchMap((user: UserReadDto) => {
+        switchMap((user: UserReadWhithEntriesDto) => {
           if (!user) {
             throw new NotFoundException('User not found');
           }
           user.profileImage = file.filename;
           return this.userService.updateOne(user.id, user).pipe(
-            map((userUpdated: UserReadDto) => {
+            map((userUpdated: UserReadWhithEntriesDto) => {
               // console.log(`#### User Updated: ${JSON.stringify(userUpdated)}`);
               return userUpdated;
             }),
@@ -225,7 +227,7 @@ export class UserController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('userName') userName: string,
-  ): Observable<Pagination<UserReadDto>> {
+  ): Observable<Pagination<UserReadWhithEntriesDto>> {
     limit = limit > 100 ? 100 : limit;
 
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/users`;

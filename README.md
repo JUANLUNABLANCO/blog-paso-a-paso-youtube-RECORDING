@@ -2982,3 +2982,217 @@ export class UserUpdateDto {
 ```
 
 Con esta estructura, los DTOs se encargarán de manejar las validaciones necesarias para las operaciones de creación y actualización de usuarios, mientras que las interfaces proporcionarán una representación limpia y clara de la estructura de los objetos de usuario para las operaciones de lectura y otras necesidades de la aplicación.
+
+### PARTE 03
+
+fijaros en estos datos ...
+
+aquí tienes un ejemplo de JSON que simula una recursividad infinita:
+
+```json
+{
+  "id": 1,
+  "userName": "JohnDoe",
+  "email": "johndoe@example.com",
+  "blogEntries": [
+    {
+      "id": 101,
+      "title": "First Blog Entry",
+      "body": "This is the body of the first blog entry.",
+      "createdAt": "2024-04-12T08:00:00Z",
+      "author": {
+        "id": 1,
+        "userName": "JohnDoe",
+        "email": "johndoe@example.com",
+        "blogEntries": [
+          {
+            "id": 102,
+            "title": "Second Blog Entry",
+            "body": "This is the body of the second blog entry.",
+            "createdAt": "2024-04-13T08:00:00Z",
+            "author": {
+              "id": 1,
+              "userName": "JohnDoe",
+              "email": "johndoe@example.com",
+              "blogEntries": [
+                {
+                  "id": 103,
+                  "title": "Third Blog Entry",
+                  "body": "This is the body of the third blog entry.",
+                  "createdAt": "2024-04-14T08:00:00Z",
+                  "author": {
+                    "id": 1,
+                    "userName": "JohnDoe",
+                    "email": "johndoe@example.com",
+                    "blogEntries": [
+                      // Esta estructura se repetiría infinitamente...
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+En este ejemplo, cada entrada de blog contiene un autor que a su vez tiene sus propias entradas de blog con su autor, que es él mismo y así sucesivamente. Esto crea una estructura de datos recursiva que podría continuar indefinidamente si no se controla.
+
+Para controlarlo, hemos limitado la cantidad de datos que se devuelven en la respuesta. En lugar de devolver un objeto de usuario completo, `IUser` devolvemos un DTO específico en las lecturas de datos. Sería el propio usuario con todas sus entradas del blog pero cuando se llama al autor lo limitamos y no le metemos las entradas del blog en este caso.
+
+```typescript
+export interface IBlogEntry {
+  id?: number
+  title?: string
+  slug?: string
+  description?: string
+  body?: string
+  createdAt?: Date
+  updatedAt?: Date
+  likes?: number
+  // WARNING no queremos que haya recursión infinita IUserBase --> UserReadWhitoutEntriesDto
+  author?: UserReadWhitoutEntriesDto // ESTE limita los datos
+  headerImage?: string
+  publishedDate?: Date
+  isPublished?: boolean
+}
+export type UserReadDto = Required<
+  Pick<
+    IUserBase,
+    'id' | 'userName' | 'email' | 'profileImage' | 'role' | 'blogEntries'
+  >
+>
+// este nuevo Dto
+export type UserReadWhitoutEntriesDto = Required<
+  Pick<IUserBase, 'id' | 'userName' | 'email' | 'profileImage' | 'role'>
+>
+```
+
+El hecho de usar `Required<>` es porque el `Pick<>` va a coger de la interfaz esos campos pero como tienen el signo `?`, se convierten en opcionales y cuando estamos leyendo la data no queremos que sean opcionales sino obligatorios
+
+Así en ocasiones cuando necesitamos llamar a una entrada del blog, podemos decirle que muestre el author pero sin las entradas al blog, para que no sea recursivo.
+
+**ejemplo de entrada al blog con autor sin sus entradas**
+
+```json
+{
+  "id": 2,
+  "title": "Mi segunda entrada",
+  "slug": "mi-segunda-entrada",
+  "description": "Esta es la descripción de mi segunda entrada",
+  "body": "Aquí va el cuerpo de mi segunda entrada...",
+  "createdAt": "2024-04-12T10:00:00Z",
+  "updatedAt": "2024-04-12T11:45:00Z",
+  "likes": 15,
+  "headerImage": "https://example.com/header-image-2.jpg",
+  "publishedDate": "2024-04-12T10:00:00Z",
+  "isPublished": true,
+  "author": {
+    "id": 1,
+    "userName": "autor1",
+    "email": "autor1@example.com",
+    "profileImage": "https://example.com/profile-image-1.jpg",
+    "role": "author"
+  }
+}
+```
+
+Pero, ¿Qué pasa cuando estamos recuperando a un autor con todas us entradas?.
+En este caso no queremos que en esas entradas de segundo nivel se muestre el autor, poruqe el autor está en el primer nivel y es el mismo para todas las entradas
+
+**ejemplo de solicitud de author con sus entradas usando el UserReadWhitoutEntriesDto que acabamos de definir**
+
+```json
+{
+  "id": 1,
+  "userName": "JohnDoe",
+  "email": "johndoe@example.com",
+  "blogEntries": [
+    {
+      "id": 101,
+      "title": "First Blog Entry",
+      "body": "This is the body of the first blog entry.",
+      "createdAt": "2024-04-12T08:00:00Z",
+      // REDUNDANCIA DE DATOS
+      "author": {
+        "id": 1,
+        "userName": "JohnDoe",
+        "email": "johndoe@example.com"
+        // NO HAY RECURSIVIDAD INFINITA, porque no solicito los BlogEntries aquí.
+      }
+    },
+    {
+      "id": 102,
+      "title": "Second Blog Entry",
+      "body": "This is the body of the second blog entry.",
+      "createdAt": "2024-04-13T08:00:00Z",
+      "author": {
+        "id": 1,
+        "userName": "JohnDoe",
+        "email": "johndoe@example.com"
+      }
+    }
+  ]
+}
+```
+
+Pero nos llega el autor dentro de la entrada al blog y en este caso específico no queremos ni el autor siquiera, para ello creamos otro DTO como este
+
+```typescript
+export type BlogEntryReadWhitoutAuthorDto = Required<
+  Pick<
+    IBlogEntry,
+    | 'id'
+    | 'title'
+    | 'slug'
+    | 'description'
+    | 'body'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'likes'
+    | 'isPublished'
+  >
+> &
+  Pick<IBlogEntry, 'headerImage' | 'publishedDate'>
+```
+
+este sería adecuado llamarlo cuando necesitamos saber todas las entradas de un `author`
+
+Entonces al solicitar un autor con sus entradas al blog, pero en las que usamos ese dto, los datos se verían así...
+
+**ejemplo de entrada al blog sin autor**
+
+```json
+{
+  "id": 1,
+  "userName": "JohnDoe",
+  "email": "johndoe@example.com",
+  "blogEntries": [
+    {
+      "id": 101,
+      "title": "First Blog Entry",
+      "body": "This is the body of the first blog entry.",
+      "createdAt": "2024-04-12T08:00:00Z"
+    },
+    {
+      "id": 102,
+      "title": "Second Blog Entry",
+      "body": "This is the body of the second blog entry.",
+      "createdAt": "2024-04-13T08:00:00Z"
+    }
+  ]
+}
+```
+
+Claro pero para aclararnos mejor cuando estemos codificando tendremos dos tipos de UserRead el UserReadDto que nos devuelve el usuario semi-completo con sus entradas (sin author) y el UserReadWhitoutEntriesDto que nos devuelve el usuario pero sin sus entradas.
+
+Vamos pues a renombrar el primero de ellos para que sea más coherente,
+
+UserReadDto --> UserReadWhitBlogEntriesDto
+
+BlogEntryReadDto --> BlogEntryReadWhitAuthorDto
+
+Definidos nuestros nuevos DTOs vamos a aplicarlos, empezando en el UserController, el UserService y continuando por el BlogEntryController y el BlogEntryService
