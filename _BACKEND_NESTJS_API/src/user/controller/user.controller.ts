@@ -15,19 +15,15 @@ import {
   UploadedFile,
   NotFoundException,
   InternalServerErrorException,
-  HttpException,
-  HttpStatus,
-  ForbiddenException,
-  UseFilters,
   BadRequestException,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { Pagination } from 'nestjs-typeorm-paginate';
 // mine
 import { ConfigService } from '@nestjs/config';
-import { IUser, UserRole, File } from '../model/user.interface';
+import { IUserBase, UserRole } from '../model/user.interface';
 import { hasRoles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -37,16 +33,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
-import { IUserCreateResponse, UserCreateDto } from '../model/user-create.dto';
+import {
+  UserReadWhithEntriesDto,
+  UserReadWhithoutEntriesDto,
+  UserCreateDto,
+  UserUpdateDto,
+} from '../model/user.dto';
 import {
   IUserLoginResponse,
   IUserLogoutResponse,
   UserLoginDto,
-} from '../model/user-login.dto';
+} from '../model/auth.dto';
 import { AuthService } from 'src/auth/services/auth.service';
-import { IUserFindResponse } from '../model/user-find.dto';
-import { ErrorHandler } from 'src/core/errors/error.handler';
-import { AllExceptionsFilter } from 'src/core/errors/all-exceptions.filter';
 
 export const storage = {
   storage: diskStorage({
@@ -78,7 +76,8 @@ export class UserController {
   @Post()
   create(@Body() user: UserCreateDto): Observable<
     | {
-        user: IUserCreateResponse;
+        user: UserReadWhithoutEntriesDto; // whit out blogEntries, no tiene de todas formas
+
         access_token: string;
       }
     | { error: any }
@@ -104,7 +103,7 @@ export class UserController {
   logout(@Param('userId') userId: string): Observable<IUserLogoutResponse> {
     // // console.log('#### logout id: ', Number(userId));
     return this.authService.generateInvalidJWT(Number(userId)).pipe(
-      map((jwt: string) => {
+      map(() => {
         // console.log('#### logout invalid jwt: ', jwt);
         return { message: `user with id ${userId} is logout` };
       }),
@@ -114,31 +113,29 @@ export class UserController {
   // TODO user is user or user is Admin
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
-  findOneById(@Param() params): Observable<IUser> {
+  findOneById(@Param() params): Observable<UserReadWhithEntriesDto> {
     return this.userService.findOneById(params.id);
   }
   // TODO WARNING solo el propio usuario o el admin podrán hacer esta solicitud
   @UseGuards(JwtAuthGuard)
   @Post('email')
-  findOneByEmail(@Body() user: IUser): Observable<IUser> {
+  findOneByEmail(@Body() user: IUserBase): Observable<UserReadWhithEntriesDto> {
     return this.userService.findOneByEmail(user);
   }
   // TODO findOneByUserName
   @Post('check-email-exists')
-  checkEmailExist(@Body() user: IUser): Observable<boolean> {
+  checkEmailExist(@Body() user: IUserBase): Observable<boolean> {
     user.email = user.email.toLowerCase();
     return this.userService.checkEmailExists(user);
   }
 
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(':id')
-  updateOne(@Param('id') id: string, @Body() user: IUser): Observable<any> {
+  updateOne(
+    @Param('id') id: string,
+    @Body() user: UserUpdateDto,
+  ): Observable<UserReadWhithEntriesDto> {
     // console.log('### USER: ', user);
-    // solo permitimos el cambio de nombre y de email
-    delete user.role;
-    delete user.id; // WARNING este debe de caparse porque sinó podrá actualizar su id
-    delete user.password;
-    delete user.email;
     return this.userService.updateOne(Number(id), user);
   }
 
@@ -155,32 +152,28 @@ export class UserController {
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
-  uploadFile(@UploadedFile() file, @Request() req): Observable<IUser> {
-    let user: IUser;
+  uploadFile(
+    @UploadedFile() file,
+    @Request() req,
+  ): Observable<UserReadWhithEntriesDto> {
+    let user: IUserBase;
 
     if (req.user) {
-      user = req.user as IUser;
+      user = req.user as UserReadWhithEntriesDto;
     } else {
       // console.log('User is not in request');
       throw new NotFoundException('User is not in request');
     }
 
-    // console.log(`#### req user: ${JSON.stringify(req.user)}`);
-    // console.log('#### Upload: ', this.configService.get('UPLOAD_IMAGE_URL'));
-    // console.log('#### file name: ', file.filename);
-    // console.log('#### file path: ', file.path);
-    // console.log('#### file originalname: ', file.originalname);
-    // console.log(`#### user id: ${user ? user.id : 'No hay usuario'}`);
-
     try {
       return this.userService.findOneById(user.id).pipe(
-        switchMap((user: IUserFindResponse) => {
+        switchMap((user: UserReadWhithEntriesDto) => {
           if (!user) {
             throw new NotFoundException('User not found');
           }
           user.profileImage = file.filename;
           return this.userService.updateOne(user.id, user).pipe(
-            map((userUpdated: IUser) => {
+            map((userUpdated: UserReadWhithEntriesDto) => {
               // console.log(`#### User Updated: ${JSON.stringify(userUpdated)}`);
               return userUpdated;
             }),
@@ -192,7 +185,7 @@ export class UserController {
             }),
           );
         }),
-        catchError((err) => {
+        catchError(() => {
           // console.log('#### err en uploadFile 1: ', err);
           throw new InternalServerErrorException('Error de Base de datos!');
         }),
@@ -234,7 +227,7 @@ export class UserController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('userName') userName: string,
-  ): Observable<Pagination<IUser>> {
+  ): Observable<Pagination<UserReadWhithEntriesDto>> {
     limit = limit > 100 ? 100 : limit;
 
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/users`;
@@ -261,7 +254,7 @@ export class UserController {
   @Put(':id/role')
   updateRoleOfUser(
     @Param('id') id: string,
-    @Body() user: IUser,
+    @Body() user: IUserBase,
   ): Observable<any> {
     const roles = Object.values(UserRole);
     // console.log('## roles keys', roles);

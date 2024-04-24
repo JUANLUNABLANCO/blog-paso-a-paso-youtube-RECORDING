@@ -14,13 +14,13 @@ import {
   Response,
 } from '@nestjs/common';
 import { BlogEntriesService } from '../service/blog-entries.service';
-import { BlogEntry } from '../model/blog-entry.interface';
+import { IBlogEntry } from '../model/blog-entry.interface';
 import { Observable, of } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserIsAuthorGuard } from '../guards/user-is-author.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
-import { UserRole } from 'src/user/model/user.interface';
+import { IUserBase, UserRole } from 'src/user/model/user.interface';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserIsUserGuard } from 'src/auth/guards/userIsUser.guard';
@@ -28,6 +28,13 @@ import * as path from 'path';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { IImage } from '../model/image.interface';
+import {
+  BlogEntryCreateDto,
+  BlogEntryReadWhithAuthorDto,
+  BlogEntryReadWhithoutAuthorDto,
+  BlogEntryUpdateDto,
+} from '../model/blog-entry.dto';
+import { UserReadWhithEntriesDto } from 'src/user/model/user.dto';
 
 export const storage = diskStorage({
   destination: './uploads/blogEntriesImages',
@@ -44,26 +51,23 @@ export class BlogEntriesController {
   constructor(private blogService: BlogEntriesService) {}
 
   @UseGuards(JwtAuthGuard)
-  // TODO USERISAUTHORGUARD
+  // TODO USERISAUTHORGUARD, AND USER IS EDITORGUARD, the slug will be `unique`
   @Post()
-  create(@Body() blogEntry: BlogEntry, @Request() req): Observable<BlogEntry> {
+  create(
+    @Body() blogEntry: BlogEntryCreateDto,
+    @Request() req,
+  ): Observable<BlogEntryReadWhithoutAuthorDto> {
+    console.log('#### Create: ', blogEntry);
     const user = req.user;
+    console.log('#### USER: ', user);
     return this.blogService.create(user, blogEntry);
   }
 
-  // @Get()
-  // findBlogEntries(@Query('userId') userId: number): Observable<BlogEntry[]> {
-  //   if (userId === null) {
-  //     return this.blogService.findAll();
-  //   } else {
-  //     return this.blogService.findByUser(userId);
-  //   }
-  // }
   @Get()
   index(
     @Query('page') page = 1,
     @Query('limit') limit = 10,
-  ): Observable<Pagination<BlogEntry>> {
+  ): Observable<Pagination<BlogEntryReadWhithAuthorDto>> {
     limit = limit > 100 ? 100 : limit;
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/blog-entries`;
     return this.blogService.paginateAll({
@@ -77,7 +81,7 @@ export class BlogEntriesController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Param('authorId') authorId: number,
-  ): Observable<Pagination<BlogEntry>> {
+  ): Observable<Pagination<BlogEntryReadWhithoutAuthorDto>> {
     limit = limit > 100 ? 100 : limit;
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/blog-entries/user/${authorId}`;
     return this.blogService.paginateByUser(
@@ -90,21 +94,21 @@ export class BlogEntriesController {
     );
   }
   @Get(':id')
-  findOne(@Param('id') id: number): Observable<BlogEntry> {
-    return this.blogService.findOne(Number(id));
+  findOne(@Param('id') id: number): Observable<BlogEntryReadWhithAuthorDto> {
+    return this.blogService.findOne(Number(id)); // si no existen entradas no enviamos nada
   }
   @Put(':id')
   @UseGuards(JwtAuthGuard, UserIsAuthorGuard)
   updateOne(
     @Param('id') id: number,
-    @Body() blogEntry: BlogEntry,
-  ): Observable<BlogEntry> {
+    @Body() blogEntry: BlogEntryUpdateDto,
+  ): Observable<BlogEntryReadWhithAuthorDto> {
     return this.blogService.updateOne(Number(id), blogEntry);
   }
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @hasRoles(UserRole.ADMIN)
-  deleteOne(@Param('id') id: number): Observable<any> {
+  deleteOne(@Param('id') id: number): Observable<string> {
     return this.blogService.deleteOne(Number(id));
   }
   // @UseGuards(JwtAuthGuard, UserIsUserGuard)

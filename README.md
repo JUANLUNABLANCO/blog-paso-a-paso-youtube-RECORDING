@@ -2323,3 +2323,876 @@ Y si entras en mi cuenta de OnlyFans puedes subscribirte por 1000€ al mes, ...
 https://www.onlyfans.com/user/nacho_la_tiene_mas_larga_que_tu_digo_codifica_mejor_que_tu
 
 Gracias por estar ahí y te espero pronto en el próximo vídeo, se acercan cosas interesantes los DTO´s llevados a su máxima expresión.
+
+## 26 Angular: ¿Qué es y cómo usar los DTO´s profesionalmente?
+
+### PARTE 01
+
+- [1. Ejemplo básico del uso de un DTO en Angular](#1-ejemplo-básico-del-uso-de-un-dto-en-angular)
+- [2. Ejemplo medio del uso de DTO´s en Angular](#2-ejemplo-medio-del-uso-de-dto´s-en-angular)
+- [3. Ejemplo más avanzado del uso de DTO´s en Angular](#3-ejemplo-más-avanzado-del-uso-de-dto´s-en-angular)
+
+#### 1. Ejemplo básico del uso de un DTO en Angular
+
+1. Definición del DTO en Angular:
+
+```typescript
+// product.dto.ts
+export class ProductDto {
+  id: number
+  name: string
+  price: number
+}
+```
+
+2. Servicio para interactuar con el backend:
+
+```typescript
+// product.service.ts
+import { HttpClient } from '@angular/common/http'
+import { Injectable } from '@angular/core'
+import { Observable } from 'rxjs'
+import { ProductDto } from './product.dto'
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ProductService {
+  private baseUrl = 'api/products'
+
+  constructor(private http: HttpClient) {}
+
+  getAllProducts(): Observable<ProductDto[]> {
+    return this.http.get<ProductDto[]>(this.baseUrl)
+  }
+
+  getProductById(id: number): Observable<ProductDto> {
+    return this.http.get<ProductDto>(`${this.baseUrl}/${id}`)
+  }
+
+  createProduct(product: ProductDto): Observable<ProductDto> {
+    return this.http.post<ProductDto>(this.baseUrl, product)
+  }
+
+  updateProduct(id: number, product: ProductDto): Observable<ProductDto> {
+    return this.http.put<ProductDto>(`${this.baseUrl}/${id}`, product)
+  }
+
+  deleteProduct(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`)
+  }
+}
+```
+
+3. Componente para mostrar y manipular los productos:
+
+```typescript
+// product.component.ts
+import { Component, OnInit } from '@angular/core'
+import { ProductDto } from './product.dto'
+import { ProductService } from './product.service'
+
+@Component({
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css'],
+})
+export class ProductComponent implements OnInit {
+  products: ProductDto[]
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit(): void {
+    this.getAllProducts()
+  }
+
+  getAllProducts(): void {
+    this.productService.getAllProducts().subscribe((products) => {
+      this.products = products
+    })
+  }
+
+  createProduct(product: ProductDto): void {
+    this.productService.createProduct(product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  updateProduct(id: number, product: ProductDto): void {
+    this.productService.updateProduct(id, product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  deleteProduct(id: number): void {
+    this.productService.deleteProduct(id).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+}
+```
+
+#### 2. Ejemplo medio del uso de DTO´s en Angular
+
+```typescript
+export class ProductDto {
+  id?: number
+  name: string
+  price: number
+}
+
+// Ejemplo de uso
+const product1: ProductDto = {
+  name: 'Producto 1',
+  price: 10.99,
+}
+
+const product2: ProductDto = {
+  id: 1,
+  name: 'Producto 2',
+  price: 20.99,
+}
+```
+
+Que no difiere mucho de esto otro
+
+```typescript
+export interface IProduct {
+  id?: number
+  name: string
+  price: number
+}
+```
+
+1. **Clase (DTO)**:
+
+   - Una clase en TypeScript es una estructura que puede contener propiedades y métodos.
+   - Se puede instanciar una clase para crear objetos.
+   - Puede tener propiedades con modificadores de acceso como `public`, `private`, `protected`.
+   - Permite definir propiedades opcionales utilizando el operador `?`.
+   - Puede tener métodos para realizar operaciones en los datos.
+   - Se pueden implementar interfaces.
+
+2. **Interfaz**:
+
+   - Una interfaz en TypeScript es una estructura que define la forma de un objeto.
+   - No se puede instanciar directamente. Solo define la estructura del objeto.
+   - No puede contener implementaciones de métodos.
+   - Se utiliza principalmente para definir la forma de los datos y para establecer contratos entre diferentes partes del código.
+   - Se puede implementar en una clase.
+
+3. Definición de los DTOs:
+
+```typescript
+// create-product.dto.ts
+export class CreateProductDTO {
+  name: string
+  price: number
+}
+
+// update-product.dto.ts
+export class UpdateProductDTO {
+  id: number
+  name: string
+  price: number
+}
+
+// read-product.dto.ts
+export class ReadProductDTO {
+  id: number
+  name: string
+  price: number
+}
+```
+
+2. Servicio para interactuar con el backend:
+
+```typescript
+// product.service.ts
+import { HttpClient } from '@angular/common/http'
+import { Injectable } from '@angular/core'
+import { Observable } from 'rxjs'
+import {
+  CreateProductDTO,
+  UpdateProductDTO,
+  ReadProductDTO,
+} from './product.dto'
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ProductService {
+  private baseUrl = 'api/products'
+
+  constructor(private http: HttpClient) {}
+
+  getAllProducts(): Observable<ReadProductDTO[]> {
+    return this.http.get<ReadProductDTO[]>(this.baseUrl)
+  }
+
+  getProductById(id: number): Observable<ReadProductDTO> {
+    return this.http.get<ReadProductDTO>(`${this.baseUrl}/${id}`)
+  }
+
+  createProduct(product: CreateProductDTO): Observable<ReadProductDTO> {
+    return this.http.post<ReadProductDTO>(this.baseUrl, product)
+  }
+
+  updateProduct(product: UpdateProductDTO): Observable<ReadProductDTO> {
+    return this.http.put<ReadProductDTO>(
+      `${this.baseUrl}/${product.id}`,
+      product,
+    )
+  }
+
+  deleteProduct(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`)
+  }
+}
+```
+
+3. Componente para mostrar y manipular los productos:
+
+```typescript
+// product.component.ts
+import { Component, OnInit } from '@angular/core'
+import { ProductService } from './product.service'
+import {
+  CreateProductDTO,
+  UpdateProductDTO,
+  ReadProductDTO,
+} from './product.dto'
+
+@Component({
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css'],
+})
+export class ProductComponent implements OnInit {
+  products: ReadProductDTO[]
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit(): void {
+    this.getAllProducts()
+  }
+
+  getAllProducts(): void {
+    this.productService.getAllProducts().subscribe((products) => {
+      this.products = products
+    })
+  }
+
+  createProduct(product: CreateProductDTO): void {
+    this.productService.createProduct(product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  updateProduct(product: UpdateProductDTO): void {
+    this.productService.updateProduct(product).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+
+  deleteProduct(id: number): void {
+    this.productService.deleteProduct(id).subscribe(() => {
+      this.getAllProducts()
+    })
+  }
+}
+```
+
+#### 3. Ejemplo más avanzado del uso de DTO´s en Angular
+
+```typescript
+// create-product.dto.ts
+export class CreateProductDTO {
+  name: string
+  price: number
+  // slug: string
+  // totalPrice: number
+  private readonly IVA: 21
+
+  constructor(name: string, price: number) {
+    this.name = this.validateAndTransformName(name)
+    this.price = price
+    this.slug = this.slug()
+    this.totalPrice = this.totalPrice()
+  }
+
+  private validateAndTransformName(name: string): string {
+    // Regla: Nombre debe tener más de 5 letras y menos de 50
+    let validatedName = name.trim().toLowerCase()
+    validatedName =
+      validatedName.charAt(0).toUpperCase() + validatedName.slice(1)
+    validatedName = validatedName.replace(/\s+/g, '-')
+    validatedName = validatedName.replace(/[^\w\s-]/g, '') // Elimina signos de puntuación
+    if (validatedName.length < 5 || validatedName.length > 50) {
+      throw new Error(
+        'El nombre del producto debe tener entre 5 y 50 caracteres.',
+      )
+    }
+    return validatedName
+  }
+
+  get slug(): string {
+    return this.name.replace(/\s+/g, '-')
+  }
+
+  get totalPrice(): number {
+    // Calcula el precio total con un 21% de IVA
+    return this.price * 1.21
+  }
+}
+
+// update-product.dto.ts
+export class UpdateProductDTO {
+  name?: string
+  price?: number
+  private readonly IVA: 21
+
+  constructor(name?: string, price?: number) {
+    if (name) {
+      this.name = this.validateAndTransformName(name)
+      this.slug = this.slug()
+    }
+    if (price) {
+      this.price = price
+      totalPrice = this.totalPrice()
+    }
+
+  }
+
+  ...
+}
+
+// read-product.dto.ts
+export class ReadProductDTO {
+  id: number
+  name: string
+  price: number
+}
+```
+
+### PARTE 02
+
+En este vídeo vamos a seguir profundizando en el uso de los DTO´s.
+Vimos en el vídeo anterior tres ejemplos de código, cada uno de ellos de más complejidad que el anterior, y en los que usando los DTO´s en angular creamos nuestras clases para al final sacarle provecho y poder validar nuestros datos antes de ser creados, ...
+
+Ahora vamos a ver cómo hacemos esto en NestJs, ya que aquí es un poquito diferente, NestJs nos provee de ciertos mecanismos para poder validar ayudándonods de una librería `class-validator` y un pipe `ValidationPipe`
+
+Esto hay dos formas de verlo o implementarlo:
+
+#### 1A Forma: usando interfaces y utility types de typescript
+
+Claro, puedes crear un archivo `user.interface.ts` que contenga las interfaces `IUser`, `IUserCreate`, `IUserUpdate` y `IUserRead` utilizando solo interfaces y utility types de TypeScript. Aquí tienes cómo hacerlo:
+
+```typescript
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+// Enumeración UserRole
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+// Definición de la interfaz IUser
+export interface IUser {
+  id?: number
+  userName?: string
+  email?: string
+  password?: string
+  role?: UserRole
+  profileImage?: string
+  blogEntries?: BlogEntry[]
+}
+
+// Interfaz para crear un usuario, donde solo userName, email y password son obligatorios
+interface IUserCreate extends Omit<IUserBase, 'id' | 'role'> {
+  password: string
+}
+
+// Interfaz para actualizar un usuario, donde solo id y userName son obligatorios
+interface IUserUpdate extends Omit<IUserBase, 'email' | 'role' | 'password'> {
+  id: number
+  userName: string
+}
+
+// Interfaz para leer un usuario, donde solo id, userName y role son obligatorios
+interface IUserRead extends Pick<IUserBase, 'id' | 'userName' | 'role'> {}
+```
+
+Con estas interfaces, tienes definiciones claras y reutilizables que puedes utilizar en tu aplicación NestJS para representar los diferentes estados de los usuarios y sus operaciones correspondientes.
+
+#### 2A Forma: usando DTOs sin más
+
+Para generar los DTOs correspondientes a las operaciones `createUser`, `updateUser` y `readUser` podemos seguir los siguientes pasos:
+
+1. **Para `createUserDto`**:
+   - Asegúrate de aplicar las validaciones necesarias según los requisitos del DTO, usando `class-validator`
+
+```typescript
+import {
+  IsEmail,
+  IsString,
+  MaxLength,
+  MinLength,
+  Matches,
+  IsOptional,
+} from 'class-validator'
+import { UserRole } from './user.interface'
+
+export class CreateUserDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  userName: string
+
+  @IsEmail()
+  email: string
+
+  @IsString()
+  @MinLength(8)
+  @MaxLength(50)
+  password: string
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage: string | null
+}
+```
+
+2. **Para `updateUserDto`**:
+
+```typescript
+import { IsString, MaxLength, MinLength, IsOptional } from 'class-validator'
+
+export class UpdateUserDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  @IsOptional()
+  userName: string
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage: string | null
+}
+```
+
+3. **Para `readUserDto`**:
+   - No necesitas aplicar validaciones ya que es un DTO de solo lectura.
+
+```typescript
+import { UserRole } from './user.interface'
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+export class ReadUserDto {
+  id: number
+  userName: string
+  role: UserRole
+  profileImage: string | null
+  blogEntries: BlogEntry[]
+}
+```
+
+para el resto de casos seguimos usando nuestra Interfaz IUser.
+
+Con estas definiciones de DTO, deberías poder trabajar de manera más segura y estructurada en tus operaciones CRUD en NestJS. Asegúrate de ajustar las validaciones y los requisitos según las necesidades específicas de tu aplicación.
+
+#### 3A Forma: Usando ambas como un PRO
+
+Ahora vamos a organizar el código teniendo en cuenta las siguientes premisas:
+los DTOs serán utilizados para las operaciones de creación y actualización de usuarios, porque necesitan validarse, mientras que las interfaces serán utilizadas para las operaciones de lectura y para definir la estructura de los objetos de un usuario en general, es decir recordáis las ventajas que vimos de los DTOs frente a las interfaces, los DTO´s podían instanciarse, podían usarse para validar datos y para transformaciones, pues eso, aquí le estamos diciendo a Nest que cuando necesitemos comprobar datos (osea validar) pues utilizaremos los DTOs y cuando no sea necesario validar o transformar usaremos interfaces simples pero un poco más allá usando los types.
+
+Aquí está el código organizado según estas premisas:
+
+**user.interface.ts**
+
+```typescript
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+// Enumeración UserRole
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+// Definición de la interfaz IUser
+export interface IUserBase {
+  id?: number
+  userName?: string
+  email?: string
+  password?: string
+  role?: UserRole
+  profileImage?: string
+  blogEntries?: BlogEntry[]
+}
+
+interface IUserCreate extends Omit<IUserBase, 'id' | 'role'> {
+  userName: string
+  email: string
+  password: string
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IUserUpdate
+  extends Omit<IUserBase, 'id' | 'email' | 'role' | 'password'> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IUserRead extends Omit<IUserBase, 'password'> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IUserDelete extends Pick<IUserBase, 'id'> {}
+
+export interface File {
+  profileImage: string
+}
+```
+
+O quitamos las interfaces y usamos solo types
+
+**user-types.ts**
+
+```typescript
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+
+// Enumeración UserRole
+export enum UserRole {
+  ADMIN = 'admin',
+  CHIEFEDITOR = 'chiefeditor',
+  EDITOR = 'editor',
+  USER = 'user',
+}
+// Definición de la interfaz IUser
+export interface IUserBase {
+  id: number
+  userName: string
+  email: string
+  role: UserRole
+  profileImage?: string
+  blogEntries?: BlogEntry[]
+}
+
+// Definición de la interfaz IUserCreate, excluyendo 'id' de IUser
+export type UserCreate = Omit<IUserBase, 'id' | 'role'> & {
+  userName: string
+  email: string
+  password: string
+}
+// Definición de la interfaz IUserUpdate, excluyendo 'id', 'password' y 'email' de IUser
+export type UserUpdate = Omit<IUserBase, 'id' | 'email' | 'role' | 'password'>
+
+// Definición de la interfaz IUserRead, seleccionando campos específicos de IUser
+export type UserRead = Omit<IUserBase, 'password'>
+// IUserDelete
+export type UserDelete = Pick<IUser, 'id'>
+```
+
+**user-create.dto.ts**
+
+```typescript
+import {
+  IsEmail,
+  IsString,
+  MaxLength,
+  MinLength,
+  IsOptional,
+  Matches,
+  IsNotEmpty,
+} from 'class-validator'
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+import { UserRole } from './user.interface'
+
+// DTO para la creación de usuarios
+export class UserCreateDto {
+  @IsString({ message: 'userName: Debe ser un string' })
+  @MinLength(3, { message: 'userName: Debe tener al menos 3 caracteres' })
+  @MaxLength(50, { message: 'userName: Debe tener menos de 50 caracteres' })
+  @IsNotEmpty({ message: 'userName: Es requerido' })
+  userName: string
+
+  @IsEmail({}, { message: 'Email: Debe ser un email válido' })
+  @IsNotEmpty({ message: 'Email: Es requerido' })
+  email: string
+
+  @IsString({ message: 'password: Debe ser un string' })
+  @MinLength(8, { message: 'password: Debe tener al menos 8 caracteres' })
+  @MaxLength(50, { message: 'password: Debe tener menos de 50 caracteres' })
+  @IsNotEmpty({ message: 'Password: Es requerido' })
+  password: string
+
+  @IsOptional()
+  @IsString({ message: 'Profile Image: Debe ser un string' })
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage: string | null
+}
+```
+
+**user-update.dto.ts**
+
+```typescript
+import {
+  IsEmail,
+  IsString,
+  MaxLength,
+  MinLength,
+  IsOptional,
+  Matches,
+  IsNotEmpty,
+} from 'class-validator'
+import { BlogEntry } from 'src/blog/model/blog-entry.interface'
+import { UserRole } from './user.interface'
+
+// DTO para la actualización de usuarios
+export class UserUpdateDto {
+  @IsOptional()
+  @IsString({ message: 'userName: Debe ser un string' })
+  @MinLength(3, { message: 'userName: Debe tener al menos 3 caracteres' })
+  @MaxLength(50, { message: 'userName: Debe tener menos de 50 caracteres' })
+  userName?: string
+
+  @IsOptional()
+  @IsEmail({}, { message: 'Email: Debe ser un email válido' })
+  email?: string
+
+  @IsOptional()
+  @IsString({ message: 'password: Debe ser un string' })
+  @MinLength(8, { message: 'password: Debe tener al menos 8 caracteres' })
+  @MaxLength(50, { message: 'password: Debe tener menos de 50 caracteres' })
+  password?: string
+
+  @IsOptional()
+  @IsString({ message: 'Profile Image: Debe ser un string' })
+  @Matches(/^https?:\/\/assets\/images\/[\w.-_]+\.(png|jpg)$/, {
+    message: 'Invalid image URL',
+  })
+  profileImage?: string | null
+}
+```
+
+Con esta estructura, los DTOs se encargarán de manejar las validaciones necesarias para las operaciones de creación y actualización de usuarios, mientras que las interfaces proporcionarán una representación limpia y clara de la estructura de los objetos de usuario para las operaciones de lectura y otras necesidades de la aplicación.
+
+### PARTE 03
+
+fijaros en estos datos ...
+
+aquí tienes un ejemplo de JSON que simula una recursividad infinita:
+
+```json
+{
+  "id": 1,
+  "userName": "JohnDoe",
+  "email": "johndoe@example.com",
+  "blogEntries": [
+    {
+      "id": 101,
+      "title": "First Blog Entry",
+      "body": "This is the body of the first blog entry.",
+      "createdAt": "2024-04-12T08:00:00Z",
+      "author": {
+        "id": 1,
+        "userName": "JohnDoe",
+        "email": "johndoe@example.com",
+        "blogEntries": [
+          {
+            "id": 102,
+            "title": "Second Blog Entry",
+            "body": "This is the body of the second blog entry.",
+            "createdAt": "2024-04-13T08:00:00Z",
+            "author": {
+              "id": 1,
+              "userName": "JohnDoe",
+              "email": "johndoe@example.com",
+              "blogEntries": [
+                {
+                  "id": 103,
+                  "title": "Third Blog Entry",
+                  "body": "This is the body of the third blog entry.",
+                  "createdAt": "2024-04-14T08:00:00Z",
+                  "author": {
+                    "id": 1,
+                    "userName": "JohnDoe",
+                    "email": "johndoe@example.com",
+                    "blogEntries": [
+                      // Esta estructura se repetiría infinitamente...
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+En este ejemplo, cada entrada de blog contiene un autor que a su vez tiene sus propias entradas de blog con su autor, que es él mismo y así sucesivamente. Esto crea una estructura de datos recursiva que podría continuar indefinidamente si no se controla.
+
+Para controlarlo, hemos limitado la cantidad de datos que se devuelven en la respuesta. En lugar de devolver un objeto de usuario completo, `IUser` devolvemos un DTO específico en las lecturas de datos. Sería el propio usuario con todas sus entradas del blog pero cuando se llama al autor lo limitamos y no le metemos las entradas del blog en este caso.
+
+```typescript
+export interface IBlogEntry {
+  id?: number
+  title?: string
+  slug?: string
+  description?: string
+  body?: string
+  createdAt?: Date
+  updatedAt?: Date
+  likes?: number
+  // WARNING no queremos que haya recursión infinita IUserBase --> UserReadWhitoutEntriesDto
+  author?: UserReadWhitoutEntriesDto // ESTE limita los datos
+  headerImage?: string
+  publishedDate?: Date
+  isPublished?: boolean
+}
+export type UserReadDto = Required<
+  Pick<
+    IUserBase,
+    'id' | 'userName' | 'email' | 'profileImage' | 'role' | 'blogEntries'
+  >
+>
+// este nuevo Dto
+export type UserReadWhitoutEntriesDto = Required<
+  Pick<IUserBase, 'id' | 'userName' | 'email' | 'profileImage' | 'role'>
+>
+```
+
+El hecho de usar `Required<>` es porque el `Pick<>` va a coger de la interfaz esos campos pero como tienen el signo `?`, se convierten en opcionales y cuando estamos leyendo la data no queremos que sean opcionales sino obligatorios
+
+Así en ocasiones cuando necesitamos llamar a una entrada del blog, podemos decirle que muestre el author pero sin las entradas al blog, para que no sea recursivo.
+
+**ejemplo de entrada al blog con autor sin sus entradas**
+
+```json
+{
+  "id": 2,
+  "title": "Mi segunda entrada",
+  "slug": "mi-segunda-entrada",
+  "description": "Esta es la descripción de mi segunda entrada",
+  "body": "Aquí va el cuerpo de mi segunda entrada...",
+  "createdAt": "2024-04-12T10:00:00Z",
+  "updatedAt": "2024-04-12T11:45:00Z",
+  "likes": 15,
+  "headerImage": "https://example.com/header-image-2.jpg",
+  "publishedDate": "2024-04-12T10:00:00Z",
+  "isPublished": true,
+  "author": {
+    "id": 1,
+    "userName": "autor1",
+    "email": "autor1@example.com",
+    "profileImage": "https://example.com/profile-image-1.jpg",
+    "role": "author"
+  }
+}
+```
+
+Pero, ¿Qué pasa cuando estamos recuperando a un autor con todas us entradas?.
+En este caso no queremos que en esas entradas de segundo nivel se muestre el autor, poruqe el autor está en el primer nivel y es el mismo para todas las entradas
+
+**ejemplo de solicitud de author con sus entradas usando el UserReadWhitoutEntriesDto que acabamos de definir**
+
+```json
+{
+  "id": 1,
+  "userName": "JohnDoe",
+  "email": "johndoe@example.com",
+  "blogEntries": [
+    {
+      "id": 101,
+      "title": "First Blog Entry",
+      "body": "This is the body of the first blog entry.",
+      "createdAt": "2024-04-12T08:00:00Z",
+      // REDUNDANCIA DE DATOS
+      "author": {
+        "id": 1,
+        "userName": "JohnDoe",
+        "email": "johndoe@example.com"
+        // NO HAY RECURSIVIDAD INFINITA, porque no solicito los BlogEntries aquí.
+      }
+    },
+    {
+      "id": 102,
+      "title": "Second Blog Entry",
+      "body": "This is the body of the second blog entry.",
+      "createdAt": "2024-04-13T08:00:00Z",
+      "author": {
+        "id": 1,
+        "userName": "JohnDoe",
+        "email": "johndoe@example.com"
+      }
+    }
+  ]
+}
+```
+
+Pero nos llega el autor dentro de la entrada al blog y en este caso específico no queremos ni el autor siquiera, para ello creamos otro DTO como este
+
+```typescript
+export type BlogEntryReadWhitoutAuthorDto = Required<
+  Pick<
+    IBlogEntry,
+    | 'id'
+    | 'title'
+    | 'slug'
+    | 'description'
+    | 'body'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'likes'
+    | 'isPublished'
+  >
+> &
+  Pick<IBlogEntry, 'headerImage' | 'publishedDate'>
+```
+
+este sería adecuado llamarlo cuando necesitamos saber todas las entradas de un `author`
+
+Entonces al solicitar un autor con sus entradas al blog, pero en las que usamos ese dto, los datos se verían así...
+
+**ejemplo de entrada al blog sin autor**
+
+```json
+{
+  "id": 1,
+  "userName": "JohnDoe",
+  "email": "johndoe@example.com",
+  "blogEntries": [
+    {
+      "id": 101,
+      "title": "First Blog Entry",
+      "body": "This is the body of the first blog entry.",
+      "createdAt": "2024-04-12T08:00:00Z"
+    },
+    {
+      "id": 102,
+      "title": "Second Blog Entry",
+      "body": "This is the body of the second blog entry.",
+      "createdAt": "2024-04-13T08:00:00Z"
+    }
+  ]
+}
+```
+
+Claro pero para aclararnos mejor cuando estemos codificando tendremos dos tipos de UserRead el UserReadDto que nos devuelve el usuario semi-completo con sus entradas (sin author) y el UserReadWhitoutEntriesDto que nos devuelve el usuario pero sin sus entradas.
+
+Vamos pues a renombrar el primero de ellos para que sea más coherente,
+
+UserReadDto --> UserReadWhitBlogEntriesDto
+
+BlogEntryReadDto --> BlogEntryReadWhitAuthorDto
+
+Definidos nuestros nuevos DTOs vamos a aplicarlos, empezando en el UserController, el UserService y continuando por el BlogEntryController y el BlogEntryService

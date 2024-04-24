@@ -1,14 +1,7 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UserLoginDto {
   @IsEmail({}, { message: 'email debe ser válido' })
-  @IsNotEmpty({ message: 'email es requerido' })
   email: string;
 
   @IsString({ message: 'password debe ser un string' })
@@ -18,13 +11,15 @@ export class UserLoginDto {
   @MaxLength(50, {
     message: 'password incorrecto debe ser menor de 50 caracteres',
   })
-  @IsNotEmpty({ message: 'password es requerida' })
   password: string;
 }
 
+// TODO cambiar estas interfaces a types
+// UserLoginReadDto
 export interface IUserLoginResponse {
   access_token: string;
 }
+// UserLogoutReadDto
 export interface IUserLogoutResponse {
   message: string;
 }

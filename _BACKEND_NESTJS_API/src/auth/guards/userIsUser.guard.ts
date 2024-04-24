@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { Observable, catchError, map, of } from 'rxjs';
 import { UserService } from 'src/user/service/user.service';
-import { IUser } from 'src/user/model/user.interface';
+import { IUserBase } from 'src/user/model/user.interface';
 import { decode } from 'jsonwebtoken';
 import { ErrorHandler } from 'src/core/errors/error.handler';
 
@@ -28,7 +28,7 @@ export class UserIsUserGuard implements CanActivate {
     const params = request.params;
 
     // ID from request
-    const user: IUser = request.user ? request.user : null;
+    const user: IUserBase = request.user ? request.user : null;
     const idFromRequest = user?.id ? user.id : null;
 
     // console.log('#### User From request: ', user, params);
@@ -76,7 +76,7 @@ export class UserIsUserGuard implements CanActivate {
     }
 
     return this.userService.findOneById(idToCheck).pipe(
-      map((userFromDB: IUser) => {
+      map((userFromDB: IUserBase) => {
         let hasPermission = false;
         if (userFromDB) {
           console.log('#### userFromDB: ', userFromDB);
@@ -84,7 +84,7 @@ export class UserIsUserGuard implements CanActivate {
         }
         return user && hasPermission;
       }),
-      catchError((err) => {
+      catchError(() => {
         // console.log('#### error: usuario no encontrado');
         throw new NotFoundException('User not found');
       }),

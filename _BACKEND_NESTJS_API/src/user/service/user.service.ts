@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -8,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../model/user.entity';
 import { Repository, Like } from 'typeorm';
 
-import { Observable, from, of } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 
 import { AuthService } from '../../auth/services/auth.service';
@@ -18,10 +19,13 @@ import {
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
 import { ErrorHandler } from 'src/core/errors/error.handler';
-import { IUser, UserRole } from '../model/user.interface';
-import { UserCreateDto, IUserCreateResponse } from '../model/user-create.dto';
-import { UserLoginDto } from '../model/user-login.dto';
-import { IUserFindResponse } from '../model/user-find.dto';
+import { IUserBase, UserRole } from '../model/user.interface';
+import {
+  UserCreateDto,
+  UserReadWhithEntriesDto,
+  UserReadWhithoutEntriesDto,
+} from '../model/user.dto';
+import { UserLoginDto } from '../model/auth.dto';
 
 @Injectable()
 export class UserService {
@@ -32,11 +36,11 @@ export class UserService {
   ) {}
   // TODO debe enviar un mensaje de error ususario ya existe
   create(user: UserCreateDto): Observable<{
-    user: IUserCreateResponse;
+    user: UserReadWhithoutEntriesDto;
     token: string;
   }> {
     return this.findOneByEmail(user).pipe(
-      switchMap((existingUser: IUser) => {
+      switchMap((existingUser: UserReadWhithoutEntriesDto) => {
         if (existingUser) {
           // console.log('#### YA EXISTE EL BICHO ####');
           throw new BadRequestException('User already exists');
@@ -47,7 +51,7 @@ export class UserService {
     );
   }
   private createUser(user: UserCreateDto): Observable<{
-    user: IUserCreateResponse;
+    user: UserReadWhithoutEntriesDto;
     token: string;
   }> {
     return this.authService
@@ -60,7 +64,7 @@ export class UserService {
     user: UserCreateDto,
     passwordHash: string,
   ): Observable<{
-    user: IUserCreateResponse;
+    user: UserReadWhithoutEntriesDto;
     token: string;
   }> {
     const newUser = new UserEntity();
@@ -70,33 +74,33 @@ export class UserService {
     newUser.role = this.getRoleAdminOrUser(user.email);
 
     return from(this.userRepository.save(newUser)).pipe(
-      switchMap((createdUser: IUser) => {
-        delete createdUser.password;
-        return this.generateToken(createdUser);
+      switchMap((createdUser: UserReadWhithoutEntriesDto) => {
+        // delete createdUser.password;
+        return this.generateToken(createdUser as UserReadWhithoutEntriesDto);
       }),
     );
   }
-  private generateToken(createdUser: IUser): Observable<{
-    user: IUserCreateResponse;
+  private generateToken(createdUser: UserReadWhithoutEntriesDto): Observable<{
+    user: UserReadWhithoutEntriesDto;
     token: string;
   }> {
     if (!createdUser) {
       throw new BadRequestException('Fallo al intentar crear al Usuario!');
     }
-    const { id, userName, email, role, profileImage, blogEntries } =
-      createdUser;
-    const userResponseDto: IUserCreateResponse = {
-      id,
-      userName,
-      email,
-      role,
-      profileImage,
-      blogEntries,
-    };
+    // const { id, userName, email, role, profileImage, blogEntries } =
+    //   createdUser;
+    // const userResponseDto: UserReadWhithEntriesDto = {
+    //   id,
+    //   userName,
+    //   email,
+    //   role,
+    //   profileImage,
+    //   blogEntries,
+    // };
 
     return this.authService.generateJWT(createdUser).pipe(
       map((token: string) => ({
-        user: userResponseDto,
+        user: createdUser,
         token: token,
       })),
     );
@@ -116,25 +120,62 @@ export class UserService {
     }
     return UserRole.USER;
   }
+  // login(user: UserLoginDto): Observable<string> {
+  //   // console.log('#### User: ', user);
+  //   try {
+  //     return this.validateUser(user.email, user.password).pipe(
+  //       switchMap((user: UserLoginDto) => {
+  //         if (user) {
+  //           return this.authService
+  //             .generateJWT(user)
+  //             .pipe(map((jwt: string) => jwt));
+  //         } else {
+  //           ErrorHandler.handleUnauthorizedError('Wrong Credentials !!'); // ANTES return 'Wrong Credentials';
+  //         }
+  //       }),
+  //     );
+  //   } catch (err) {
+  //     throw new InternalServerErrorException('Fallo de base de Datos!');
+  //   }
+  // }
   login(user: UserLoginDto): Observable<string> {
-    // console.log('#### User: ', user);
     try {
       return this.validateUser(user.email, user.password).pipe(
         switchMap((user: UserLoginDto) => {
           if (user) {
-            return this.authService
-              .generateJWT(user)
-              .pipe(map((jwt: string) => jwt));
+            // Obtener el usuario sin sus blogEntries
+            return this.findOneByEmailWihtoutEntries(user).pipe(
+              switchMap((userWithoutEntries: UserReadWhithoutEntriesDto) => {
+                // Generar el JWT con el usuario obtenido
+                return this.authService.generateJWT(userWithoutEntries).pipe(
+                  map((jwt: string) => jwt),
+                  catchError((error) => {
+                    // Manejo de errores del JWT aquí
+                    throw new UnauthorizedException('Jwt failed!');
+                  }),
+                );
+              }),
+              catchError((error) => {
+                // Manejo de errores de obtención de usuario aquí
+                throw new UnauthorizedException('User not found!');
+              }),
+            );
           } else {
-            ErrorHandler.handleUnauthorizedError('Wrong Credentials !!'); // ANTES return 'Wrong Credentials';
+            // Manejo de credenciales incorrectas
+            throw new UnauthorizedException('Wrong Credentials!!');
           }
+        }),
+        catchError((error) => {
+          // Manejo de errores de validación de usuario aquí
+          throw new InternalServerErrorException('Database Failure!');
         }),
       );
     } catch (err) {
-      throw new InternalServerErrorException('Fallo de base de Datos!');
+      // Manejo de errores generales aquí
+      throw new InternalServerErrorException('Database Failure!');
     }
   }
-  findOneById(id: number): Observable<IUserFindResponse> {
+  findOneById(id: number): Observable<UserReadWhithEntriesDto> {
     try {
       // console.log(`#### Aquí llega, findOneById: ${id}`);
       return from(
@@ -142,39 +183,18 @@ export class UserService {
           where: { id: id },
           relations: { blogEntries: true },
         }),
-      ).pipe(
-        map((user: IUser) => {
-          if (!user) {
-            // WARNING NO BORRAR COMENTARIO
-            // COMENTARIO no queremos provocar un error, si no lo encuentra eso que lo decida la función que llama a esta
-            return null;
-          }
-          return this.transformUserToResponse(user);
-        }),
-        catchError((err) => {
-          // console.log('#### err en findOneById 1: ', err);
-          throw new InternalServerErrorException('Error en La Base de Datos!');
-        }),
       );
     } catch (err) {
       // console.log('#### err en findOneById 2: ', err);
       throw new InternalServerErrorException('Error en La Base de Datos!');
     }
   }
-  findOneByEmail(user: IUser): Observable<IUserFindResponse> {
+  findOneByEmail(user: IUserBase): Observable<UserReadWhithEntriesDto> {
     try {
       return from(
         this.userRepository.findOne({
           where: { email: user.email },
           relations: { blogEntries: true },
-        }),
-      ).pipe(
-        map((user: IUser) => {
-          if (!user) {
-            // ErrorHandler.handleNotFoundError('User not found'); // WARNING no queremos provocar un error si no lo encuentra eso que lo decida la función que llama a esta
-            return null;
-          }
-          return this.transformUserToResponse(user);
         }),
       );
     } catch (err) {
@@ -182,39 +202,47 @@ export class UserService {
       throw new InternalServerErrorException(err.message);
     }
   }
-  findOneByUserName(user: IUser): Observable<IUserFindResponse> {
+  findOneByEmailWihtoutEntries(
+    user: IUserBase,
+  ): Observable<UserReadWhithoutEntriesDto> {
+    try {
+      return from(
+        this.userRepository.findOne({
+          where: { email: user.email },
+          relations: { blogEntries: false },
+        }),
+      );
+    } catch (err) {
+      // console.log('#### err en findOneByEmail: ', err);
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+  findOneByUserName(user: IUserBase): Observable<UserReadWhithEntriesDto> {
     try {
       return from(
         this.userRepository.findOne({
           where: { userName: user.userName },
           relations: ['blogEntries'],
         }),
-      ).pipe(
-        map((user: IUser) => {
-          if (!user) {
-            // ErrorHandler.handleNotFoundError('User not found'); // WARNING no queremos provocar un error si no lo encuentra eso que lo decida la función que llama a esta
-            return null;
-          }
-          return this.transformUserToResponse(user);
-        }),
       );
     } catch (err) {
       throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
-  private transformUserToResponse(user: IUser): IUserFindResponse {
-    // console.log(`#### Transforming user to response...${JSON.stringify(user)}`);
-    const { password, ...result } = user;
-    return {
-      id: result.id,
-      userName: result.userName,
-      email: result.email,
-      role: result.role,
-      profileImage: result.profileImage,
-      blogEntries: result.blogEntries,
-    };
-  }
-  checkEmailExists(user: IUser): Observable<boolean> {
+  // TODO refactoriza este ya no es necesario
+  // private transformUserToResponse(user: IUserBase): UserReadWhithEntriesDto {
+  //   // console.log(`#### Transforming user to response...${JSON.stringify(user)}`);
+  //   const { password, ...result } = user;
+  //   return {
+  //     id: result.id,
+  //     userName: result.userName,
+  //     email: result.email,
+  //     role: result.role,
+  //     profileImage: result.profileImage,
+  //     blogEntries: result.blogEntries,
+  //   };
+  // }
+  checkEmailExists(user: IUserBase): Observable<boolean> {
     try {
       return from(
         this.userRepository
@@ -236,15 +264,17 @@ export class UserService {
     }
   }
   // TODO check-userName-exists
-  findAll(): Observable<IUserFindResponse[]> {
+  findAll(): Observable<UserReadWhithEntriesDto[]> {
     try {
       return from(
         this.userRepository.find({
           relations: { blogEntries: true },
+          // TODO select ???
         }),
       ).pipe(
-        map((users: IUser[]) => {
-          return users.map((user: IUser) => this.transformUserToResponse(user));
+        map((resultado) => {
+          console.log('#### RESULTADO: ', resultado);
+          return resultado;
         }),
       );
     } catch (err) {
@@ -252,21 +282,26 @@ export class UserService {
     }
   }
   // TODO add relations : ['blogEntries']
-  paginate(options: IPaginationOptions): Observable<Pagination<IUser>> {
-    return from(paginate<UserEntity>(this.userRepository, options)).pipe(
-      map((usersPageable: Pagination<IUser>) => {
-        usersPageable.items.forEach((user) => {
-          delete user.password;
-        });
-        // console.log('## usersPageable in paginate: ', usersPageable);
-        return usersPageable;
+  paginate(
+    options: IPaginationOptions,
+  ): Observable<Pagination<UserReadWhithEntriesDto>> {
+    console.log('#### paginate');
+    return from(
+      // CHANGED hemos añadido el relations, pues ahora es diferente
+      paginate<UserReadWhithEntriesDto>(this.userRepository, options, {
+        relations: ['blogEntries'],
+      }),
+    ).pipe(
+      map((resultado) => {
+        console.log('#### RESULTADO: ', resultado);
+        return resultado;
       }),
     );
   }
   paginateFilterByUserName(
     options: IPaginationOptions,
-    user: IUser,
-  ): Observable<Pagination<IUser>> {
+    user: IUserBase,
+  ): Observable<Pagination<UserReadWhithEntriesDto>> {
     // console.log('#### USER: ', user);
     return from(
       this.userRepository.findAndCount({
@@ -296,7 +331,7 @@ export class UserService {
         const totalPages = Math.ceil(totalUsers / Number(options.limit));
         const nextPage = Number(options.page) + 1;
 
-        const usersPageable: Pagination<IUser> = {
+        const usersPageable: Pagination<UserReadWhithEntriesDto> = {
           items: users,
           links: {
             first: options.route + `?limit=${options.limit}`,
@@ -315,12 +350,12 @@ export class UserService {
             totalPages: Math.ceil(totalUsers / Number(options.limit)),
           },
         };
-        // console.log('## usersPageable in FilterByUserName: ', usersPageable);
+        console.log('## usersPageable in FilterByUserName: ', usersPageable);
         return usersPageable;
       }),
     );
   }
-  updateOne(id: number, user: IUser): Observable<IUser> {
+  updateOne(id: number, user: IUserBase): Observable<UserReadWhithEntriesDto> {
     // console.log('#### User to update in updateOne(): ', user);
     // No se pueden actualizar desde aquí el email, password, role. Solo username, profileImage and BlogEntries[]
     // delete user.email;
@@ -331,7 +366,7 @@ export class UserService {
     return from(
       this.userRepository.update(Number(id), userWithoutRelations),
     ).pipe(
-      switchMap((resp) => {
+      switchMap(() => {
         // console.log('#### User Just Updated ####' + JSON.stringify(resp));
         return this.findOneById(id); // of(user); //
       }),
@@ -341,22 +376,54 @@ export class UserService {
       }),
     );
   }
-  updateRoleOfUser(id: number, user: IUser): Observable<any> {
+
+  // TODO por seguridad este IUserBase solo debe traer el role, puedes crear un dto
+  updateRoleOfUser(
+    id: number,
+    user: IUserBase,
+  ): Observable<UserReadWhithEntriesDto> {
     delete user.email;
     delete user.password;
     delete user.userName;
 
-    return from(this.userRepository.update(id, user));
+    // return from(this.userRepository.update(id, user));
+    return from(this.userRepository.update(id, user)).pipe(
+      switchMap((resultado: any) => {
+        if (resultado.affected === 0) {
+          throw new InternalServerErrorException(
+            'Error al actualizar el rol del usuario',
+          );
+        } else {
+          return this.findOneById(id);
+        }
+      }),
+    );
   }
   deleteOne(id: number): Observable<any> {
-    return from(this.userRepository.delete(id));
+    return from(this.userRepository.delete(id)).pipe(
+      map((resultado) => {
+        if (resultado.affected === 0) {
+          throw new InternalServerErrorException('Error al borrar el usuario');
+        } else {
+          return {
+            message: `Usuario con id ${id} eliminado correctamente`,
+            status: HttpStatus.OK,
+          };
+        }
+      }),
+      catchError((err) => {
+        console.log('#### err en deleteOne: ', err);
+        throw new InternalServerErrorException(`Error al eliminar el usuario, Un usuario no puede ser eliminado si tiene entradas de blog asociadas.
+          Borra primero sus entradas.`);
+      }),
+    );
   }
-  private validateUser(email: string, password: string): Observable<IUser> {
+  private validateUser(email: string, password: string): Observable<IUserBase> {
     // console.log('#### PASSWORD: ', password);
     try {
       return from(
         this.findByEmail(email.toLowerCase()).pipe(
-          switchMap((user: IUser) => {
+          switchMap((user: IUserBase) => {
             if (!user) {
               ErrorHandler.handleUnauthorizedError('Wrong Credentials !!');
             }
@@ -381,7 +448,7 @@ export class UserService {
       throw new InternalServerErrorException('Fallo de base de Datos!');
     }
   }
-  private findByEmail(email: string): Observable<IUser> {
+  private findByEmail(email: string): Observable<IUserBase> {
     try {
       return from(
         this.userRepository
@@ -397,7 +464,7 @@ export class UserService {
             relations: ['blogEntries'],
             where: { email: email },
           })
-          .then((user: IUser) => {
+          .then((user: IUserBase) => {
             if (!user) {
               // WARNING NO BORRAR EL COMENTARIO
               // COMENTARIO al ser un método privado que se usa en varias partes por ejemplo en el login, en el profile
