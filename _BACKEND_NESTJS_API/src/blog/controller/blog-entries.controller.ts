@@ -36,15 +36,17 @@ import {
 } from '../model/blog-entry.dto';
 import { UserReadWhithEntriesDto } from 'src/user/model/user.dto';
 
-export const storage = diskStorage({
-  destination: './uploads/blogEntriesImages',
-  filename: (req, file, cb) => {
-    const filename: string =
-      file.originalname.replace(/\s/g, '').split('.')[0] + uuidv4();
-    const extension: string = path.extname(file.originalname);
-    cb(null, `${filename}${extension}`);
-  },
-});
+export const storage = {
+  storage: diskStorage({
+    destination: './uploads/blogEntriesImages',
+    filename: (req, file, cb) => {
+      const filename: string =
+        file.originalname.replace(/\s/g, '').split('.')[0] + uuidv4();
+      const extension: string = path.extname(file.originalname);
+      cb(null, `${filename}${extension}`);
+    },
+  }),
+};
 @Controller('blog-entries')
 export class BlogEntriesController {
   configService: any;
@@ -113,10 +115,13 @@ export class BlogEntriesController {
   }
   // @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', { storage }))
-  uploadFile(@UploadedFile() file, @Request() req): Observable<IImage> {
+  @UseInterceptors(FileInterceptor('file', storage))
+  uploadFile(@UploadedFile() file, @Request() req): Observable<any> {
     // // // // console.log('#### file name: ', file.filename);
-    return of(file);
+    return of({
+      headerImage: file.filename,
+      message: 'file uploaded successfully',
+    });
   }
 
   @Get('header-image/:imageName')
@@ -125,7 +130,7 @@ export class BlogEntriesController {
     @Response() resp,
   ): Observable<unknown> {
     console.log(
-      'ruta file',
+      '#### ruta file',
       path.join(process.cwd(), 'uploads/blogEntriesImages/', imageName),
     );
     return of(

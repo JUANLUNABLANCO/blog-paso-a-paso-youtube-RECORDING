@@ -136,7 +136,12 @@ export class UserController {
     @Body() user: UserUpdateDto,
   ): Observable<UserReadWhithEntriesDto> {
     // console.log('### USER: ', user);
-    return this.userService.updateOne(Number(id), user);
+    return this.userService.updateOne(Number(id), user).pipe(
+      map((userUpdated: UserReadWhithEntriesDto) => {
+        console.log(`#### User Updated: ${JSON.stringify(userUpdated)}`);
+        return userUpdated;
+      }),
+    );
   }
 
   // @UseGuards(JwtAuthGuard, UserIsUserGuard)
