@@ -26,7 +26,6 @@ export class BlogEntryCreateDto {
 
   @IsString({ message: 'body: Debe ser un string' })
   @MinLength(5, { message: 'body: Debe tener al menos 5 caracteres' })
-  @MaxLength(150, { message: 'body: Debe tener menos de 150 caracteres' })
   body: string;
 
   @IsString({ message: 'image: Debe ser un string' })

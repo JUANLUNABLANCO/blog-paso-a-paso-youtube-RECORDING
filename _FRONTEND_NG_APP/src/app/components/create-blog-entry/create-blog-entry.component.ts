@@ -38,7 +38,7 @@ export class CreateBlogEntryComponent implements OnInit {
       title: [null, [Validators.required]],
       description: [null, [Validators.required]],
       body: [null, [Validators.required]],
-      headerImage: [null, null],
+      headerImage: [null, [Validators.required]],
     });
   }
   createNewBlogEntry() {

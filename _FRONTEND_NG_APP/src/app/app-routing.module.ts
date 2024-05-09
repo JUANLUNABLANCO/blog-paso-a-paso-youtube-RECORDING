@@ -59,7 +59,7 @@ const routes: Routes = [
   {
     path: 'create-blog-entry',
     component: CreateBlogEntryComponent,
-    // canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
   },
   {
     path: '',
