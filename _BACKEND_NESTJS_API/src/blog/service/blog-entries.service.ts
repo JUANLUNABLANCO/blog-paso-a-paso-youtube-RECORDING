@@ -37,26 +37,38 @@ export class BlogEntriesService {
   ) {}
 
   // TODO después del save debe devolver un array de entradas de ese usuario y no el resultado de la BD
+  // create(
+  //   user: UserReadWhithEntriesDto,
+  //   blogEntry: BlogEntryCreateDto,
+  // ): Observable<BlogEntryReadWhithoutAuthorDto> {
+  //   blogEntry.author = user;
+
+  //   console.log('#### Create: ', blogEntry, user);
+  //   return this.generateSlug(blogEntry.title).pipe(
+  //     switchMap((slug: string) => {
+  //       blogEntry.slug = slug;
+  //       return from(this.blogRepository.save(blogEntry)).pipe(
+  //         switchMap((resultado) => {
+  //           if (!resultado) {
+  //             throw new InternalServerErrorException(
+  //               'Error creating blog entry',
+  //             );
+  //           }
+  //           return this.findOne(resultado.id);
+  //         }),
+  //       );
+  //     }),
+  //   );
+  // }
   create(
     user: UserReadWhithEntriesDto,
     blogEntry: BlogEntryCreateDto,
-  ): Observable<BlogEntryReadWhithAuthorDto> {
+  ): Observable<BlogEntryReadWhithoutAuthorDto> {
     blogEntry.author = user;
-
-    console.log('#### Create: ', blogEntry, user);
     return this.generateSlug(blogEntry.title).pipe(
       switchMap((slug: string) => {
         blogEntry.slug = slug;
-        return from(this.blogRepository.save(blogEntry)).pipe(
-          switchMap((resultado) => {
-            if (!resultado) {
-              throw new InternalServerErrorException(
-                'Error creating blog entry',
-              );
-            }
-            return this.findOne(resultado.id);
-          }),
-        );
+        return from(this.blogRepository.save(blogEntry));
       }),
     );
   }
@@ -103,8 +115,22 @@ export class BlogEntriesService {
           author: {
             id: userId,
           },
+          // isPublished: true
         },
-        relations: { author: true },
+        relations: { author: false },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          headerImage: true,
+          likes: true,
+          body: true,
+          createdAt: true,
+          updatedAt: true,
+          isPublished: true,
+          publishedDate: true,
+        },
       }),
     ).pipe(map((blogEntries: BlogEntryReadWhithoutAuthorDto[]) => blogEntries));
   }
@@ -114,6 +140,28 @@ export class BlogEntriesService {
       this.blogRepository.findOne({
         where: { id: id },
         relations: ['author'],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          headerImage: true,
+          likes: true,
+          body: true,
+          createdAt: true,
+          updatedAt: true,
+          isPublished: true,
+          publishedDate: true,
+          author: {
+            // Excluir el campo 'password' del objeto 'author'
+            id: true,
+            userName: true,
+            email: true,
+            role: true,
+            profileImage: true,
+            // Otros campos que deseas incluir
+          },
+        },
       }),
     );
   }

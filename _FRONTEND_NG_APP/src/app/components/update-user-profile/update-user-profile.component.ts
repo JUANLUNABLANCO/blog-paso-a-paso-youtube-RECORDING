@@ -45,7 +45,7 @@ export class UpdateUserProfileComponent implements OnInit {
       email: [{ value: null, disabled: true }, [Validators.required]],
       role: [{ value: null, disabled: true }, [Validators.required]],
       userName: [null, [Validators.required]],
-      profileImage: [{ value: null, disabled: true }],
+      profileImage: [null],
     });
 
     // this.authService.userId$;
@@ -61,6 +61,7 @@ export class UpdateUserProfileComponent implements OnInit {
                   email: user.email,
                   userName: user.userName,
                   profileImage: user.profileImage,
+                  role: user.role,
                 });
               }),
             );
@@ -76,36 +77,41 @@ export class UpdateUserProfileComponent implements OnInit {
     return this.updateProfileForm.get('profileImage')?.value;
   }
   updateProfile() {
-    this.usersService
-      .updateUser(this.updateProfileForm.getRawValue())
-      .pipe(
-        tap((user: IUser) => {
-          console.log('### User updated: ', user);
-          // this.updateProfileForm.patchValue({
-          //   id: user.id,
-          //   email: user.email,
-          //   userName: user.userName,
-          //   profileImage: user.profileImage,
-          // });
-        }),
-      )
-      .subscribe();
+    if (this.updateProfileForm.valid) {
+      const formToUpdate = { ...this.updateProfileForm.getRawValue() };
+      delete formToUpdate.profileImage; // la imagen no la quiere el backend
+      this.usersService
+        .updateUser(formToUpdate)
+        .pipe(
+          tap((user: IUser) => {
+            console.log('### User updated: ', user);
+          }),
+        )
+        .subscribe();
+    }
   }
 
   onClickFile() {
     const fileInput = this.fileUpload.nativeElement;
     fileInput.click();
-    fileInput.onchange = () => {
-      this.file = {
-        data: fileInput.files[0],
-        inProgress: false,
-        progress: 0,
-      };
-      this.fileUpload.nativeElement.value = '';
-      this.uploadFile();
+    fileInput.onchange = (event: any) => {
+      if (event.target.files.length > 0) {
+        const fileSelected = fileInput.files[0];
+        this.file = {
+          data: fileSelected,
+          inProgress: false,
+          progress: 0,
+        };
+        this.fileUpload.nativeElement.value = '';
+        this.uploadFile();
+      }
     };
   }
   uploadFile() {
+    if (!this.file.data) {
+      this.fileUpload.nativeElement.value = '';
+      return;
+    }
     const formData = new FormData();
     formData.append('file', this.file.data);
     this.file.inProgress = true;
@@ -131,8 +137,9 @@ export class UpdateUserProfileComponent implements OnInit {
       )
       .subscribe((event: any) => {
         if (typeof event === 'object') {
+          const fileName = event.body.profileImage;
           this.updateProfileForm.patchValue({
-            profileImage: event.body.profileImage,
+            profileImage: fileName,
           });
         }
       });

@@ -1,20 +1,17 @@
-import { IBlogEntry } from './blog-entry.interface';
+import { Exclude } from 'class-transformer';
 import {
-  IsString,
-  MaxLength,
-  MinLength,
-  IsOptional,
-  Matches,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
-import { Not } from 'typeorm';
-import { Exclude } from 'class-transformer';
 import { UserReadWhithEntriesDto } from 'src/user/model/user.dto';
+import { IBlogEntry } from './blog-entry.interface';
 
 export class BlogEntryCreateDto {
-  // TODO hay que transformar este title, limpiandolo de signos de puntuación, espacios laterales, etc.
   @IsString({ message: 'title: Debe ser un string' })
   @MinLength(5, { message: 'title: Debe tener al menos 5 caracteres' })
   @MaxLength(150, { message: 'title: Debe tener menos de 150 caracteres' })
@@ -29,24 +26,20 @@ export class BlogEntryCreateDto {
 
   @IsString({ message: 'body: Debe ser un string' })
   @MinLength(5, { message: 'body: Debe tener al menos 5 caracteres' })
-  @MaxLength(150, { message: 'body: Debe tener menos de 150 caracteres' })
   body: string;
-  // no queremos que llegue en la serialización, pero necesitamos tenerlo para poder agregarlo al objeto
+
+  @IsString({ message: 'image: Debe ser un string' })
+  @IsNotEmpty({ message: 'image: Es requerida' })
+  headerImage: string;
+
   @Exclude()
   slug: string;
 
   @Exclude()
-  author: UserReadWhithEntriesDto; // en vez de userEntity
+  author: UserReadWhithEntriesDto;
 }
 
 export class BlogEntryUpdateDto {
-  // WARNING solo estos podrán ser actualizados por el autor
-  // title?: string; // CLIENT
-  // description?: string; // ENTITY
-  // body?: string; // ENTITY
-  // likes?: number;  // ENTITY
-  // headerImage?: string;  // ENTITY
-
   @IsOptional()
   @IsString({ message: 'title: Debe ser un string' })
   @MinLength(5, { message: 'title: Debe tener al menos 5 caracteres' })
@@ -84,6 +77,7 @@ export type BlogEntryReadWhithAuthorDto = Required<
     | 'slug'
     | 'description'
     | 'body'
+    | 'headerImage'
     | 'createdAt'
     | 'updatedAt'
     | 'likes'
@@ -93,7 +87,7 @@ export type BlogEntryReadWhithAuthorDto = Required<
     // | 'publishedDate' // CAN BE nullable
   >
 > &
-  Pick<IBlogEntry, 'headerImage' | 'publishedDate'>;
+  Pick<IBlogEntry, 'publishedDate'>;
 
 export type BlogEntryReadWhithoutAuthorDto = Required<
   Pick<
@@ -103,12 +97,13 @@ export type BlogEntryReadWhithoutAuthorDto = Required<
     | 'slug'
     | 'description'
     | 'body'
+    | 'headerImage'
     | 'createdAt'
     | 'updatedAt'
     | 'likes'
     | 'isPublished'
   >
 > &
-  Pick<IBlogEntry, 'headerImage' | 'publishedDate'>;
+  Pick<IBlogEntry, 'publishedDate'>;
 
 export type BlogEntryDeleteDto = Pick<IBlogEntry, 'id'>;

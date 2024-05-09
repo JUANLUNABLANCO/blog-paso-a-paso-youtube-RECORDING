@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 })
 export class UploadFilesService {
   baseUrl = environment.API_URL;
-  upload_files = environment.UPLOAD_FILES; // /api/users/upload
+  api_users_upload = environment.API_USERS_UPLOAD; // /api/users/upload
 
   constructor(private http: HttpClient) {}
 
@@ -23,7 +23,7 @@ export class UploadFilesService {
 
     const req = new HttpRequest(
       'POST',
-      `${this.baseUrl}/${this.upload_files}`,
+      `${this.baseUrl}/${this.api_users_upload}`,
       formData,
       {
         reportProgress: true,

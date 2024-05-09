@@ -2,91 +2,49 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  Inject,
-  forwardRef,
-  HttpException,
-  HttpStatus,
   UnauthorizedException,
-  NotFoundException,
 } from '@nestjs/common';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UserService } from 'src/user/service/user.service';
 import { IUserBase } from 'src/user/model/user.interface';
 import { decode } from 'jsonwebtoken';
-import { ErrorHandler } from 'src/core/errors/error.handler';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable()
 export class UserIsUserGuard implements CanActivate {
-  constructor(
-    @Inject(forwardRef(() => UserService))
-    private userService: UserService,
-  ) {}
+  constructor(private userService: UserService) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    const params = request.params;
+    const token = request.headers.authorization?.split(' ')[1];
 
-    // ID from request
-    const user: IUserBase = request.user ? request.user : null;
-    const idFromRequest = user?.id ? user.id : null;
-
-    // console.log('#### User From request: ', user, params);
-    // ID from params
-    let idFromParams = null;
-
-    // console.log('#### existe params.id' + params.id);
-    idFromParams = params?.id ? Number(params.id) : null;
-
-    const token = request.headers.authorization
-      ? request.headers.authorization.split(' ')[1]
-      : null;
-
-    // ID from token
-    let idFromToken = null;
-
-    try {
-      if (token) {
-        const jwtDecoded = decode(token, { json: true });
-        idFromToken = jwtDecoded.user?.id;
-      }
-    } catch (error) {
-      // TODO mirar el uso de ErrorHandler, si es necesario o no...
-      throw new HttpException('Invalid token!', HttpStatus.UNAUTHORIZED);
-    }
-    // id to check
-    let idToCheck: number;
-    if (
-      idFromRequest &&
-      idFromParams &&
-      idFromParams === idFromToken &&
-      idFromParams === idFromRequest
-    ) {
-      // console.log('#### Id from Params exists: ' + idFromParams);
-      idToCheck = idFromParams;
-    } else if (
-      !idFromParams &&
-      idFromRequest &&
-      idFromToken === idFromRequest
-    ) {
-      // console.log('#### Id from Params not exists: ');
-      idToCheck = idFromToken || idFromRequest;
-    } else {
-      return of(false);
+    if (!token) {
+      throw new UnauthorizedException('Authorization token missing!');
     }
 
-    return this.userService.findOneById(idToCheck).pipe(
+    const decodedToken: any = decode(token);
+    const userIdFromToken = decodedToken?.user?.id;
+    const userIdFromParams = +request.params.id;
+
+    if (!userIdFromToken) {
+      throw new UnauthorizedException('Invalid token!');
+    }
+
+    if (userIdFromParams && userIdFromToken !== userIdFromParams) {
+      throw new UnauthorizedException('Unauthorized: User ID mismatch!');
+    }
+
+    return this.userService.findOneById(userIdFromToken).pipe(
       map((userFromDB: IUserBase) => {
-        let hasPermission = false;
-        if (userFromDB) {
-          console.log('#### userFromDB: ', userFromDB);
-          hasPermission = true;
+        if (!userFromDB) {
+          throw new UnauthorizedException('User not found!');
         }
-        return user && hasPermission;
+        return true; // El usuario existe, tiene permisos
       }),
       catchError(() => {
-        // console.log('#### error: usuario no encontrado');
-        throw new NotFoundException('User not found');
+        throw new UnauthorizedException('User not found!');
       }),
     );
   }

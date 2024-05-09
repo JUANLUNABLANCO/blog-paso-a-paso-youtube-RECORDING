@@ -5,6 +5,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
 import { BlogEntriesController } from './controller/blog-entries.controller';
 import { BlogEntriesService } from './service/blog-entries.service';
+import { UserIsAuthorGuard } from './guards/user-is-author.guard';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { BlogEntriesService } from './service/blog-entries.service';
     UserModule,
   ],
   controllers: [BlogEntriesController],
-  providers: [BlogEntriesService],
+  providers: [BlogEntriesService, UserIsAuthorGuard],
 })
 export class BlogModule {}

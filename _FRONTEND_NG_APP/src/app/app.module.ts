@@ -19,7 +19,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-
+import { MarkdownModule } from 'ngx-markdown';
 // # librerias externas
 import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
 
@@ -39,6 +39,7 @@ import { GlobalErrorHandler } from './core/errors/global-error-handler';
 import { UploadFilesComponent } from './core/components/upload-files/upload-files.component';
 import { HomeComponent } from './components/home/home.component';
 import { BlogEntriesComponent } from './components/blog-entries/blog-entries.component';
+import { CreateBlogEntryComponent } from './components/create-blog-entry/create-blog-entry.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { BlogEntriesComponent } from './components/blog-entries/blog-entries.com
     UploadFilesComponent,
     HomeComponent,
     BlogEntriesComponent,
+    CreateBlogEntryComponent,
   ],
   imports: [
     BrowserModule,
@@ -72,6 +74,7 @@ import { BlogEntriesComponent } from './components/blog-entries/blog-entries.com
     HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
+    MarkdownModule.forRoot(),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable

@@ -18,10 +18,10 @@ export class BlogEntryEntity {
   @Column()
   slug: string;
 
-  @Column({ default: '' })
+  @Column()
   description: string;
 
-  @Column({ default: '' })
+  @Column({ type: 'text' })
   body: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -38,7 +38,7 @@ export class BlogEntryEntity {
   @Column({ default: 0 })
   likes: number;
 
-  @Column({ nullable: true })
+  @Column()
   headerImage: string;
 
   @Column({ nullable: true })

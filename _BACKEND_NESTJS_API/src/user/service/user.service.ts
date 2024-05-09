@@ -182,6 +182,14 @@ export class UserService {
         this.userRepository.findOne({
           where: { id: id },
           relations: { blogEntries: true },
+          select: [
+            'id',
+            'userName',
+            'email',
+            'role',
+            'blogEntries',
+            'profileImage',
+          ],
         }),
       );
     } catch (err) {

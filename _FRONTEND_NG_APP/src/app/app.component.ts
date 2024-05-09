@@ -77,6 +77,10 @@ export class AppComponent implements OnInit {
           name: 'Update Profile',
           link: 'update-profile',
         },
+        {
+          name: 'New Blog Entry',
+          link: 'create-blog-entry',
+        },
       ];
     } else {
       this.userNavigationEntries = [
