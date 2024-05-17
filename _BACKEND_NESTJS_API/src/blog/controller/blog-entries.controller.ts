@@ -30,11 +30,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { IImage } from '../model/image.interface';
 import {
   BlogEntryCreateDto,
-  BlogEntryReadWhithAuthorDto,
-  BlogEntryReadWhithoutAuthorDto,
+  BlogEntryReadWithAuthorDto,
+  BlogEntryReadWithoutAuthorDto,
   BlogEntryUpdateDto,
 } from '../model/blog-entry.dto';
-import { UserReadWhithEntriesDto } from 'src/user/model/user.dto';
+import { UserReadWithEntriesDto } from 'src/user/model/user.dto';
 
 export const storage = {
   storage: diskStorage({
@@ -58,7 +58,7 @@ export class BlogEntriesController {
   create(
     @Body() blogEntry: BlogEntryCreateDto,
     @Request() req,
-  ): Observable<BlogEntryReadWhithoutAuthorDto> {
+  ): Observable<BlogEntryReadWithoutAuthorDto> {
     console.log('#### Create: ', blogEntry);
     const user = req.user;
     console.log('#### USER: ', user);
@@ -69,7 +69,7 @@ export class BlogEntriesController {
   index(
     @Query('page') page = 1,
     @Query('limit') limit = 10,
-  ): Observable<Pagination<BlogEntryReadWhithAuthorDto>> {
+  ): Observable<Pagination<BlogEntryReadWithAuthorDto>> {
     limit = limit > 100 ? 100 : limit;
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/blog-entries`;
     return this.blogService.paginateAll({
@@ -83,7 +83,7 @@ export class BlogEntriesController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Param('authorId') authorId: number,
-  ): Observable<Pagination<BlogEntryReadWhithoutAuthorDto>> {
+  ): Observable<Pagination<BlogEntryReadWithoutAuthorDto>> {
     limit = limit > 100 ? 100 : limit;
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/blog-entries/user/${authorId}`;
     return this.blogService.paginateByUser(
@@ -96,7 +96,7 @@ export class BlogEntriesController {
     );
   }
   @Get(':id')
-  findOne(@Param('id') id: number): Observable<BlogEntryReadWhithAuthorDto> {
+  findOne(@Param('id') id: number): Observable<BlogEntryReadWithAuthorDto> {
     return this.blogService.findOne(Number(id)); // si no existen entradas no enviamos nada
   }
   @Put(':id')
@@ -104,7 +104,7 @@ export class BlogEntriesController {
   updateOne(
     @Param('id') id: number,
     @Body() blogEntry: BlogEntryUpdateDto,
-  ): Observable<BlogEntryReadWhithAuthorDto> {
+  ): Observable<BlogEntryReadWithAuthorDto> {
     return this.blogService.updateOne(Number(id), blogEntry);
   }
   @Delete(':id')
@@ -117,7 +117,6 @@ export class BlogEntriesController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
   uploadFile(@UploadedFile() file, @Request() req): Observable<any> {
-    // // // // console.log('#### file name: ', file.filename);
     return of({
       headerImage: file.filename,
       message: 'file uploaded successfully',
@@ -129,10 +128,10 @@ export class BlogEntriesController {
     @Param('imageName') imageName,
     @Response() resp,
   ): Observable<unknown> {
-    console.log(
-      '#### ruta file',
-      path.join(process.cwd(), 'uploads/blogEntriesImages/', imageName),
-    );
+    // console.log(
+    //   '#### ruta file',
+    //   path.join(process.cwd(), 'uploads/blogEntriesImages/', imageName),
+    // );
     return of(
       resp.sendFile(
         path.join(process.cwd(), 'uploads/blogEntriesImages', imageName),

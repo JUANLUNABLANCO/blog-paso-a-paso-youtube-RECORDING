@@ -46,7 +46,7 @@ export class UserUpdateDto {
 }
 
 // CHANGED ...
-export type UserReadWhithEntriesDto = Required<
+export type UserReadWithEntriesDto = Required<
   Pick<
     IUserBase,
     'id' | 'userName' | 'email' | 'profileImage' | 'role' | 'blogEntries'
@@ -59,7 +59,7 @@ export type UserReadWhithEntriesDto = Required<
 //   IUserBase,
 //   'password' | 'blogEntries'
 //   >;
-export type UserReadWhithoutEntriesDto = Required<
+export type UserReadWithoutEntriesDto = Required<
   Pick<IUserBase, 'id' | 'userName' | 'email' | 'profileImage' | 'role'>
 >;
 

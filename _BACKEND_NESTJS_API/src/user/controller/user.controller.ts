@@ -34,8 +34,8 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import {
-  UserReadWhithEntriesDto,
-  UserReadWhithoutEntriesDto,
+  UserReadWithEntriesDto,
+  UserReadWithoutEntriesDto,
   UserCreateDto,
   UserUpdateDto,
 } from '../model/user.dto';
@@ -76,7 +76,7 @@ export class UserController {
   @Post()
   create(@Body() user: UserCreateDto): Observable<
     | {
-        user: UserReadWhithoutEntriesDto; // whit out blogEntries, no tiene de todas formas
+        user: UserReadWithoutEntriesDto; // whit out blogEntries, no tiene de todas formas
 
         access_token: string;
       }
@@ -113,13 +113,13 @@ export class UserController {
   // TODO user is user or user is Admin
   @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Get(':id')
-  findOneById(@Param() params): Observable<UserReadWhithEntriesDto> {
+  findOneById(@Param() params): Observable<UserReadWithEntriesDto> {
     return this.userService.findOneById(params.id);
   }
   // TODO WARNING solo el propio usuario o el admin podrán hacer esta solicitud
   @UseGuards(JwtAuthGuard)
   @Post('email')
-  findOneByEmail(@Body() user: IUserBase): Observable<UserReadWhithEntriesDto> {
+  findOneByEmail(@Body() user: IUserBase): Observable<UserReadWithEntriesDto> {
     return this.userService.findOneByEmail(user);
   }
   // TODO findOneByUserName
@@ -134,10 +134,10 @@ export class UserController {
   updateOne(
     @Param('id') id: string,
     @Body() user: UserUpdateDto,
-  ): Observable<UserReadWhithEntriesDto> {
+  ): Observable<UserReadWithEntriesDto> {
     // console.log('### USER: ', user);
     return this.userService.updateOne(Number(id), user).pipe(
-      map((userUpdated: UserReadWhithEntriesDto) => {
+      map((userUpdated: UserReadWithEntriesDto) => {
         console.log(`#### User Updated: ${JSON.stringify(userUpdated)}`);
         return userUpdated;
       }),
@@ -160,11 +160,11 @@ export class UserController {
   uploadFile(
     @UploadedFile() file,
     @Request() req,
-  ): Observable<UserReadWhithEntriesDto> {
+  ): Observable<UserReadWithEntriesDto> {
     let user: IUserBase;
 
     if (req.user) {
-      user = req.user as UserReadWhithEntriesDto;
+      user = req.user as UserReadWithEntriesDto;
     } else {
       // console.log('User is not in request');
       throw new NotFoundException('User is not in request');
@@ -172,13 +172,13 @@ export class UserController {
 
     try {
       return this.userService.findOneById(user.id).pipe(
-        switchMap((user: UserReadWhithEntriesDto) => {
+        switchMap((user: UserReadWithEntriesDto) => {
           if (!user) {
             throw new NotFoundException('User not found');
           }
           user.profileImage = file.filename;
           return this.userService.updateOne(user.id, user).pipe(
-            map((userUpdated: UserReadWhithEntriesDto) => {
+            map((userUpdated: UserReadWithEntriesDto) => {
               // console.log(`#### User Updated: ${JSON.stringify(userUpdated)}`);
               return userUpdated;
             }),
@@ -232,7 +232,7 @@ export class UserController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('userName') userName: string,
-  ): Observable<Pagination<UserReadWhithEntriesDto>> {
+  ): Observable<Pagination<UserReadWithEntriesDto>> {
     limit = limit > 100 ? 100 : limit;
 
     const route = `${process.env.API_URL}:${process.env.API_PORT}/api/users`;

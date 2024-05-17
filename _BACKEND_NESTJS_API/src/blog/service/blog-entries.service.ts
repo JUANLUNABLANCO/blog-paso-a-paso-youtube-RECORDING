@@ -19,14 +19,10 @@ import {
 } from 'nestjs-typeorm-paginate';
 import {
   BlogEntryCreateDto,
-  BlogEntryReadWhithAuthorDto,
-  BlogEntryReadWhithoutAuthorDto,
+  BlogEntryReadWithAuthorDto,
+  BlogEntryReadWithoutAuthorDto,
 } from '../model/blog-entry.dto';
-import {
-  UserCreateDto,
-  UserReadWhithEntriesDto,
-  UserReadWhithoutEntriesDto,
-} from 'src/user/model/user.dto';
+import { UserReadWithEntriesDto } from 'src/user/model/user.dto';
 
 @Injectable()
 export class BlogEntriesService {
@@ -61,9 +57,9 @@ export class BlogEntriesService {
   //   );
   // }
   create(
-    user: UserReadWhithEntriesDto,
+    user: UserReadWithEntriesDto,
     blogEntry: BlogEntryCreateDto,
-  ): Observable<BlogEntryReadWhithoutAuthorDto> {
+  ): Observable<BlogEntryReadWithoutAuthorDto> {
     blogEntry.author = user;
     return this.generateSlug(blogEntry.title).pipe(
       switchMap((slug: string) => {
@@ -73,42 +69,40 @@ export class BlogEntriesService {
     );
   }
 
-  findAll(): Observable<BlogEntryReadWhithAuthorDto[]> {
+  findAll(): Observable<BlogEntryReadWithAuthorDto[]> {
     return from(this.blogRepository.find({ relations: { author: true } }));
   }
 
   paginateAll(
     options: IPaginationOptions,
-  ): Observable<Pagination<BlogEntryReadWhithAuthorDto>> {
+  ): Observable<Pagination<BlogEntryReadWithAuthorDto>> {
     return from(
-      paginate<BlogEntryReadWhithAuthorDto>(this.blogRepository, options, {
+      paginate<BlogEntryReadWithAuthorDto>(this.blogRepository, options, {
         relations: ['author'],
       }),
     ).pipe(
-      map(
-        (blogEntries: Pagination<BlogEntryReadWhithAuthorDto>) => blogEntries,
-      ),
+      map((blogEntries: Pagination<BlogEntryReadWithAuthorDto>) => blogEntries),
     );
   }
   // WARNING queremos enviar el author cuando ya sabemos quien es??
   paginateByUser(
     options: IPaginationOptions,
     authorId: number,
-  ): Observable<Pagination<BlogEntryReadWhithoutAuthorDto>> {
+  ): Observable<Pagination<BlogEntryReadWithoutAuthorDto>> {
     return from(
-      paginate<BlogEntryReadWhithAuthorDto>(this.blogRepository, options, {
+      paginate<BlogEntryReadWithAuthorDto>(this.blogRepository, options, {
         // relations: ['author'],
         where: [{ author: { id: authorId } }],
       }),
     ).pipe(
-      map((blogEntries: Pagination<BlogEntryReadWhithoutAuthorDto>) => {
+      map((blogEntries: Pagination<BlogEntryReadWithoutAuthorDto>) => {
         console.log('#### blogEntries: ', blogEntries);
         return blogEntries;
       }),
     );
   }
   // TODO es necesario? obtienes todas las netradas de un usuario, pero no paginadas
-  findByUser(userId: number): Observable<BlogEntryReadWhithoutAuthorDto[]> {
+  findByUser(userId: number): Observable<BlogEntryReadWithoutAuthorDto[]> {
     return from(
       this.blogRepository.find({
         where: {
@@ -132,10 +126,10 @@ export class BlogEntriesService {
           publishedDate: true,
         },
       }),
-    ).pipe(map((blogEntries: BlogEntryReadWhithoutAuthorDto[]) => blogEntries));
+    ).pipe(map((blogEntries: BlogEntryReadWithoutAuthorDto[]) => blogEntries));
   }
 
-  findOne(id: number): Observable<BlogEntryReadWhithAuthorDto> {
+  findOne(id: number): Observable<BlogEntryReadWithAuthorDto> {
     return from(
       this.blogRepository.findOne({
         where: { id: id },
@@ -167,7 +161,7 @@ export class BlogEntriesService {
   }
 
   // TODO switchMap() ??
-  updateOne(id, blogEntry): Observable<BlogEntryReadWhithAuthorDto> {
+  updateOne(id, blogEntry): Observable<BlogEntryReadWithAuthorDto> {
     return from(this.blogRepository.update(Number(id), blogEntry)).pipe(
       switchMap(() => this.findOne(id)),
     );

@@ -8,7 +8,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { UserReadWhithEntriesDto } from 'src/user/model/user.dto';
+import { UserReadWithEntriesDto } from 'src/user/model/user.dto';
 import { IBlogEntry } from './blog-entry.interface';
 
 export class BlogEntryCreateDto {
@@ -36,7 +36,7 @@ export class BlogEntryCreateDto {
   slug: string;
 
   @Exclude()
-  author: UserReadWhithEntriesDto;
+  author: UserReadWithEntriesDto;
 }
 
 export class BlogEntryUpdateDto {
@@ -69,7 +69,7 @@ export class BlogEntryUpdateDto {
   headerImage?: string;
 }
 
-export type BlogEntryReadWhithAuthorDto = Required<
+export type BlogEntryReadWithAuthorDto = Required<
   Pick<
     IBlogEntry,
     | 'id'
@@ -89,7 +89,7 @@ export type BlogEntryReadWhithAuthorDto = Required<
 > &
   Pick<IBlogEntry, 'publishedDate'>;
 
-export type BlogEntryReadWhithoutAuthorDto = Required<
+export type BlogEntryReadWithoutAuthorDto = Required<
   Pick<
     IBlogEntry,
     | 'id'
