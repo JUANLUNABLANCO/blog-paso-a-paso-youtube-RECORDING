@@ -240,6 +240,7 @@ git flow feature finish
 ```
 
 ## Task 02: CRUD de usuario
+## Task 02: CRUD de usuario
 
 ### specifications
 
@@ -251,10 +252,42 @@ Como líder o jefe técnico quisiera tener un CRUD básico para la entidad usuar
 2. Usar observables en vez de promesas
 3. feature Module "user"
 4. user should have properties
-   — name
-   — email (unique)
-   — id (primary key)
-5. Use git flow
+  — name
+  — email (unique)
+  — id (primary key)
+5.  Use git flow
+
+#### Pasos
+1. crear  el módulo, servicio, controlador, etc
+
+```bash
+# module
+cd src
+nest generate module user
+
+# service
+cd user
+nest generate service user
+
+# controller
+nest generate controller user
+```
+
+modificar los nombres de las carpetas que correspondan
+
+vrear además manualmente los siguientes:
+
+./model/user.entity.ts
+./model/user.interface.ts
+
+-- ver ficheros creados --
+
+2. Arrancar app
+3. ir a postman y probar todo
+4. git flow
+
+
+
 
 ## TASK 03: Module auth with JWT authentication (login)
 
