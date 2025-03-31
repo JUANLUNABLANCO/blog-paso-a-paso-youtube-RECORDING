@@ -1,4 +1,4 @@
-import { BlogEntryReadWhithoutAuthorDto } from 'src/blog/model/blog-entry.dto';
+import { BlogEntryReadWithoutAuthorDto } from 'src/blog/model/blog-entry.dto';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -15,7 +15,7 @@ export interface IUserBase {
   role?: UserRole;
   profileImage?: string;
   // blogEntries?: IBlogEntry[];
-  blogEntries?: BlogEntryReadWhithoutAuthorDto[];
+  blogEntries?: BlogEntryReadWithoutAuthorDto[];
 }
 
 export interface File {

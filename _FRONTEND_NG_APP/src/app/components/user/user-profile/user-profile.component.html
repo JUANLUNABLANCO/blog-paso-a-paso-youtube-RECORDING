@@ -25,5 +25,12 @@
     </mat-card-header>
     <mat-card-content> Email: {{ user.email }} </mat-card-content>
   </mat-card>
+  <button
+    mat-raised-button
+    color="primary"
+    [routerLink]="['/authors', user.id]"
+  >
+    Ver publicaciones
+  </button>
 </div>
 <ng-template #notUser> No hay usuario con ese id: {{ userId }} </ng-template>

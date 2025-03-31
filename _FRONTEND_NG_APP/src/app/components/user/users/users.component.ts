@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { IUsersPageable } from '../../interfaces/user.interface';
-import { UsersService } from '../../services/users/users.service';
 import { map } from 'rxjs/operators';
 import { PageEvent } from '@angular/material/paginator';
 import { Router, ActivatedRoute } from '@angular/router';
+
+import { IUsersPageable } from '../../../interfaces/user.interface';
+import { UsersService } from '../../../services/users/users.service';
 
 @Component({
   selector: 'app-users',

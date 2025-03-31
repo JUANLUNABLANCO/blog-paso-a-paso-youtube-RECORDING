@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../environments/environment';
 import { AuthenticationService } from './services/auth/authentication.service';
-import { map } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { UserNavigationEntries } from './core/interfaces/user-navigation-entries.interface';
 
 @Component({
@@ -10,10 +10,11 @@ import { UserNavigationEntries } from './core/interfaces/user-navigation-entries
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'frontend';
   isLogged = false;
   private userId: number | null = null;
+  private destroy$ = new Subject<void>();
 
   userNavigationEntries: UserNavigationEntries[] = [
     {
@@ -35,19 +36,29 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.isLogged$.subscribe((isLogged) => {
-      // Actualizar la navegación del usuario y la autenticación
-      this.updateUserNavigationEntries(isLogged);
-      this.updateUserAuthentication(isLogged);
-      // Si el usuario está autenticado, redirigir al perfil
-      if (isLogged) {
-        this.authService.fetchAndSetUserIdFromToken().subscribe((userId) => {
-          if (userId) {
-            this.userId = userId;
-            this.router.navigate(['/users', userId]);
-          }
-        });
-      }
+    this.authService.isLogged$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (isLogged) => {
+        this.updateUserNavigationEntries(isLogged);
+        this.updateUserAuthentication(isLogged);
+        // Si el usuario está autenticado, suscribirse al ID del usuario
+        if (isLogged) {
+          this.authService.userId$.pipe(takeUntil(this.destroy$)).subscribe({
+            next: (userId) => {
+              this.userId = userId;
+              if (userId) {
+                this.updateUserId(userId);
+                // this.router.navigate(['/users', userId]);
+              }
+            },
+            error: (error) => {
+              console.error('Error en la suscripción userId$', error);
+            },
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Error en la suscripción isLogged$', error);
+      },
     });
   }
   private updateUserId(userId: number | null): void {
@@ -98,11 +109,10 @@ export class AppComponent implements OnInit {
 
   private updateUserAuthentication(isLogged: boolean): void {
     if (!isLogged) {
-      this.isLogged = false;
       this.clearUserData();
-      // this.router.navigate(['/']); // Redirigir al usuario a una ruta predeterminada después de cerrar sesión
     } else {
-      this.isLogged = true;
+      this.isLogged = isLogged;
+      this.updateUserId(this.userId);
     }
   }
 
@@ -119,7 +129,24 @@ export class AppComponent implements OnInit {
       this.router.navigate([value]);
     } else {
       console.log('### logout ! iniciado', this.userId);
-      this.authService.advancedLogout(this.userId).subscribe();
+      this.authService
+        .advancedLogout(this.userId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            console.log('Logout completado');
+          },
+          error: (error) => {
+            console.error('Error en el logout', error);
+          },
+          complete: () => {
+            console.info('Advenced Logout complete');
+          },
+        });
     }
+  }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -5,10 +5,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  // border: 1px solid red;
 }
-
 .dashboard {
   width: 100%;
   max-width: 100%;
@@ -17,13 +14,14 @@
   align-items: flex-start;
   justify-content: center;
 }
-
 .card {
   max-width: 300px;
+  min-height: 400px;
   border-radius: 0.5rem;
   background-color: #fff;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   border: 1px solid transparent;
+  // border: 1px solid red;
 }
 
 .card a {
@@ -39,15 +37,31 @@
   width: 100%;
   height: 150px;
   background-color: rgb(239, 205, 255);
+  // border-top-left-radius: 0.5rem;
+  // border-top-right-radius: 0.5rem;
+  overflow: hidden;
 }
 .image img {
   max-width: 300px;
+  display: block;
+  // height: 175px;
+  // border-top-left-radius: 0.5rem;
+  // border-top-right-radius: 0.5rem;
 }
+
 .title {
+  display: block;
   color: #111827;
   font-size: 1.125rem;
   line-height: 1.75rem;
   font-weight: 600;
+  white-space: nowrap;
+  max-width: 300px;
+  border: 1px solid #e6e2e2;
+  background-color: rgba(240, 238, 238, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .desc {
@@ -55,26 +69,43 @@
   color: #6b7280;
   font-size: 0.875rem;
   line-height: 1.25rem;
+  max-height: 80px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4; /* Ajusta el número de líneas que deseas mostrar ... */
+  white-space: normal;
 }
-
+.wrapper-action {
+  display: flex;
+  justify-content: flex-end;
+}
 .action {
   display: inline-flex;
+  align-items: center;
   margin-top: 1rem;
+  padding: 4px 8px;
   color: #ffffff;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
-  align-items: center;
   gap: 0.25rem;
   background-color: #673ab7;
-  padding: 4px 8px;
   border-radius: 4px;
+  // posicionado a la derecha
+  // margin-left: 170px;
 }
-
 .action span {
   transition: 0.3s ease;
 }
-
 .action:hover span {
   transform: translateX(4px);
+}
+
+.info-author {
+  color: rgb(175, 110, 236);
+  font-weight: bold;
+  display: block;
+  display: flex;
+  justify-content: flex-end;
 }

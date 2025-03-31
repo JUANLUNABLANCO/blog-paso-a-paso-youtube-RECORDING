@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { Observable } from 'rxjs';
-import { IBlogEntriesPageable } from 'src/app/interfaces/blog-entries.interface';
-import { BlogService } from 'src/app/services/blog/blog.service';
+
+import { IBlogEntriesPageable } from '../../../interfaces/blog-entries.interface';
+import { BlogService } from '../../../services/blog/blog.service';
 
 @Component({
   selector: 'app-blog-entries',

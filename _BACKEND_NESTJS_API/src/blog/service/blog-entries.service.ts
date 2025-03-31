@@ -3,9 +3,9 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Observable, catchError, from, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, from, map, of, switchMap, tap } from 'rxjs';
 import { IBlogEntry } from '../model/blog-entry.interface';
-import { IUserBase } from 'src/user/model/user.interface';
+import { IUserBase, UserRole } from 'src/user/model/user.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogEntryEntity } from '../model/blog-entry.entity';
 import { Repository } from 'typeorm';
@@ -23,6 +23,7 @@ import {
   BlogEntryReadWithoutAuthorDto,
 } from '../model/blog-entry.dto';
 import { UserReadWithEntriesDto } from 'src/user/model/user.dto';
+import { Console } from 'console';
 
 @Injectable()
 export class BlogEntriesService {
@@ -193,5 +194,36 @@ export class BlogEntriesService {
 
   generateSlug(title: string): Observable<string> {
     return of(slugify(title));
+  }
+
+  findByAuthor(userId: number): Observable<BlogEntryReadWithoutAuthorDto[]> {
+    // console.log('#### findByAuthor: service');
+    return from(
+      this.blogRepository
+        .createQueryBuilder('blog')
+        .innerJoinAndSelect('blog.author', 'author')
+        .where('author.id = :userId', { userId })
+        .andWhere('author.role = :role', { role: UserRole.EDITOR })
+        // .andWhere('blog.isPublished = :isPublished', { isPublished: true }) // filtra solo los publicados deberás tener otro para que un usuario con permiso de editor y desde su propio perfil pueda ver además los que no están publicados.
+        .select([
+          'blog.id',
+          'blog.title',
+          'blog.slug',
+          'blog.description',
+          'blog.headerImage',
+          'blog.likes',
+          'blog.body',
+          'blog.createdAt',
+          'blog.updatedAt',
+          'blog.isPublished',
+          'blog.publishedDate',
+        ])
+        .getMany(),
+    ).pipe(
+      // tap((blogEntries: BlogEntryReadWithoutAuthorDto[]) => {
+      //   console.log('#### blogEntries: ', blogEntries);
+      // }),
+      map((blogEntries: BlogEntryReadWithoutAuthorDto[]) => blogEntries),
+    );
   }
 }

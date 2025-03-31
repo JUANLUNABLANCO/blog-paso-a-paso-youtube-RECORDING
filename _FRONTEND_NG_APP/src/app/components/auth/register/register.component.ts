@@ -7,13 +7,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-
-import { AuthenticationService } from '../../services/auth/authentication.service';
-import { UsersService } from '../../services/users/users.service';
 import { Observable, from, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { CustomValidators } from '../../utils/custom-validators';
-import { LoggingService } from '../../core/services/logging.service';
+
+import { AuthenticationService } from '../../../services/auth/authentication.service';
+import { UsersService } from '../../../services/users/users.service';
+import { CustomValidators } from '../../../utils/custom-validators';
+import { LoggingService } from '../../../core/services/logging.service';
 
 @Component({
   selector: 'app-register',

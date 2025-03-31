@@ -2,14 +2,15 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
-import { AuthenticationService } from 'src/app/services/auth/authentication.service';
-import { UsersService } from 'src/app/services/users/users.service';
-import { IUser } from 'src/app/interfaces/user.interface';
-import { environment } from 'src/environments/environment';
-import { FileUpload } from 'src/app/core/interfaces/file-upload.interface';
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { EMPTY, of } from 'rxjs';
 import { Router } from '@angular/router';
+
+import { AuthenticationService } from '../../../services/auth/authentication.service';
+import { UsersService } from '../../../services/users/users.service';
+import { IUser } from '../../../interfaces/user.interface';
+import { environment } from '../../../../environments/environment';
+import { FileUpload } from '../../../core/interfaces/file-upload.interface';
 
 const BASE_URL = `${environment.API_URL}`;
 @Component({

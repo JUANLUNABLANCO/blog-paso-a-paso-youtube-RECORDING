@@ -1,0 +1,135 @@
+.container-cards {
+  width: 75%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dashboard {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+}
+.card {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid transparent;
+  // border: 1px solid red;
+}
+
+.card a {
+  text-decoration: none;
+}
+
+.content {
+  padding: 1.1rem;
+}
+
+.image {
+  object-fit: cover;
+  min-width: 100%;
+  background-color: rgb(239, 205, 255);
+}
+.image img {
+  max-width: 100%;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.title {
+  text-transform: uppercase;
+  color: #111827;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  // margin: 20px 20px;
+}
+
+.desc {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.action {
+  display: inline-flex;
+  margin-top: 1rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: #673ab7;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.action span {
+  transition: 0.3s ease;
+}
+
+.action:hover span {
+  transform: translateX(4px);
+}
+.info-author {
+  text-align: right;
+  margin-top: 24px;
+  margin-right: 24px;
+  color: #673ab7;
+}
+
+// Para poder aplicar este estilo hemos tenido que modificar el encapsulation del css
+.custom-markdown {
+  img {
+    max-width: 300px; // Hacer que las imágenes sean responsivas
+    height: auto; // Mantener la proporción de la imagen
+    display: block; // Asegurarse de que las imágenes sean elementos de bloque
+    margin: 12px auto; // Centrarlas horizontalmente
+    border-radius: 8px; // Bordes redondeados
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Sombra sutil
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Arial', sans-serif; // Cambiar la fuente
+    margin-top: 1.5em; // Espacio superior
+    margin-bottom: 0.5em; // Espacio inferior
+    color: #333; // Color de texto
+  }
+
+  p {
+    font-family: 'Georgia', serif; // Cambiar la fuente
+    line-height: 1.6; // Altura de línea para mejorar la legibilidad
+    color: #666; // Color de texto
+    margin-bottom: 1em; // Espacio inferior
+  }
+
+  a {
+    color: #1e88e5; // Color del enlace
+    text-decoration: none; // Sin subrayado
+  }
+
+  a:hover {
+    text-decoration: underline; // Subrayado al pasar el ratón
+  }
+
+  blockquote {
+    border-left: 4px solid #ccc; // Borde izquierdo
+    padding-left: 1em; // Relleno izquierdo
+    color: #666; // Color de texto
+    font-style: italic; // Cursiva
+    background-color: #f9f9f9; // Fondo
+  }
+}

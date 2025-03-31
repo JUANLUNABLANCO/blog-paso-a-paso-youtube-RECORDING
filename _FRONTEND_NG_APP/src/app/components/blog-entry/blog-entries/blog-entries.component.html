@@ -1,4 +1,5 @@
 <div class="container-cards">
+  <h1 style="margin-top: 12px">All Blog Entries</h1>
   <div class="dashboard">
     <mat-card
       *ngFor="let blogEntry of (dataSource | async)?.items"
@@ -29,12 +30,22 @@
           <p class="desc">
             {{ blogEntry.description }}
           </p>
-          <small>Author: {{ blogEntry.author.userName }}</small>
-
-          <a class="action" href="#">
-            Leer más
-            <span aria-hidden="true"> → </span>
-          </a>
+          <small class="info-author"
+            >Author:
+            <a [routerLink]="['/authors', blogEntry.author.id]">
+              {{ blogEntry.author.userName }}
+            </a>
+          </small>
+          <div class="wrapper-action">
+            <a
+              class="action"
+              routerLink="/blog-entries/{{ blogEntry.id }}"
+              href=""
+            >
+              Leer más
+              <span aria-hidden="true"> → </span>
+            </a>
+          </div>
         </div>
       </div>
     </mat-card>
@@ -45,6 +56,7 @@
     [pageSize]="(dataSource | async)?.meta.itemsPerPage"
     [pageSizeOptions]="pageSizeOptions"
     (page)="pageEvent = $event; onPaginateChange($event)"
-    showFirstLastButtons
-  ></mat-paginator>
+    showFirstLastButtons="true"
+  >
+  </mat-paginator>
 </div>
