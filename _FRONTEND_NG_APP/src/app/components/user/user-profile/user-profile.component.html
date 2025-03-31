@@ -1,0 +1,36 @@
+<div *ngIf="user; else notUser" class="main-div">
+  <mat-card class="card">
+    <mat-card-header>
+      <mat-card-title-group>
+        <mat-card-title data-test-id="userNameField">
+          User Name: {{ user.userName }} | id: {{ user.id }}
+        </mat-card-title>
+        <mat-card-subtitle> Role: {{ user.role }} </mat-card-subtitle>
+        <div mat-card-avatar>
+          <img
+            src="{{ baseUrl }}/api/users/profile-image/{{ user.profileImage }}"
+            alt="avatar"
+            *ngIf="user.profileImage; else notImageProfile"
+            class="avatar"
+          />
+          <ng-template #notImageProfile>
+            <img
+              src="assets/images/avatar-default.png"
+              class="avatar"
+              alt="an avatar image for profile"
+            />
+          </ng-template>
+        </div>
+      </mat-card-title-group>
+    </mat-card-header>
+    <mat-card-content> Email: {{ user.email }} </mat-card-content>
+  </mat-card>
+  <button
+    mat-raised-button
+    color="primary"
+    [routerLink]="['/authors', user.id]"
+  >
+    Ver publicaciones
+  </button>
+</div>
+<ng-template #notUser> No hay usuario con ese id: {{ userId }} </ng-template>

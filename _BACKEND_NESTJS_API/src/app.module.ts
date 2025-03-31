@@ -5,6 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { BlogModule } from './blog/blog.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './core/errors/all-exceptions.filter';
+import { AuthorModule } from './author/author.module';
 
 @Module({
   imports: [
@@ -20,8 +24,16 @@ import { AuthModule } from './auth/auth.module';
     }),
     UserModule,
     AuthModule,
+    BlogModule,
+    AuthorModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: AllExceptionsFilter,
+    // }, // colocado en el main.ts
+    AppService,
+  ],
 })
 export class AppModule {}

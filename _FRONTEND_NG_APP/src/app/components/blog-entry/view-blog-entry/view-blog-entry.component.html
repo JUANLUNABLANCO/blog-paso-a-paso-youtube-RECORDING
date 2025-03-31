@@ -1,0 +1,38 @@
+<div class="container-cards" *ngIf="blogEntry">
+  <h2 class="title" style="margin-top: 12px">{{ blogEntry.title }}</h2>
+  <div class="dashboard">
+    <mat-card class="card">
+      <mat-card-header>
+        <div class="image border-radius-4">
+          <img
+            src="http://localhost:3000/api/blog-entries/header-image/{{
+              blogEntry.headerImage
+            }}"
+            alt="header Image"
+            *ngIf="blogEntry.headerImage"
+          />
+          <img
+            src="./assets/images/default-header-image.png"
+            alt="default header Image"
+            *ngIf="!blogEntry.headerImage"
+          />
+        </div>
+      </mat-card-header>
+      <div class="content">
+        <mat-card-content>
+          <div>
+            <markdown
+              class="variable-binding custom-markdown"
+              [data]="blogEntry.body"
+            ></markdown>
+          </div>
+          <div class="info-author">
+            <a routerLink="../../authors/{{ blogEntry.author.id }}">
+              <small>Author: {{ blogEntry.author.userName }}</small>
+            </a>
+          </div>
+        </mat-card-content>
+      </div>
+    </mat-card>
+  </div>
+</div>

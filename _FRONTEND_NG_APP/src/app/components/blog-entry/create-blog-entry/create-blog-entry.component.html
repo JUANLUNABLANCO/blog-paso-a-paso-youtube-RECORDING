@@ -1,0 +1,93 @@
+<form [formGroup]="formBlogEntry">
+  <div>
+    <mat-card class="container">
+      <div style="width: 100%">
+        <mat-card>
+          <mat-card-content>
+            <img
+              *ngIf="
+                formBlogEntry.get('headerImage')?.value;
+                else notHeaderImage
+              "
+              src="{{ baseUrl }}/api/blog-entries/header-image/{{
+                formBlogEntry.get('headerImage')?.value
+              }}"
+              alt="header Image"
+              class="header-image"
+            />
+            <ng-template #notHeaderImage>
+              <img
+                src="assets/images/default-header-image.png"
+                class="header-image"
+                alt="A header image for blog entry"
+              />
+            </ng-template>
+            <ul class="no-style-type">
+              <li>
+                <mat-progress-bar [value]="file.progress"></mat-progress-bar>
+              </li>
+            </ul>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button color="warm" (click)="onClickFile($event)">
+              <mat-icon>cloud_upload</mat-icon>
+              <small>Upload Image</small>
+            </button>
+            <input
+              type="file"
+              #headerImageUpload
+              id="headerImageUpload"
+              name="headerImageUpload"
+              accept="image/*"
+              style="display: none"
+            />
+          </mat-card-actions>
+        </mat-card>
+      </div>
+      <div class="container" style="width: 100%">
+        <mat-form-field>
+          <input matInput placeholder="Id" formControlName="id" />
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Slug" formControlName="slug" />
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Title" formControlName="title" />
+        </mat-form-field>
+        <mat-form-field>
+          <input
+            matInput
+            placeholder="Description"
+            formControlName="description"
+          />
+        </mat-form-field>
+        <div style="width: 100%; display: flex">
+          <mat-form-field style="width: 45%">
+            <textarea
+              class="variable-textarea"
+              rows="15"
+              matInput
+              placeholder="Enter markdown..."
+              formControlName="body"
+            >
+            </textarea>
+          </mat-form-field>
+          <markdown
+            style="width: 45%"
+            class="markdown"
+            [data]="formBlogEntry.get('body').value"
+          ></markdown>
+        </div>
+      </div>
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="formBlogEntry.invalid"
+        type="submit"
+        (click)="createNewBlogEntry()"
+      >
+        Add Blog Entry
+      </button>
+    </mat-card>
+  </div>
+</form>

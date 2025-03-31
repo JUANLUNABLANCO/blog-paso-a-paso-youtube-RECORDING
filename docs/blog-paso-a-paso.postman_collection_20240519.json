@@ -1,0 +1,1570 @@
+{
+	"info": {
+		"_postman_id": "aad1646a-e750-47af-a739-c808bb3637c7",
+		"name": "Blog-Status-Code-666",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4575834"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "PRODUCTION",
+					"item": [
+						{
+							"name": "get-all-users PRODUCTION",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:5000/api/users?limit=10&page=2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "page",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create One User 1 PRODUCTION",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"test1\",\r\n    \"email\": \"test1@gmail.com\",\r\n    \"password\":\"test12345678\",\r\n    \"role\": \"admin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5000/api/users/",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"users",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "ALL the same request but in PRODUCTION MODE, http://localhost:5000, using CORS"
+				},
+				{
+					"name": "users-create-one",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userName\": \"Test19\",\r\n  \"email\": \"test19@test.com\",\r\n  \"password\": \"Test_12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create-ADMIN",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\": \"Yo soy admin\",\r\n    \"email\": \"admin@admin.com\",\r\n    \"password\": \"Test_12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test@test.com\",\r\n    \"password\": \"Test_12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "upload file",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6Ik5hbWUgd2lsbCBjaGFuZ2VkIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkdDF1RzBSaEtrZE0uSzVMVjBwNTcydUc0ZjlUZm1nRkc3b1RUc01TY2Y2aHN2TVBHUTFVZWUiLCJwcm9maWxlSW1hZ2UiOm51bGwsInJvbGUiOiJlZGl0b3IifSwiaWF0IjoxNzE0NjQ1MDQyLCJleHAiOjE3MTQ2NzUwNDJ9.297EcZESCpayTvjfaaucXkHiCam_PHolPbS2M0H4VDY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/E:/____01 ZONA PERSONAL____/__003 TRABAJO/01 MY CURRICULUM PERFILES/fotos perfiles/DALL·E 2023-04-21 11.43.32 - foto realista de un unicornio programando en una habitación futurística.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo1LCJ1c2VyTmFtZSI6IlRlc3Q1IiwiZW1haWwiOiJ0ZXN0NUB0ZXN0LmNvbSIsInByb2ZpbGVJbWFnZSI6bnVsbCwicm9sZSI6InVzZXIiLCJibG9nRW50cmllcyI6W119LCJpYXQiOjE3MTA5NTIyNzYsImV4cCI6MjE0Mjk1MjI3Nn0.LX6o6N_JTCxeA67_4lZFjcPAvOnm2j3V9BOlIMRZ9GY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/users/logout/10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"logout",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-one-user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6Ik5hbWUgd2lsbCBjaGFuZ2VkIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkdDF1RzBSaEtrZE0uSzVMVjBwNTcydUc0ZjlUZm1nRkc3b1RUc01TY2Y2aHN2TVBHUTFVZWUiLCJwcm9maWxlSW1hZ2UiOiJGT1RPLU1JTkUtMjAyNDA0NmZjNmIzM2EtNTI0Ni00ZDQ5LWFiM2UtZDQxN2NkYmUwYmQ3LnBuZyIsInJvbGUiOiJlZGl0b3IifSwiaWF0IjoxNzE0NjUwMTk0LCJleHAiOjE3MTQ2ODAxOTR9.0a_nV4BxAJ0LRLdML70UTXP8kwCSibCFhkwjw8GALsA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/users/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-one-user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6InRlc3QyIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkdDF1RzBSaEtrZE0uSzVMVjBwNTcydUc0ZjlUZm1nRkc3b1RUc01TY2Y2aHN2TVBHUTFVZWUiLCJwcm9maWxlSW1hZ2UiOm51bGwsInJvbGUiOiJlZGl0b3IifSwiaWF0IjoxNzE0NjQ0NDYwLCJleHAiOjE3MTQ2NzQ0NjB9.x64Ml8Z4s8ZYIEiI__wjQwkzdr80MqVd_0uU4Y6NxWI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\": \"Name will changed\",\r\n    \"email\": \"shouldnotwork\",\r\n    \"password\": \"shouldnotwork\",\r\n    \"id\": 1,\r\n    \"role\": \"notwork\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-one-user-by-email",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6InRlc3QiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJyb2xlIjoiZWRpdG9yIiwicHJvZmlsZUltYWdlIjoiaW1hZ2VzKDMpNWYwOWIwNDQtYjQxOC00YzU1LWI1N2MtNjA0ZWFlYmM5ODlmLmpwZyJ9LCJpYXQiOjE3MTU5NjQwNDgsImV4cCI6MTcxNTk2NDY0OH0.wlC18w7qaiyM1CEoziiTmJZ2p0bJtdA5tKskKEnXjH8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test@test.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/email",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ADMIN-login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"admin@admin.com\",\r\n    \"password\": \"Test_12345678\"   \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-all-users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMjkzNjU2MiwiZXhwIjoxNzEyOTM3MTYyfQ.7HXLq4yPMJceH9sOLDknHwYlQ6RiRhUcsbnvdf8lhyo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "paginación con limit and page",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMjkzNjU2MiwiZXhwIjoxNzEyOTM3MTYyfQ.7HXLq4yPMJceH9sOLDknHwYlQ6RiRhUcsbnvdf8lhyo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/users?limit=3&page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "3"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "paginación con limit, page and name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMjkzNjU2MiwiZXhwIjoxNzEyOTM3MTYyfQ.7HXLq4yPMJceH9sOLDknHwYlQ6RiRhUcsbnvdf8lhyo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users?limit=10&page=1&userName=test",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "userName",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update one role user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMjkzNjU2MiwiZXhwIjoxNzEyOTM3MTYyfQ.7HXLq4yPMJceH9sOLDknHwYlQ6RiRhUcsbnvdf8lhyo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"editor\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/12/role",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"12",
+								"role"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-one-user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMjkzNjU2MiwiZXhwIjoxNzEyOTM3MTYyfQ.7HXLq4yPMJceH9sOLDknHwYlQ6RiRhUcsbnvdf8lhyo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/users/14",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"14"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "email ADMIN exist",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"admin@admin.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/check-email-exists",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"check-email-exists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "app check email exists",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"pedro@admin.com\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/check-email-exists",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"check-email-exists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user: subir imagen profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNSwidXNlck5hbWUiOiJUZXN0OCIsImVtYWlsIjoidGVzdDhAdGVzdC5jb20iLCJwcm9maWxlSW1hZ2UiOm51bGwsInJvbGUiOiJ1c2VyIiwiYmxvZ0VudHJpZXMiOltdfSwiaWF0IjoxNzEyOTM3MjY0LCJleHAiOjE3MTI5Mzc4NjR9.dEg14KMh-a2sRnZJpv0hEEAODy9fbe4Fdl4gfaY1Uyc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1eee76db-d4f3-43c0-bd56-82c6c44034ed"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create One User 1",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\": \"test1\",\r\n    \"email\": \"test1@test.com\",\r\n    \"password\":\"Test_12345678\",\r\n    \"role\": \"carpintero\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create One User 2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userName\": \"test2\",\r\n    \"email\": \"test2@test.com\",\r\n    \"password\":\"Test_12345678\",\r\n    \"role\": \"user\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user update his password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJOYW1lIjoidGVzdDIiLCJlbWFpbCI6InRlc3QyQHRlc3QuY29tIiwicm9sZSI6InVzZXIiLCJwcm9maWxlSW1hZ2UiOm51bGwsImlkIjo5fSwiaWF0IjoxNzEwOTU1MTIyLCJleHAiOjIxNDI5NTUxMjJ9.Gyk2TvtmfNGEHEHKQP5Pcqg3Jx0JrHdIMikjfSBudnQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Test_12345678test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/8/change-password",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"8",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Users-Paginated-10-25",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMDk1NjcyMywiZXhwIjoyMTQyOTU2NzIzfQ.LbYMw5mwqK9vPzRddyu5YyG3yeLEqexD5QzcvJ7x4ZM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:3000/api/users?limit=10&page=1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Users-Paginated-10-2",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMDk1NjcyMywiZXhwIjoyMTQyOTU2NzIzfQ.LbYMw5mwqK9vPzRddyu5YyG3yeLEqexD5QzcvJ7x4ZM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:3000/api/users?limit=3&page=2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "3"
+								},
+								{
+									"key": "page",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "upload image profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6Ik5hbWUgd2lsbCBjaGFuZ2VkIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkdDF1RzBSaEtrZE0uSzVMVjBwNTcydUc0ZjlUZm1nRkc3b1RUc01TY2Y2aHN2TVBHUTFVZWUiLCJwcm9maWxlSW1hZ2UiOiJGT1RPLU1JTkUtMjAyNDA0ZDYzNTYxZTQtNDJlYi00OGExLWFlZjYtMDJjZjYwNDVjYWRiLnBuZyIsInJvbGUiOiJlZGl0b3IifSwiaWF0IjoxNzE0NjQ5MTQ3LCJleHAiOjE3MTQ2NzkxNDd9.7_kD9bRkHr0JYhEQzVeqhuQUMN6fS5ape5hG5ta3Tv8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:3000/api/users/profile-image/FOTO-MINE-202404ad4ae653-ac17-4e69-8487-ac54c6b326e1.png",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"profile-image",
+								"FOTO-MINE-202404ad4ae653-ac17-4e69-8487-ac54c6b326e1.png"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Blog",
+			"item": [
+				{
+					"name": "user-login Copy id=1",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test@test.com\",\r\n    \"password\": \"Test_12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create blog entry (jwt needed)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6InRlc3QyIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkdDF1RzBSaEtrZE0uSzVMVjBwNTcydUc0ZjlUZm1nRkc3b1RUc01TY2Y2aHN2TVBHUTFVZWUiLCJwcm9maWxlSW1hZ2UiOm51bGwsInJvbGUiOiJlZGl0b3IifSwiaWF0IjoxNzE0NjM2NTExLCJleHAiOjE3MTQ2NjY1MTF9.WyM95qP4SIczJGOLS5LczZdeqWCxqajzDP7tehOdUvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"test title user 121\",\r\n    \"description\": \"test description user 121\",\r\n    \"body\": \"test body user 121\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "blog-entries-all paginated",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6IkFydHVyaXRvIEd1dGllcnJleiAyIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkdDF1RzBSaEtrZE0uSzVMVjBwNTcydUc0ZjlUZm1nRkc3b1RUc01TY2Y2aHN2TVBHUTFVZWUiLCJwcm9maWxlSW1hZ2UiOiJGSU5FUzIxMjhjNzYwZmZkMi04OWQ4LTRmYzEtYjc1YS03ZWM4ZTlmYWM3ZjkuanBnIiwicm9sZSI6ImVkaXRvciJ9LCJpYXQiOjE3MTQ3NDM1ODksImV4cCI6MTcxNDc3MzU4OX0.uUb1GXqKhJBvTVLMbus80M9HgeZR8QHcJGPyfCtQIvA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"test title\",\r\n    \"description\": \"test description\",\r\n    \"body\": \"test body\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "blog-entries-all paginated page and size",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"test title\",\r\n    \"description\": \"test description\",\r\n    \"body\": \"test body\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries?page=1&limit=25",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "25"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "blog entries get all paginated by One user whithout author",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries/user/15",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries",
+								"user",
+								"15"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "blog-entries-by-id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"test title\",\r\n    \"description\": \"test description\",\r\n    \"body\": \"test body\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find-one-blog-entry-by-id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-one-blog-entry-by-id-userIsAuthorGuard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJ1c2VyTmFtZSI6InRlc3QiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJwcm9maWxlSW1hZ2UiOm51bGwsInJvbGUiOiJlZGl0b3IiLCJibG9nRW50cmllcyI6W3siaWQiOjMsInRpdGxlIjoidGVzdCB0aXRsZSAyIiwic2x1ZyI6InRlc3QtdGl0bGUtMiIsImRlc2NyaXB0aW9uIjoidGVzdCBkZXNjcmlwdGlvbiAyIiwiYm9keSI6InRlc3QgYm9keSAyIiwiY3JlYXRlZEF0IjoiMjAyNC0wMi0yOFQxNjoxNjozOC4xMTFaIiwidXBkYXRlZEF0IjoiMjAyNC0wMi0yOFQxNjoxNjozOC4xMTFaIiwibGlrZXMiOjAsImhlYWRlckltYWdlIjpudWxsLCJwdWJsaXNoZWREYXRlIjpudWxsLCJpc1B1Ymxpc2hlZCI6ZmFsc2V9LHsiaWQiOjQsInRpdGxlIjoidGVzdCB0aXRsZSAzIiwic2x1ZyI6InRlc3QtdGl0bGUtMyIsImRlc2NyaXB0aW9uIjoidGVzdCBkZXNjcmlwdGlvbiAzIiwiYm9keSI6InRlc3QgYm9keSAzIiwiY3JlYXRlZEF0IjoiMjAyNC0wMy0wM1QxNDo1Nzo1Mi4zNzNaIiwidXBkYXRlZEF0IjoiMjAyNC0wMy0wM1QxNDo1Nzo1Mi4zNzNaIiwibGlrZXMiOjAsImhlYWRlckltYWdlIjpudWxsLCJwdWJsaXNoZWREYXRlIjpudWxsLCJpc1B1Ymxpc2hlZCI6ZmFsc2V9LHsiaWQiOjUsInRpdGxlIjoidGVzdCB0aXRsZSA0Iiwic2x1ZyI6InRlc3QtdGl0bGUtNCIsImRlc2NyaXB0aW9uIjoidGVzdCBkZXNjcmlwdGlvbiA0IiwiYm9keSI6InRlc3QgYm9keSA0IiwiY3JlYXRlZEF0IjoiMjAyNC0wMy0wM1QxNDo1ODowNi45OTZaIiwidXBkYXRlZEF0IjoiMjAyNC0wMy0wM1QxNDo1ODowNi45OTZaIiwibGlrZXMiOjAsImhlYWRlckltYWdlIjpudWxsLCJwdWJsaXNoZWREYXRlIjpudWxsLCJpc1B1Ymxpc2hlZCI6ZmFsc2V9XX0sImlhdCI6MTcxMjk0MTI1OCwiZXhwIjoxNzEyOTQxODU4fQ.MwWXw28KULxPmbuvmfS2HeEL4vhrTgS8OEgKqD3ejyo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"test title 1 new updated\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-one-blog-entry-by-id-userIsAdminGuard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJ1c2VyTmFtZSI6IllvIHNveSBhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicHJvZmlsZUltYWdlIjoiU2NyZWVuc2hvdF80NTNiZjIyY2YtM2QxOC00YTc3LTkyZTMtYzQ3ZTUxMTg2ZjBlLnBuZyIsInJvbGUiOiJhZG1pbiIsImJsb2dFbnRyaWVzIjpbXX0sImlhdCI6MTcxMjk0MTQyOSwiZXhwIjoxNzEyOTQyMDI5fQ.mxOujciCjICfaRobuCZJtTaNztRhsMAonXHU7lqtH2k",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries/15",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries",
+								"15"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "blog-entry-upload-image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0LCJ1c2VyTmFtZSI6IlZlbmFuY2lvIFRlc3QzIiwiZW1haWwiOiJ0ZXN0M0B0ZXN0LmNvbSIsInByb2ZpbGVJbWFnZSI6bnVsbCwicm9sZSI6InVzZXIiLCJibG9nRW50cmllcyI6W3siaWQiOjYsInRpdGxlIjoidGVzdCB0aXRsZSA1Iiwic2x1ZyI6InRlc3QtdGl0bGUtNSIsImRlc2NyaXB0aW9uIjoidGVzdCBkZXNjcmlwdGlvbiA1IiwiYm9keSI6InRlc3QgYm9keSA1IiwiY3JlYXRlZEF0IjoiMjAyNC0wMy0wM1QxNTowMDowNi4xNDdaIiwidXBkYXRlZEF0IjoiMjAyNC0wMy0wM1QxNTowMDowNi4xNDdaIiwibGlrZXMiOjAsImhlYWRlckltYWdlIjpudWxsLCJwdWJsaXNoZWREYXRlIjpudWxsLCJpc1B1Ymxpc2hlZCI6ZmFsc2V9XX0sImlhdCI6MTcxMDIzNjc2OSwiZXhwIjoyMTQyMjM2NzY5fQ.lo_HFFl2BtpogjL_rRxHEgPPqncWqScroSFEu9whgIg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/E:/____03 ZONA DE DESARROLLO____/____01 PROYECTOS____/08 BLOG_nestjs_angular/03 YOUTUBE_Blog_paso-a-paso/_BACKEND_NESTJS_API/config/imagenes-de-ejemplo/Blog-Banner-Blog-Header.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "blog-entry-download-image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMTk2OGM3ZDMtMGNiYy00Nzg3LThkZTgtYmRmYTg2MmU5OTQ4IiwidXNlck5hbWUiOiJUZXN0XzAxIiwicm9sZXMiOiJBZG1pbiIsImVtYWlsIjoidGVzdF8wMUB0ZXN0LmNvbSJ9LCJpYXQiOjE3MDk3MzcxNzYsIm5iZiI6MTcwOTczNzE3NiwiZXhwIjoxNzA5ODIzNTc2LCJqdGkiOiI3NzQyZTVmZC0wMmFiLTQxYTUtOTNiZC1jYjUyMWFjZGZkNzkiLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo3MjIyIiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NzIyMiJ9.GUlJmxD8BAV6j5VPwMogOf_PUL1b1C0MK2VEaFOTHCw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries/header-image/Blog-Banner-Blog-Header151cff54-a56d-4dbd-903b-618d1340874a.png",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries",
+								"header-image",
+								"Blog-Banner-Blog-Header151cff54-a56d-4dbd-903b-618d1340874a.png"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/blog-entries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blog-entries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-entries"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "fizzbuzzkata",
+			"item": [
+				{
+					"name": "response Fizz",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/fizzbuzz/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"fizzbuzz",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "response Buzz",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/fizzbuzz/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"fizzbuzz",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "response FizzBuzz",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/fizzbuzz/15",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"fizzbuzz",
+								"15"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "response 22",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/fizzbuzz/22",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"fizzbuzz",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "response null",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/fizzbuzz/101",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"fizzbuzz",
+								"101"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "testing para NestJs con Jest y Supertest"
+		},
+		{
+			"name": "reserva-espacios",
+			"item": [
+				{
+					"name": "Reservas",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.XbPfbIHMI6arZ3Y922BhjWgQzWXcXNrz0ogtVhfEd2o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/reserva",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"reserva"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "espacios",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.XbPfbIHMI6arZ3Y922BhjWgQzWXcXNrz0ogtVhfEd2o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/espacio",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"espacio"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "solicitudes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.XbPfbIHMI6arZ3Y922BhjWgQzWXcXNrz0ogtVhfEd2o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/solicitud",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"solicitud"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

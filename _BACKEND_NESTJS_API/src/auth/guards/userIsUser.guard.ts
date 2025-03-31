@@ -2,37 +2,49 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  Inject,
-  forwardRef,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UserService } from 'src/user/service/user.service';
-import { User } from 'src/user/model/user.interface';
+import { IUserBase } from 'src/user/model/user.interface';
+import { decode } from 'jsonwebtoken';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable()
 export class UserIsUserGuard implements CanActivate {
-  constructor(
-    @Inject(forwardRef(() => UserService))
-    private userService: UserService,
-  ) {}
+  constructor(private userService: UserService) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    const params = request.params;
-    const user: User = request.user.user;
-    // console.log('## user: ', user);
+    const token = request.headers.authorization?.split(' ')[1];
 
-    return this.userService.findOne(user.id).pipe(
-      map((user: User) => {
-        let hasPermission = false;
+    if (!token) {
+      throw new UnauthorizedException('Authorization token missing!');
+    }
 
-        // console.log('## USER IS USER GUARD: ', user.id, params.id);
+    const decodedToken: any = decode(token);
+    const userIdFromToken = decodedToken?.user?.id;
+    const userIdFromParams = +request.params.id;
 
-        if (user.id === Number(params.id)) {
-          hasPermission = true;
+    if (!userIdFromToken) {
+      throw new UnauthorizedException('Invalid token!');
+    }
+
+    if (userIdFromParams && userIdFromToken !== userIdFromParams) {
+      throw new UnauthorizedException('Unauthorized: User ID mismatch!');
+    }
+
+    return this.userService.findOneById(userIdFromToken).pipe(
+      map((userFromDB: IUserBase) => {
+        if (!userFromDB) {
+          throw new UnauthorizedException('User not found!');
         }
-        return user && hasPermission;
+        return true; // El usuario existe, tiene permisos
+      }),
+      catchError(() => {
+        throw new UnauthorizedException('User not found!');
       }),
     );
   }

@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  OneToMany,
+} from 'typeorm';
 import { UserRole } from './user.interface';
+import { BlogEntryEntity } from 'src/blog/model/blog-entry.entity';
 
 @Entity()
 export class UserEntity {
@@ -7,13 +14,16 @@ export class UserEntity {
   id: number;
 
   @Column()
-  name: string;
+  userName: string;
 
   @Column({ unique: true })
   email: string;
 
   @Column()
   password: string;
+
+  @Column({ nullable: true })
+  profileImage: string;
 
   @Column({
     type: 'enum',
@@ -27,4 +37,11 @@ export class UserEntity {
   emailToLowerCase() {
     this.email = this.email.toLowerCase();
   }
+
+  @OneToMany(
+    () => BlogEntryEntity,
+    (blogEntryEntity) => blogEntryEntity.author,
+    { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }, // NO borraremos físicamente, el update habría que mirarlo
+  )
+  blogEntries: BlogEntryEntity[];
 }

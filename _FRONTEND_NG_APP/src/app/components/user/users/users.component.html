@@ -1,0 +1,69 @@
+<h1>Todos los Usuarios</h1>
+
+<mat-form-field>
+  <mat-label>Filetring By name</mat-label>
+  <input
+    type="text"
+    matInput
+    [(ngModel)]="filterValue"
+    (input)="findByName(filterValue)"
+    placeholder="Search name"
+    data-test-id="searchNameField"
+  />
+</mat-form-field>
+
+<div *ngIf="dataSource">
+  <mat-table
+    [dataSource]="dataSource.items"
+    class="mat-elevation-z8"
+    data-test-id="usersTable"
+  >
+    <!-- Id Column -->
+    <ng-container matColumnDef="id">
+      <mat-header-cell *matHeaderCellDef mat-sort-header> ID </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.id }} </mat-cell>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Name
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.name }} </mat-cell>
+    </ng-container>
+
+    <!-- Email Column -->
+    <ng-container matColumnDef="email">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        email
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.email }} </mat-cell>
+    </ng-container>
+
+    <!-- Role Column -->
+    <ng-container matColumnDef="role">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>
+        Role
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row"> {{ row.role }} </mat-cell>
+    </ng-container>
+
+    <!-- definition structure table-->
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row
+      *matRowDef="let row; columns: displayedColumns"
+      (click)="navigateToProfile(row.id)"
+    ></mat-row>
+  </mat-table>
+  <mat-paginator
+    [length]="dataSource.meta.totalItems"
+    [pageSize]="dataSource.meta.itemsPerPage"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="pageEvent = $event; onPaginateChange($event)"
+    showFirstLastButtons
+  >
+  </mat-paginator>
+</div>
+<!-- <h2 *ngIf="!dataSource" style="text-align: center">
+  No tienes Acceso a la base de datos!
+</h2> -->

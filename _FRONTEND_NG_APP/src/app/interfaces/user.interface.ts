@@ -5,11 +5,28 @@ export enum UserRole {
   USER = 'user',
 }
 
-export interface User {
-  id?: number;
-  name?: string;
-  email?: string;
-  password?: string;
-  role?: UserRole;
+export interface IUser {
+  id: number;
+  userName: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  profileImage?: string;
 }
 
+export interface IUsersPageable {
+  items: IUser[];
+  meta: {
+    totalItems: number;
+    itemCount: number;
+    itemsPerPage: number;
+    totalPages: number;
+    currentPage: number;
+  };
+  links: {
+    first: string;
+    previous: string;
+    next: string;
+    last: string;
+  };
+}

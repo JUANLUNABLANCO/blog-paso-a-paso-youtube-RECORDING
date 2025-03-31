@@ -1,0 +1,62 @@
+<div class="container-cards">
+  <h1 style="margin-top: 12px">All Blog Entries</h1>
+  <div class="dashboard">
+    <mat-card
+      *ngFor="let blogEntry of (dataSource | async)?.items"
+      class="gap-10"
+    >
+      <div class="card">
+        <div class="image border-radius-4">
+          <img
+            src="http://localhost:3000/api/blog-entries/header-image/{{
+              blogEntry.headerImage
+            }}"
+            alt="header Image"
+            *ngIf="blogEntry.headerImage"
+          />
+          <img
+            src="./assets/images/default-header-image.png"
+            alt="default header Image"
+            *ngIf="!blogEntry.headerImage"
+          />
+        </div>
+        <div class="content">
+          <a href="#">
+            <span class="title">
+              {{ blogEntry.title }}
+            </span>
+          </a>
+
+          <p class="desc">
+            {{ blogEntry.description }}
+          </p>
+          <small class="info-author"
+            >Author:
+            <a [routerLink]="['/authors', blogEntry.author.id]">
+              {{ blogEntry.author.userName }}
+            </a>
+          </small>
+          <div class="wrapper-action">
+            <a
+              class="action"
+              routerLink="/blog-entries/{{ blogEntry.id }}"
+              href=""
+            >
+              Leer más
+              <span aria-hidden="true"> → </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+  <mat-paginator
+    class="gap-10"
+    [length]="(dataSource | async)?.meta.totalItems"
+    [pageSize]="(dataSource | async)?.meta.itemsPerPage"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="pageEvent = $event; onPaginateChange($event)"
+    showFirstLastButtons="true"
+  >
+  </mat-paginator>
+</div>
