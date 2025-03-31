@@ -2,10 +2,12 @@ import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { catchError, map, of, tap } from 'rxjs';
-import { FileUpload } from 'src/app/core/interfaces/file-upload.interface';
-import { IBlogEntry } from 'src/app/interfaces/blog-entries.interface';
-import { BlogService } from 'src/app/services/blog/blog.service';
-import { environment } from 'src/environments/environment';
+
+import { FileUpload } from '../../../core/interfaces/file-upload.interface';
+import { IBlogEntry } from '../../../interfaces/blog-entries.interface';
+import { BlogService } from '../../../services/blog/blog.service';
+import { environment } from '../../../../environments/environment';
+import { Router } from '@angular/router';
 
 const BASE_URL = `${environment.API_URL}`;
 @Component({
@@ -29,15 +31,30 @@ export class CreateBlogEntryComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private blogService: BlogService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.formBlogEntry = this.formBuilder.group({
       id: [{ value: null, disabled: true }],
       slug: [{ value: null, disabled: true }],
-      title: [null, [Validators.required]],
-      description: [null, [Validators.required]],
-      body: [null, [Validators.required]],
+      title: [
+        null,
+        [
+          Validators.required,
+          Validators.minLength(5),
+          Validators.maxLength(150),
+        ],
+      ],
+      description: [
+        null,
+        [
+          Validators.required,
+          Validators.minLength(5),
+          Validators.maxLength(500),
+        ],
+      ],
+      body: [null, [Validators.required, Validators.minLength(5)]],
       headerImage: [null, [Validators.required]],
     });
   }
@@ -46,10 +63,28 @@ export class CreateBlogEntryComponent implements OnInit {
       .createNewBlogEntry(this.formBlogEntry.getRawValue())
       .pipe(
         tap((blogEntry: IBlogEntry) => {
-          console.log('#### blogEntry: ', blogEntry);
+          if (!blogEntry) {
+            console.log('### blogEntry no creado');
+            return;
+          }
+          console.log('### blogEntry Created: ', blogEntry);
+          this.resetData();
+          this.redirectToBlogEntries(blogEntry.id);
         }),
       )
       .subscribe();
+  }
+  private resetData() {
+    this.formBlogEntry.reset();
+    this.file = {
+      data: null,
+      inProgress: false,
+      progress: 0,
+    };
+    this.headerImageUpload.nativeElement.value = '';
+  }
+  private redirectToBlogEntries(id: number) {
+    this.router.navigate([`/blog-entries/${id}`]);
   }
   onClickFile(event: MouseEvent) {
     event.preventDefault();

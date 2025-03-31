@@ -22,7 +22,7 @@ git push -uf origin main
 
 ### npm update
 
-```
+```bash
  npm i -g  npm@9.7.2
 ```
 
@@ -284,11 +284,11 @@ nest generate module auth
 
 Esto genera un módulo a la misma altura que el módulo del usuario.
 
-![auth-module-structure](./documentation/screenshots/Screenshot_01_auth-module.png)
+![auth-module-structure](./docs/screenshots/Screenshot_01_auth-module.png)
 
 También actualiza el app.module.ts, incluyendo el nuevo módulo
 
-![app-module-updated](./documentation/screenshots/Screenshot_02_app-module-updated.png)
+![app-module-updated](./docs/screenshots/Screenshot_02_app-module-updated.png)
 
 Actualizamos el .env con:
 DATABASE_URL, API_PORT, JWT_SECRET
@@ -376,11 +376,11 @@ password: string;
 
 Como vemos en la imagen, al solicitar todos los usuarios el password ha sido omitido, gracias a nuestros pipes(map())
 
-![Data sin password](./documentation/screenshots/Screenshot_03_data-whitout-password.png)
+![Data sin password](./docs/screenshots/Screenshot_03_data-whitout-password.png)
 
 También si hacemos login desde postman con usuario y password válidos recibimos el jwt, que podemos analizar y extraer su info en jwt.io
 
-![JWTio correct token](./documentation/screenshots/Screenshot_04_jwt-correct.png)
+![JWTio correct token](./docs/screenshots/Screenshot_04_jwt-correct.png)
 
 Recuerda para ver si la signature is ok debes colocar tu JWT_SECRET del archivo .env en el recuadro de abajo a la derecha y te mostrará Signature Verified
 
@@ -403,7 +403,7 @@ rules: {
   },
 ```
 
-![config prettier](./documentation/screenshots/Screenshot_05_config-prettier.png)
+![config prettier](./docs/screenshots/Screenshot_05_config-prettier.png)
 
 solucionado
 
@@ -493,15 +493,15 @@ npm i @nestjs/passport passport passport-jwt --save
 
 No olvides en el módulo llamar a los guards, strategy y demás
 
-![jwtAuthGuard](./documentation/screenshots/Screenshot_06_auth-module.png)
+![jwtAuthGuard](./docs/screenshots/Screenshot_06_auth-module.png)
 
 En este punto solo podemos acceder a todos los usuarios solo con el role de administrador
 
-![postman endpoint role unauthorized](./documentation/screenshots/Screenshot_07_postman-endpoint-role-admin-unauthorized.png)
+![postman endpoint role unauthorized](./docs/screenshots/Screenshot_07_postman-endpoint-role-admin-unauthorized.png)
 
 Ahora hacemos login y el token devuelto se lo pasamos al get-all-users en el postman, nos devuelve todos los usuarios, debido a que no hemos implementado correctamente todavía el hasRoles('Admin'), ya que no hemos creado los roles, ni el RolesGuard, simplemente tiene un true y pasa la utenticación.
 
-![authRolesGuard](./documentation/screenshots/Screenshot_08_roles-guard.png)
+![authRolesGuard](./docs/screenshots/Screenshot_08_roles-guard.png)
 
 y claro este código todavía no está al 100%
 
@@ -554,11 +554,11 @@ export enum UserRole {
 }
 ```
 
-![user roles in entity DB](./documentation/screenshots/Screenshot_09_user-entity-for-roles.png)
+![user roles in entity DB](./docs/screenshots/Screenshot_09_user-entity-for-roles.png)
 
 Fíjate como quedan los métodos del controlador después de indicar quien puede editar borrar, crear, etc
 
-![metodos del controller](./documentation/screenshots/Screenshot_10_user-controller.png)
+![metodos del controller](./docs/screenshots/Screenshot_10_user-controller.png)
 
 A partir de entonces no podrás hacer nada sino esres administrador y si no pones el token en la cabecera
 
@@ -576,11 +576,11 @@ las contraseñas son todas iguales, para todos los usuarios 'test123' | 'prueba1
 
 Si observamos la BD en ElephantSQL, vemos los usuarios que hay hasta ahora, como se ha llamado a la tabla 'user_entity' y los campos correspondientes:
 
-![BD in ElephantSQL](./documentation/screenshots/Screenshot_11_bd_postgrees.png)
+![BD in ElephantSQL](./docs/screenshots/Screenshot_11_bd_postgrees.png)
 
 A partir de ahora me abstengo de usar ElephantSQL (postgres), para ello alimenté el contenedor de docker que mantiene una base de datos postgresql gratuita en la máquina local.
 
-![docker-compose](./documentation/screenshots/Screenshot_20_docker-container-postgres.png)
+![docker-compose](./docs/screenshots/Screenshot_20_docker-container-postgres.png)
 
 ## Task-05: Set up angular project with PWA and CORS
 
@@ -773,13 +773,13 @@ npx cypress open
 Esto nos abrirá cypress, con una consola que muestra dos opciones e2e test y components test, seleccionamos el primero e2e.
 Ahora nos muestra lo siguiente:
 
-![cypress consola 1](./documentation/screenshoots/Screenshot_13_cy_consola-1.png)
+![cypress consola 1](./docs/screenshoots/Screenshot_13_cy_consola-1.png)
 
-![cypress consola 2](./documentation/screenshoots/Screenshot_14_cy_consola-2.png)
+![cypress consola 2](./docs/screenshoots/Screenshot_14_cy_consola-2.png)
 
 Luego seleccionamos el navegador, en mi caso chrome y veremos un simulador de navegador chrome con algunas características especiales, es una app que nos muestra un menú a la izda.
 
-![cypress chrome browser](./documentation/screenshoots/Screenshot_15_cy_chrome.png)
+![cypress chrome browser](./docs/screenshoots/Screenshot_15_cy_chrome.png)
 
 En la estructura del proyecto, en el FRONTEND aparece una nueva carpeta llamada cypress
 
@@ -807,7 +807,7 @@ export default defineConfig({
 })
 ```
 
-![cypress structure folder](./documentation/screenshoots/Screenshot_16_cy_structure-folder.png)
+![cypress structure folder](./docs/screenshoots/Screenshot_16_cy_structure-folder.png)
 
 Como no hemos escrito nungún test, no puede encontrarlo y en el navegador de cypress, vemos que en la pestaña 'run' no se está ejecutando nada, sin embargo en la pestaña de Specs hay algunos ejemplos ya desarrollados para poder ver y ejecutar
 
@@ -834,7 +834,7 @@ así si el proyecto crece mucho tenemos todo identificado y organizado con una v
 
 No borremos esos ejemplos, porque ahí hay de todo tipo de tests y nos puede ayudar a entender bastante como fucniona cypress, por otro lado existe una documentación oficial en:
 
-[cypress documentation](https://docs.cypress.io/)
+[cypress docs](https://docs.cypress.io/)
 
 ### Nuestros primeros tests
 
@@ -876,9 +876,9 @@ Store 'email' always in lowercase in database —- DONE --> test el email debe e
 Store 'password' always as hashed value in database —- DONE
 Add an Auth Module for this —- DONE
 
-![algunos tests y sus resultados](./documentation/screenshoots/Screenshot_17_cy-test-1.png)
+![algunos tests y sus resultados](./docs/screenshoots/Screenshot_17_cy-test-1.png)
 
-![algunos tests y sus resultados](./documentation/screenshoots/Screenshot_18_cy-test1-result.png)
+![algunos tests y sus resultados](./docs/screenshoots/Screenshot_18_cy-test1-result.png)
 
 4. Task-04:
    Secure some endpoints with JWT, add a role to the User and protect some endpoints with @hashRole
@@ -946,7 +946,7 @@ request: other // no está todavía implementado
 --> test ver que funciona la paginacion, crear al menos 15 usuarios para estas comprobaciones, que pasa si pido 5 y solo hay tres ()enviamos tres), o no hay nadie (enviamos un mensaje, no hay usuarios en la base de datos aún o algo similar), controlar si estás en la última página y te pide una más, devolver la misma y lo contrario,
 estamos en la primera y queremos ir ahcia atrás. -- DONE
 
-![pagination cypress](./documentation/screenshoots/Screenshot_25_pagination-getallUsers.png)
+![pagination cypress](./docs/screenshoots/Screenshot_25_pagination-getallUsers.png)
 
 ver test en el file: './cypress/e2e/3-User-Authentication/07_pagination.cy.js'
 
@@ -965,9 +965,9 @@ estamos en la primera y queremos ir ahcia atrás.
 
 Aquí tenemos ejemplos de tests a peticiones http y los resultados, observamos que cada vez que ejecutamos el test, la primera vez funciona,la segunda falla, porque el email se repitiría, para ello debemos crear una base de datos de testing, que se resetee por completo antes de empezar el test
 
-![cypress test 02 create-user](./documentation/screenshoots/Screenshot_17_cy-test-1.png)
+![cypress test 02 create-user](./docs/screenshoots/Screenshot_17_cy-test-1.png)
 
-![cypress test 02 create-user-result](./documentation/screenshoots/Screenshot_18_cy-test1-result.png)
+![cypress test 02 create-user-result](./docs/screenshoots/Screenshot_18_cy-test1-result.png)
 
 ## Task-08: Formularios reactivos y validaciones con angular
 
@@ -3196,3 +3196,205 @@ UserReadDto --> UserReadWhitBlogEntriesDto
 BlogEntryReadDto --> BlogEntryReadWhitAuthorDto
 
 Definidos nuestros nuevos DTOs vamos a aplicarlos, empezando en el UserController, el UserService y continuando por el BlogEntryController y el BlogEntryService
+
+
+## 33 - documentation
+
+### 1.  Markdown
+
+```markdown
+# Título Principal  
+## Subtítulo  
+**Texto en negrita** y *texto en cursiva*  
+
+- Lista de elementos  
+  - Subpunto  
+1. Elemento numerado  
+2. Otro elemento  
+```
+
+```md
+| Encabezado 1 | Encabezado 2 |
+|-------------|-------------|
+| Dato 1      | Dato 2      |
+```
+
+```javascript
+console.log("Hola, Markdown!");
+```
+
+```json
+{
+  "arbol": "pino"
+}
+```
+
+- **GitHub/GitLab**: Utilizado en `README.md`, issues, pull requests y documentación de repositorios.  
+- **Docusaurus**: Generador de documentación basado en Markdown para proyectos de código abierto.  
+- **GitBook**: Plataforma para crear manuales y documentación técnica.  
+- **Jekyll**: Motor de generación de sitios estáticos que utiliza Markdown para crear blogs y páginas web.  
+- **Notion**: Permite importar y exportar documentos en Markdown.  
+
+---
+
+# Título del Proyecto
+
+_Acá va un párrafo que describa lo que es el proyecto_
+
+## Comenzando 🚀
+
+_Estas instrucciones te permitirán obtener una copia del proyecto en funcionamiento en tu máquina local para propósitos de desarrollo y pruebas._
+
+Mira **Deployment** para conocer como desplegar el proyecto.
+
+
+### Pre-requisitos 📋
+
+_Que cosas necesitas para instalar el software y como instalarlas_
+
+```
+Da un ejemplo
+```
+
+### Instalación 🔧
+
+_Una serie de ejemplos paso a paso que te dice lo que debes ejecutar para tener un entorno de desarrollo ejecutandose_
+
+_Dí cómo será ese paso_
+
+```
+Da un ejemplo
+```
+
+_Y repite_
+
+```
+hasta finalizar
+```
+
+_Finaliza con un ejemplo de cómo obtener datos del sistema o como usarlos para una pequeña demo_
+
+## Ejecutando las pruebas ⚙️
+
+_Explica como ejecutar las pruebas automatizadas para este sistema_
+
+### Analice las pruebas end-to-end 🔩
+
+_Explica que verifican estas pruebas y por qué_
+
+```
+Da un ejemplo
+```
+
+### Y las pruebas de estilo de codificación ⌨️
+
+_Explica que verifican estas pruebas y por qué_
+
+```
+Da un ejemplo
+```
+
+## Despliegue 📦
+
+_Agrega notas adicionales sobre como hacer deploy_
+
+## Construido con 🛠️
+
+_Menciona las herramientas que utilizaste para crear tu proyecto_
+
+* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - El framework web usado
+* [Maven](https://maven.apache.org/) - Manejador de dependencias
+* [ROME](https://rometools.github.io/rome/) - Usado para generar RSS
+
+## Contribuyendo 🖇️
+
+Por favor lee el [CONTRIBUTING.md](https://gist.github.com/villanuevand/xxxxxx) para detalles de nuestro código de conducta, y el proceso para enviarnos pull requests.
+
+## Wiki 📖
+
+Puedes encontrar mucho más de cómo utilizar este proyecto en nuestra [Wiki](https://github.com/tu/proyecto/wiki)
+
+## Versionado 📌
+
+Usamos [SemVer](http://semver.org/) para el versionado. Para todas las versiones disponibles, mira los [tags en este repositorio](https://github.com/tu/proyecto/tags).
+
+## Autores ✒️
+
+_Menciona a todos aquellos que ayudaron a levantar el proyecto desde sus inicios_
+
+* **Andrés Villanueva** - *Trabajo Inicial* - [villanuevand](https://github.com/villanuevand)
+* **Fulanito Detal** - *Documentación* - [fulanitodetal](#fulanito-de-tal)
+
+También puedes mirar la lista de todos los [contribuyentes](https://github.com/your/project/contributors) quíenes han participado en este proyecto. 
+
+## Licencia 📄
+
+Este proyecto está bajo la Licencia (Tu Licencia) - mira el archivo [LICENSE.md](LICENSE.md) para detalles
+
+## Expresiones de Gratitud 🎁
+
+* Comenta a otros sobre este proyecto 📢
+* Invita una cerveza 🍺 o un café ☕ a alguien del equipo. 
+* Da las gracias públicamente 🤓.
+* Dona con cripto a esta dirección: `0xf253fc233333078436d111175e5a76a649890000`
+* etc.
+
+
+
+---
+⌨️ con ❤️ por [Villanuevand](https://github.com/Villanuevand) 😊
+
+![alt imagen](./docs/imagenes/avatars/images%20(1).jpg)
+
+
+---
+
+# La leyenda del guardián perdido
+
+## Índice
+
+- [1. Introducción](#1-Introducción)
+- [2. El descubrimiento](#2-El-descubrimiento)
+- [3. El viaje](#3-El-viaje)
+- [4. El desafío final](#4-El-desafío-final)
+- [5. Conclusión](#5-Conclusión)
+
+---
+
+## 1. Introducción
+
+En un pueblo olvidado por el tiempo, se hablaba de un antiguo guardián que protegía un tesoro inalcanzable. Durante siglos, nadie había logrado encontrarlo, hasta que un joven llamado Elian descubrió una pista que cambiaría su destino.
+
+[Volver al Índice](#Índice)
+
+---
+
+## 2. El descubrimiento
+
+Un día, mientras exploraba la biblioteca del pueblo, Elian encontró un viejo pergamino con un mapa oculto. Las marcas indicaban la existencia de un sendero en la montaña prohibida, un lugar del que nadie regresaba. Decidido, tomó sus provisiones y partió.
+
+[Volver al Índice](#Índice)
+
+---
+
+## 3. El viaje
+
+Elian cruzó ríos, escaló acantilados y enfrentó tormentas. En el camino, conoció a una anciana que le entregó un amuleto, advirtiéndole que solo el de corazón puro podría completar la travesía. Con renovada determinación, siguió adelante hasta llegar a la entrada de una cueva oculta.
+
+[Volver al Índice](#Índice)
+
+---
+
+## 4. El desafío final
+
+Dentro de la cueva, Elian halló una puerta custodiada por una estatua de piedra. Una inscripción decía: "Responde con verdad, o quedarás atrapado para siempre". Con valentía, respondió a las preguntas de la estatua, demostrando su sabiduría y nobleza. La puerta se abrió, revelando el tesoro: un libro con el conocimiento de los antiguos guardianes.
+
+[Volver al Índice](#Índice)
+
+---
+
+## 5. Conclusión
+
+Elian regresó al pueblo y compartió su hallazgo. No era oro ni joyas, sino el legado de generaciones pasadas. Gracias a su valentía, la historia del guardián perdido fue finalmente revelada, inspirando a su gente a explorar su propio destino.
+
+[Volver al Índice](#Índice)

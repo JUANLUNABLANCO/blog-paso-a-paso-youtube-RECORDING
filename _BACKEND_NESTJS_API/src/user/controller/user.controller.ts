@@ -45,6 +45,7 @@ import {
   UserLoginDto,
 } from '../model/auth.dto';
 import { AuthService } from 'src/auth/services/auth.service';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 export const storage = {
   storage: diskStorage({
@@ -66,6 +67,7 @@ export const storage = {
 
 // @UseFilters(AllExceptionsFilter)
 @Controller('users')
+@ApiTags('usuarios')
 export class UserController {
   constructor(
     private userService: UserService,
@@ -74,6 +76,13 @@ export class UserController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Crear usuario' })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuario creado correctamente',
+    type: UserCreateDto,
+  })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
   create(@Body() user: UserCreateDto): Observable<
     | {
         user: UserReadWithoutEntriesDto; // whit out blogEntries, no tiene de todas formas

@@ -1,13 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-
-import { Subscription, map, throwError } from 'rxjs';
-
-import { IUser } from '../../interfaces/user.interface';
-
-import { UsersService } from '../../services/users/users.service';
+import { Subscription, map } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { environment } from 'src/environments/environment';
-import { AuthenticationService } from 'src/app/services/auth/authentication.service';
+
+import { IUser } from '../../../interfaces/user.interface';
+import { UsersService } from '../../../services/users/users.service';
+import { environment } from '../../../../environments/environment';
+import { AuthenticationService } from '../../../services/auth/authentication.service';
 
 const BASE_URL = `${environment.API_URL}`;
 

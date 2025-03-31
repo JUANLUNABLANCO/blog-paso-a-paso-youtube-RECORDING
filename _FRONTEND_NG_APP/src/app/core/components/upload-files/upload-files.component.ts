@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { UploadFilesService } from '../../services/upload-files.service';
 import { EMPTY, Observable } from 'rxjs';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
+
+import { UploadFilesService } from '../../services/upload-files.service';
 
 @Component({
   selector: 'app-upload-files',

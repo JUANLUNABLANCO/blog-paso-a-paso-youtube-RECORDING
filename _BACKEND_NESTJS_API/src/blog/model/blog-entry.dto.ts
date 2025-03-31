@@ -19,7 +19,7 @@ export class BlogEntryCreateDto {
 
   @IsString({ message: 'description: Debe ser un string' })
   @MinLength(5, { message: 'description: Debe tener al menos 5 caracteres' })
-  @MaxLength(150, {
+  @MaxLength(500, {
     message: 'description: Debe tener menos de 150 caracteres',
   })
   description: string;

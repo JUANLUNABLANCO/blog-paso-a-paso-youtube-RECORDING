@@ -138,4 +138,13 @@ export class BlogEntriesController {
       ),
     );
   }
+
+  @Get('authors/:authorId')
+  findByAuthor(
+    @Param('authorId') authorId: string,
+  ): Observable<BlogEntryReadWithoutAuthorDto[]> {
+    // console.log('#### getPostsByAuthor: author id: ', authorId);
+    return this.blogService.findByAuthor(Number(authorId));
+    // .pipe(tap((data) => console.log('#### Posts encontrados: ', data)));
+  }
 }

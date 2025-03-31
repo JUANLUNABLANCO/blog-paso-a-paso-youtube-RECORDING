@@ -1,10 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { AuthenticationService } from '../../services/auth/authentication.service';
-import { map, take, tap } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { LoggingService } from '../../core/services/logging.service';
+
+import { LoggingService } from '../../../core/services/logging.service';
+import { AuthenticationService } from '../../../services/auth/authentication.service';
 // TODO @URLS
 
 @Component({

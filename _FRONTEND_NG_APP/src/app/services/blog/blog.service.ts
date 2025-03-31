@@ -30,6 +30,11 @@ export class BlogService {
       blogEntry,
     );
   }
+  getBlogEntryById(id: number): Observable<IBlogEntry> {
+    return this.http.get<IBlogEntry>(
+      `${environment.API_URL}/api/blog-entries/${id}`,
+    );
+  }
   uploadHeaderImage(formData: FormData): Observable<any> {
     console.log('#### subiendo fichero', formData);
     return this.http.post<FormData>(
@@ -39,6 +44,12 @@ export class BlogService {
         reportProgress: true,
         observe: 'events',
       },
+    );
+  }
+
+  getPostsByAuthor(authorId: number): Observable<IBlogEntry[]> {
+    return this.http.get<IBlogEntry[]>(
+      `${environment.API_URL}/api/blog-entries/authors/${authorId}`,
     );
   }
 }

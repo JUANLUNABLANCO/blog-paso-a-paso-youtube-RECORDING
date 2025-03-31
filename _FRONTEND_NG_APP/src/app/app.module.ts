@@ -19,6 +19,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { MarkdownModule } from 'ngx-markdown';
 // # librerias externas
 import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
@@ -28,18 +30,20 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from './interceptors/jwt.interceptor';
 
 // # Components
-import { LoginComponent } from './components/login/login.component';
-import { RegisterComponent } from './components/register/register.component';
-import { UsersComponent } from './components/users/users.component';
-import { UserProfileComponent } from './components/user-profile/user-profile.component';
-import { UpdateUserProfileComponent } from './components/update-user-profile/update-user-profile.component';
+import { LoginComponent } from './components/auth/login/login.component';
+import { RegisterComponent } from './components/auth/register/register.component';
+import { UsersComponent } from './components/user/users/users.component';
+import { UserProfileComponent } from './components/user/user-profile/user-profile.component';
+import { UpdateUserProfileComponent } from './components/user/update-user-profile/update-user-profile.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { ServerErrorInterceptor } from './core/errors/interceptors/server-error.interceptor';
 import { GlobalErrorHandler } from './core/errors/global-error-handler';
 import { UploadFilesComponent } from './core/components/upload-files/upload-files.component';
 import { HomeComponent } from './components/home/home.component';
-import { BlogEntriesComponent } from './components/blog-entries/blog-entries.component';
-import { CreateBlogEntryComponent } from './components/create-blog-entry/create-blog-entry.component';
+import { BlogEntriesComponent } from './components/blog-entry/blog-entries/blog-entries.component';
+import { CreateBlogEntryComponent } from './components/blog-entry/create-blog-entry/create-blog-entry.component';
+import { ViewBlogEntryComponent } from './components/blog-entry/view-blog-entry/view-blog-entry.component';
+import { AuthorPostsComponent } from './components/author-posts/author-posts.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +57,8 @@ import { CreateBlogEntryComponent } from './components/create-blog-entry/create-
     HomeComponent,
     BlogEntriesComponent,
     CreateBlogEntryComponent,
+    ViewBlogEntryComponent,
+    AuthorPostsComponent,
   ],
   imports: [
     BrowserModule,
@@ -70,6 +76,7 @@ import { CreateBlogEntryComponent } from './components/create-blog-entry/create-
     MatSelectModule,
     MatSnackBarModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
 
     HttpClientModule,
     ReactiveFormsModule,
