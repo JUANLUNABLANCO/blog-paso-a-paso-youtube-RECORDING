@@ -3453,3 +3453,15 @@ Git Flow es un modelo de ramificación para Git que organiza el desarrollo de so
 - **`hotfix/*`**: Diseñadas para abordar errores críticos en producción. Se crean a partir de `master` y, tras aplicar las correcciones, se integran en `master` y `develop`.
 
 Este flujo de trabajo proporciona una estructura clara para el manejo de versiones y facilita la colaboración entre desarrolladores, asegurando que el código en producción se mantenga estable mientras se desarrollan y prueban nuevas funcionalidades. 
+
+##### Release V1.0.0
+
+* Actualizar documentación
+* Actualizar README.md
+* Actualizar .env
+* Actualizar .gitignore
+* Actualizar package.json
+* Corrección de errores mínimos
+* Pasar pruebas de release
+
+
