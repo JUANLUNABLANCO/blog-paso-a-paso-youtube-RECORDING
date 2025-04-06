@@ -3438,3 +3438,18 @@ Elian regresó al pueblo y compartió su hallazgo. No era oro ni joyas, sino el 
 ## 35. Git Flow y Buenas prácticas
 
 ![screenshot git flow](./docs/screenshots/Screenshot_35_git-flow.png)
+
+Git Flow es un modelo de ramificación para Git que organiza el desarrollo de software en ramas específicas, cada una con un propósito definido, facilitando la colaboración y el control de versiones en proyectos complejos.
+
+**Ramas principales:**
+
+- **`master`**: Contiene el código en producción, siempre estable y listo para desplegar.
+- **`develop`**: Sirve como rama de integración donde se combinan las características desarrolladas y se prepara el código para la siguiente versión.
+
+**Ramas de soporte:**
+
+- **`feature/*`**: Dedicadas al desarrollo de nuevas funcionalidades. Se crean a partir de `develop` y, una vez finalizadas, se integran nuevamente en `develop`.
+- **`release/*`**: Utilizadas para preparar nuevas versiones de producción. Permiten realizar ajustes finales y correcciones antes del lanzamiento. Se originan de `develop` y, al completarse, se fusionan tanto en `master` como en `develop`.
+- **`hotfix/*`**: Diseñadas para abordar errores críticos en producción. Se crean a partir de `master` y, tras aplicar las correcciones, se integran en `master` y `develop`.
+
+Este flujo de trabajo proporciona una estructura clara para el manejo de versiones y facilita la colaboración entre desarrolladores, asegurando que el código en producción se mantenga estable mientras se desarrollan y prueban nuevas funcionalidades. 
