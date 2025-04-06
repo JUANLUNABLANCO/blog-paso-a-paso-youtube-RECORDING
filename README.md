@@ -3432,34 +3432,46 @@ Dentro de la cueva, Elian halló una puerta custodiada por una estatua de piedra
 Elian regresó al pueblo y compartió su hallazgo. No era oro ni joyas, sino el legado de generaciones pasadas. Gracias a su valentía, la historia del guardián perdido fue finalmente revelada, inspirando a su gente a explorar su propio destino.
 
 [Volver al Índice](#Índice)
-
 ```
 
-## 35. Git Flow y Buenas prácticas
+## 35. Git Flow
 
-![screenshot git flow](./docs/screenshots/Screenshot_35_git-flow.png)
+El **Git Flow** es un modelo de ramificación que facilita la gestión de proyectos de software, especialmente en equipos de desarrollo colaborativos. Este enfoque organiza el código en diferentes ramas, cada una con un propósito específico, permitiendo un flujo de trabajo estructurado y eficiente.  
 
-Git Flow es un modelo de ramificación para Git que organiza el desarrollo de software en ramas específicas, cada una con un propósito definido, facilitando la colaboración y el control de versiones en proyectos complejos.
+**Estructura de Ramas en Git Flow:**
 
-**Ramas principales:**
+- **Ramas Principales:**
+  - **`main` (o `master`):** Contiene el código en producción, siempre en un estado estable.  
+  - **`develop`:** Integración de nuevas funcionalidades; la base para las ramas de características.  
 
-- **`master`**: Contiene el código en producción, siempre estable y listo para desplegar.
-- **`develop`**: Sirve como rama de integración donde se combinan las características desarrolladas y se prepara el código para la siguiente versión.
+- **Ramas de Soporte:**
+  - **`feature/*`:** Desarrollo de nuevas funcionalidades. Se crean a partir de `develop` y, una vez completadas, se fusionan de nuevo en `develop`.  
+  - **`release/*`:** Preparación de nuevas versiones. Se originan de `develop` y, tras finalizar, se fusionan en `main` y `develop`.  
+  - **`hotfix/*`:** Correcciones urgentes en producción. Se crean desde `main` y, después de aplicar la corrección, se fusionan en `main` y `develop`.  
 
-**Ramas de soporte:**
+**Buenas Prácticas al Usar Git Flow:**
 
-- **`feature/*`**: Dedicadas al desarrollo de nuevas funcionalidades. Se crean a partir de `develop` y, una vez finalizadas, se integran nuevamente en `develop`.
-- **`release/*`**: Utilizadas para preparar nuevas versiones de producción. Permiten realizar ajustes finales y correcciones antes del lanzamiento. Se originan de `develop` y, al completarse, se fusionan tanto en `master` como en `develop`.
-- **`hotfix/*`**: Diseñadas para abordar errores críticos en producción. Se crean a partir de `master` y, tras aplicar las correcciones, se integran en `master` y `develop`.
+1. **Commits Claros y Consistentes:**
+   - **Mensajes de Commit:** Utiliza el imperativo y mensajes concisos que expliquen el "por qué" del cambio. Por ejemplo: "Añadir validación de usuario".  
+   - **Convenciones:** Adopta estándares como los [Conventional Commits](https://www.conventionalcommits.org/) para mantener uniformidad.  
 
-Este flujo de trabajo proporciona una estructura clara para el manejo de versiones y facilita la colaboración entre desarrolladores, asegurando que el código en producción se mantenga estable mientras se desarrollan y prueban nuevas funcionalidades. 
+2. **Rebase vs. Merge:**
+   - **Rebase:** Mantiene un historial lineal al aplicar cambios encima de la rama base.  
+   - **Merge:** Preserva el historial completo, mostrando cuándo se integraron las ramas.  
+   - Elige según el contexto y la claridad que desees en el historial.  
 
-##### Release V1.0.0
+3. **Estrategias de Branching en Equipos Grandes:**
+   - **Ramas de Funcionalidad:** Desarrolla cada nueva característica en una rama independiente para facilitar el trabajo paralelo.  
+   - **Ramas de Liberación:** Prepara versiones estables en ramas dedicadas, permitiendo ajustes finales sin interrumpir el desarrollo activo.  
+   - **Ramas de Corrección Rápida:** Aborda errores críticos directamente en producción y asegúrate de que las soluciones se reflejen en todas las ramas relevantes.  
 
-* Actualizar documentación
-* Actualizar README.md
-* Actualizar .env
-* Actualizar .gitignore
-* Actualizar package.json
-* Corrección de errores mínimos
-* Pasar pruebas de release
+4. **Automatización con Git Hooks y CI/CD:**
+   - **Git Hooks:** Implementa scripts que validen código, ejecuten pruebas o verifiquen convenciones antes de aceptar cambios.  
+   - **Integración y Despliegue Continuo (CI/CD):** Automatiza pruebas y despliegues para garantizar que solo el código validado llegue a producción, mejorando la calidad y reduciendo errores.  
+
+5. **Integración con Docker y Archivos `.env`:**
+   - **Docker:** Utiliza contenedores para asegurar consistencia en diferentes entornos de desarrollo y producción.  
+   - **Archivos `.env`:** Gestiona configuraciones sensibles y variables de entorno, facilitando ajustes según el entorno sin modificar el código fuente.  
+
+Al seguir estas prácticas, Git Flow ayuda a mantener un código organizado, facilita la colaboración y mejora la calidad del software en proyectos de desarrollo colaborativo.  
+
