@@ -3270,6 +3270,7 @@ console.log("Hola, Markdown!");
 
 ---
 
+```markdown
 # Título del Proyecto
 
 _Acá va un párrafo que describa lo que es el proyecto_
@@ -3431,3 +3432,9 @@ Dentro de la cueva, Elian halló una puerta custodiada por una estatua de piedra
 Elian regresó al pueblo y compartió su hallazgo. No era oro ni joyas, sino el legado de generaciones pasadas. Gracias a su valentía, la historia del guardián perdido fue finalmente revelada, inspirando a su gente a explorar su propio destino.
 
 [Volver al Índice](#Índice)
+
+```
+
+## 35. Git Flow y Buenas prácticas
+
+![screenshot git flow](./docs/screenshots/Screenshot_35_git-flow.png)
