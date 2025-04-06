@@ -3463,5 +3463,3 @@ Este flujo de trabajo proporciona una estructura clara para el manejo de version
 * Actualizar package.json
 * Corrección de errores mínimos
 * Pasar pruebas de release
-
-
