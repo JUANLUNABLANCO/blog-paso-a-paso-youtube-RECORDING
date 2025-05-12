@@ -14,6 +14,7 @@ import { HomeComponent } from './components/home/home.component';
 import { CreateBlogEntryComponent } from './components/blog-entry/create-blog-entry/create-blog-entry.component';
 import { ViewBlogEntryComponent } from './components/blog-entry/view-blog-entry/view-blog-entry.component';
 import { AuthorPostsComponent } from './components/author-posts/author-posts.component';
+import { ContadorComponent } from './tdd/components/contador/contador.component';
 
 const routes: Routes = [
   {
@@ -71,6 +72,10 @@ const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
+  },
+  {
+    path: 'tdd/contador',
+    component: ContadorComponent,
   },
   {
     path: '',

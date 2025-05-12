@@ -3475,3 +3475,1174 @@ El **Git Flow** es un modelo de ramificación que facilita la gestión de proyec
 
 Al seguir estas prácticas, Git Flow ayuda a mantener un código organizado, facilita la colaboración y mejora la calidad del software en proyectos de desarrollo colaborativo.  
 
+
+Perfecto, ¡todo claro! Aquí tienes la primera versión del documento `.md` con unas 300 líneas, tal como me pediste, para el vídeo **"36. TDD en Angular y Buenas Prácticas"**. Incluye índice enlazado, imágenes, ejemplos de código, secciones bien diferenciadas y respetando el estilo que sueles usar.
+
+---
+
+## 36. TDD en Angular y Buenas Prácticas
+
+![TDD en Angular](./docs/screenshots/00_TDD_bestpractices.jpg)
+
+> En este documento veremos cómo aplicar TDD (Test Driven Development) en proyectos Angular, qué herramientas ofrece el framework para facilitarnos esta tarea, y cómo seguir buenas prácticas a la hora de testear componentes, servicios y lógica de negocio.
+
+![TDD en Angular](./docs/screenshots/01_TDD_angular.jpg)
+
+---
+
+### Índice 2 📌
+
+- [1. Introducción a TDD](#1-Introducción-a-TDD)  
+- [2. Herramientas para TDD en Angular](#2-Herramientas-para-TDD-en-Angular)  
+  - [2.1 Jasmine](#21--Jasmine)  
+  - [2.2 Karma](#22-️-karma)  
+  - [2.3 TestBed](#23-️-testbed)  
+  - [2.4 Spies y Mocks](#24--Spies-y-Mocks)  
+  - [2.5 Demostración](#25--demostración-rápida-servicio-ficticio)
+- [3. Implementación paso a paso con TDD](#3-Implementación-paso-a-paso-con-TDD)  
+  - [3.1. Ciclo TDD: Red-Green-Factor ](#31-ciclo-tdd-red---green---refactor)
+  - [3.2. Ciclo de Pruebas en Vivo](#32-ciclo-de-pruebas-en-vivo)
+- [4. Buenas prácticas](#4-Buenas-prácticas)  
+- [5. Ejemplos prácticos adicionales](#5-Ejemplos-prácticos-adicionales)  
+  - [5.1 Servicios con HttpClient](#51-Servicios-con-HttpClient)  
+  - [5.2 Componentes con Inputs/Outputs](#52-Componentes-con-InputsOutputs)  
+  - [5.3 Directivas y Pipes](#53-directiva-o-pipe)
+- [6. Conclusiones y próximos pasos](#6-Conclusiones-y-próximos-pasos)  
+
+---
+
+### 1. Introducción a TDD
+[volver](#Índice-2-)
+
+TDD (Test Driven Development) es una metodología de desarrollo en la que se escriben las pruebas **antes del código funcional**. El ciclo se resume en tres pasos:
+
+1. **Red**: Escribir una prueba que falle.
+2. **Green**: Escribir el código mínimo necesario para que la prueba pase.
+3. **Refactor**: Mejorar el código manteniendo los tests en verde.
+
+Este enfoque permite diseñar software más robusto, mantenible y bien documentado desde el principio.
+
+![IMAGEN 01](./docs/screenshots/02_TDD_life-cycle.jpg)
+
+Los beneficios de usar TDD son:
+- **Mejora la calidad y el diseño del código**: Al escribir pruebas antes de escribir el código, se asegura que el código cumple con los requisitos antes de ser desplegado.
+- **Facilita la refactorización y escalabilidad**: Al tener pruebas, se puede cambiar el código con confianza, sabiendo que no se romperán las funcionalidades existentes, como estas pruebas son unitarias, se pueden ejecutar de forma aislada y rápida y además ayuda en el diseño de la aplicación.
+- **Documentación**: Las pruebas son un tipo de documentación viva que muestra cómo se espera que funcione el código.
+- **Mejora la confianza**: Al tener pruebas, se puede tener más confianza en el código, lo que puede reducir los errores y aumentar la productividad.
+
+---
+
+### 2. Herramientas para TDD en Angular
+[Volver al índice](#Índice-2-)
+![karam jasmine Jest](./docs/screenshots/03_TDD_jasmine-karma.jpg)
+
+Angular proporciona herramientas integradas para facilitar el desarrollo guiado por tests.
+
+
+
+#### 2.1. 🧪 Jasmine
+[volver al índice](#Índice-2-)
+![Jasmine](./docs/screenshots/04_TDD_jasmine.jpg)
+
+> “Jasmine es el framework de testing que usamos por defecto en Angular. Nos permite describir y estructurar nuestras pruebas de forma muy legible.”
+
+Ejemplo básico:
+```ts
+describe('MiFunción', () => {
+  it('debería devolver true', () => {
+    expect(true).toBeTrue();
+  });
+});
+```
+
+Explicación:
+- `describe()`: agrupador de pruebas por componentes o unidades funcionales.
+- `it()`: caso de prueba.
+- `expect()`: afirmación que queremos validar.
+
+✅ *“Todo esto ya viene integrado en un proyecto Angular con `ng new`.”*
+
+
+#### 2.2 ⚙️ Karma
+[Volver al índice](#Índice-2-)
+
+![Karma](./docs/screenshots/05_TDD_karma.jpg)
+
+Es el *test runner* por defecto en Angular. Ejecuta los tests en navegadores reales y muestra los resultados en tiempo real.
+
+- Se lanza con: `ng test`
+- Abre una ventana del navegador con los resultados.
+- Muestra qué pruebas pasan, cuáles fallan y cobertura si la activamos. `--code-coverage`
+
+🎯 *“Lo ideal es tener Karma ejecutándose en segundo plano durante el desarrollo, para recibir feedback inmediato.”*
+
+#### 2.3 🏗️ TestBed
+[Volver al índice](#Índice-2-)
+![testing](./docs/screenshots/06_TDD_result-tests.jpg)
+
+Herramienta de Angular para configurar entornos de test similares al runtime real de una app, necesario para simular una app de angular, en la que se importan módulos o componentes, para no cargar toda la app.
+
+```ts
+beforeEach(() => {
+  TestBed.configureTestingModule({
+    declarations: [ContadorComponent]
+  }).compileComponents();
+});
+```
+- Permite inyectar dependencias como Angular lo haría en producción.
+- Puedes usar `TestBed.inject()` o crear un fixture para componentes.
+
+🧠 *“Piensa en TestBed como una mini-app donde puedes testear con seguridad.”*
+
+#### 2.4 🎭 Spies y Mocks
+[Volver al índice](#Índice-2-)
+
+![mocks and spies](./docs/screenshots/07_TDD_mock-spy.jpg)
+
+Jasmine permite espiar métodos (`spyOn`) o crear servicios falsos (`mocks`) para probar comportamientos aislados.
+
+> “No queremos depender de servicios reales. Para eso usamos *mocks* o *spies* que simulan el comportamiento de objetos.”
+
+Ejemplo con un spy:
+
+```ts
+const servicioFake = jasmine.createSpyObj('MiServicio', ['getDatos']);
+servicioFake.getDatos.and.returnValue(of(['dato1', 'dato2']));
+```
+
+🛠️ Luego se pasa como provider:
+```ts
+providers: [{ provide: MiServicio, useValue: servicioFake }]
+```
+
+- **Mocks**: versión manual del servicio.
+- **Spies**: versiones automáticas para espiar y simular llamadas.
+
+👍 *“Esto es clave para el TDD: probar solo una cosa a la vez sin depender del mundo exterior.”*
+
+#### 2.5. 🚀 Demostración rápida: Servicio ficticio
+[Volver al índice](#Índice-2-)
+
+Creamos un servicio simple llamado `SaludoService`:
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class SaludoService {
+  obtenerSaludo(nombre: string): string {
+    return `Hola, ${nombre}!`;
+  }
+}
+```
+
+Prueba básica:
+
+```ts
+describe('SaludoService', () => {
+  let service: SaludoService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(SaludoService);
+  });
+
+  it('debería devolver un saludo personalizado', () => {
+    const saludo = service.obtenerSaludo('Ana');
+    expect(saludo).toBe('Hola, Ana!');
+  });
+});
+```
+
+##### 📁 `src/app/saludo.service.ts`
+
+```ts
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SaludoService {
+  obtenerSaludo(nombre: string): string {
+    return `Hola, ${nombre}!`;
+  }
+}
+```
+
+---
+
+##### 📁 `src/app/saludo.service.spec.ts`
+
+```bash
+ng g s tdd/saludo/saludo
+```
+
+```ts
+import { TestBed } from '@angular/core/testing';
+import { SaludoService } from './saludo.service';
+
+describe('SaludoService', () => {
+  let service: SaludoService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(SaludoService);
+  });
+
+  it('debería devolver un saludo personalizado', () => {
+    const saludo = service.obtenerSaludo('Ana');
+    expect(saludo).toBe('Hola, Ana!');
+  });
+
+  it('debería devolver el saludo correcto con otro nombre', () => {
+    const saludo = service.obtenerSaludo('Carlos');
+    expect(saludo).toBe('Hola, Carlos!');
+  });
+});
+```
+
+---
+
+##### 📦 Comando para correr la prueba
+
+➡️ Ejecutamos con `ng test` y mostramos el resultado en el navegador:
+
+```bash
+ng test
+```
+
+Esto abrirá Karma en el navegador mostrando los resultados en tiempo real.
+ ✅ **Test passed**
+
+---
+
+##### 🧠 Tip Visual: Diagrama del flujo de herramientas
+
+
+```
++------------+        +-------------+       +--------------+
+|  Jasmine   | -----> |   TestBed   | --->  |  Karma + CLI |
++------------+        +-------------+       +--------------+
+     ^                        |                    |
+     |                        v                    v
+describe(), it()       Inyección Angular     Feedback en navegador
+expect()               Mocks / Fixtures      Ejecución continua
+```
+
+![diagrama de flujo de la herramienta](./docs/screenshots/08_TDD_tdd-flujo-test.jpg)
+
+---
+
+##### 🧩 Cierre
+> “Con estas herramientas ya podemos aplicar TDD en Angular de forma profesional. A continuación, veamos cómo se aplican en un caso real desde cero.”
+
+[Volver al índice](#Índice)
+
+---
+
+### 3. Implementación paso a paso con TDD
+[Volver al índice](#Índice-2-)
+
+**Objetivo:** Aplicar el ciclo TDD completo en un ejemplo real de Angular: `ContadorComponent`.
+
+---
+
+#### 3.1 Ciclo TDD: Red - Green - Refactor
+[Volver al índice](#Índice-2-)
+
+![tdd-red](./docs/screenshots/09_TDD_life-cycle-01.jpg)
+
+> Mostramos cómo escribir pruebas antes de implementar, cómo hacerlas pasar y luego cómo mejorar el código con confianza.
+
+##### 1. Escribimos la prueba primero (Red) 🟥
+
+- **Descripción:** Definimos el comportamiento esperado: el contador debe iniciar en 0 y aumentar con `increment()`.
+- **Acción:** Creamos el componente y escribimos pruebas unitarias que inicialmente fallarán.
+
+```bash
+ng generate component tdd/contador
+```
+
+```ts
+describe('ContadorComponent', () => {
+  it('debería iniciar en 0', () => {
+    const component = new ContadorComponent();
+    expect(component.count).toBe(0);
+  });
+
+  it('debería incrementar en 1', () => {
+    const component = new ContadorComponent();
+    component.increment();
+    expect(component.count).toBe(1); // Falla si no está implementado
+  });
+});
+```
+
+---
+
+##### 2. Implementamos el código mínimo (Green) 🟩
+
+![LIFE CYCLE GREEN](./docs/screenshots/09_TDD_life-cycle-02.jpg)
+
+- **Descripción:** Creamos el código justo y necesario para que las pruebas pasen.
+- **Acción:** Definimos la propiedad `count` y el método `increment()`.
+
+```ts
+export class ContadorComponent {
+  count = 0;
+
+  increment() {
+    this.count++;
+  }
+}
+```
+
+📸  
+![tdd-GREEN](./docs/screenshots/09_TDD_life-cycle-03.jpg)
+
+> Ejecutamos los tests con `ng test --code-coverage`. Karma abrirá el navegador y nos mostrará los resultados.
+
+---
+
+##### 3. nuevas funcionalidaes 🟥
+
+- **Descripción:** Mejoramos el diseño del componente sin romper su funcionalidad. Añadimos nueva lógica con pruebas.
+- **Acción:** Debemos agregar una nueva funcionalidad que nos han pedido el método `decrement()`y que además siempre deben haber números positivos y escribimos su test correspondiente.
+
+```ts
+// añadimos más funcionalidades, más tests
+    it('debería decrementar en 1 al ejecutar decrement()', () => {
+      const component = new ContadorComponent();
+      component.increment();
+      component.increment(); // ahora vale 2
+      component.decrement(); // debe valer 1
+      expect(component.count).toBe(1);
+    });
+// prueba límite
+    it('no debe decrecer por debajo de 0', () => {
+      const component = new ContadorComponent();
+      component.decrement();
+      expect(component.count).toBe(0);
+    });
+    // esta prueba nos obliga a hacer un mínimo de estructura html
+it('debe incrementar el contador al hacer clic en el botón', () => {
+      const boton = fixture.debugElement.nativeElement.querySelector('button');
+      boton.click();
+      fixture.detectChanges(); // Actualiza el DOM después del clic
+      expect(component.count).toBe(1);
+    });
+```
+
+El test falla porque el método `decrement()` no está implementado.
+
+```ts
+export class ContadorComponent {
+  count = 0;
+
+  increment() {
+    this.count++;
+  }
+  decrement() {
+    if (count > 0) {
+      this.count--;
+    }
+  }
+}
+```
+
+```html
+<div>
+  <p>Contador: {{ count }}</p>
+  <button (click)="increment()">Incrementar</button>
+  <button (click)="decrement()">Decrementar</button>
+</div>
+```
+
+Ahora el test es superado. 🎉
+
+##### 4. Refactorizamos con confianza (Refactor) 🟦
+
+![LIFE CYCLE REFATORIZAR](./docs/screenshots/09_TDD_life-cycle-04.jpg)
+
+- **Descripción:** Mejoramos el diseño del componente sin romper su funcionalidad.
+- **Acción:** Ajustamos el código para que sea más legible y eficiente.
+
+```ts
+
+export class ContadorComponent {
+  count : number = 0;
+
+  increment() {
+    this.count++;
+  }
+  
+  isPositive() {
+    return this.count > 0;
+  }
+  decrement() {
+    if (this.isPositive()) {
+      this.count--;
+    }
+  }
+}
+```
+
+A pesar que modificamos el código y lo preparamos para la siguiente iteración, las pruebas pasan, debido a que en la refactorización no hemos roto ningún test y de ahí la confiablidad de los mismos.
+
+Imaginemos una app con miles de archivos, líneas etc y que al modificar algo, se rompa otra parte de la app, si no tenemos tests, pasaremos horas averigüando que pasó, pero si tenemos tests, sabremos de inmediato donde hemos roto algo.
+
+📸  
+![refactor](./docs/screenshots/09_TDD_life-cycle-04.jpg)
+
+#### 3.2 Ciclo de pruebas en vivo
+[Volver al índice](#Índice-2-)
+📸  
+![ciclo de pruebas](./docs/screenshots/10_TDD_pipeline_cicd.jpg)
+
+> 🧪 Durante todo el proceso, usamos `ng test` en segundo plano para recibir feedback inmediato. Esto es clave en el enfoque TDD.
+
+Ahora te invito a crear el siguiente componente con sus pruebas unitarias.
+
+- llámalo contador-complejo.component.ts
+
+- debe pasar las siguientes pruebas:
+  - 1. debe iniciar con count en 0 y un historial con [0]
+  - 2. debe incrementar el contador en 1 al hacer clic en el botón "Incrementar" y a la vez actualizará el historial con el nuevo valor.
+  - 3. debe decrementar el contador y actualizar el historial cuando se hace clic en el botón "Decrementar".
+  - 4. no debe incrementar si count alcanza el valor máximo, escoge tú mismo, cual va a ser ese valor máximo inicialmente.
+  - 5. no debe decrementar si count es igual al valor mínimo, en este caso el valor mínimo será 0.
+  - 6. debe bloquearse temporalmente al alcanzar los límites y desbloquearse después de 2 segundos.
+  - 7. debe reiniciar el contador, el historial y el estado de bloqueo al hacer clic en el botón "Reiniciar".
+  - 8. debe retornar el historial, al pulsar cualquier botón incrementar o decrementar o resetear, pero la cadena debe estar en el mismo orden que se ha ido agregando y formateada, al estilo '0 → 1 → 2 → 3'
+
+- No uses el Html para nada
+- Solo la variable historial es accesible con su getter, lo demás es inascesible desde fuera de la clase (private o portected)
+
+- Sube tu código a GitHub y comparte el link en los comentarios del vídeo.
+---
+
+[Volver al índice](#Índice)
+
+---  
+
+
+### 4. Buenas prácticas
+[Volver al índice](#Índice-2-)
+![fin tdd](./docs/screenshots/11_TDD_finish.png)
+
+- Nombrar bien los tests: deben explicar claramente el comportamiento esperado.
+- Separar casos felices y casos de error.
+- Usar `beforeEach` para inicializar el estado común.
+- Testear unidades, no integraciones completas en componentes simples.
+- Usar *spies* para evitar llamadas reales en servicios.
+
+> ⚠️ Evita probar detalles de implementación (como qué método se llama internamente), céntrate en lo observable desde fuera.
+
+[Volver al índice](#Índice)
+
+---
+
+### 5. Ejemplos prácticos adicionales
+
+#### 5.1 Servicios con HttpClient
+[Volver al índice](#Índice-2-)
+
+Supongamos que tenemos este servicio:
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class UsuarioService {
+  constructor(private http: HttpClient) {}
+
+  obtenerUsuarios() {
+    return this.http.get<Usuario[]>('/api/usuarios');
+  }
+}
+```
+
+Creamos un mock de HttpClient:
+
+```ts
+const httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
+httpClientSpy.get.and.returnValue(of([{ nombre: 'Ana' }]));
+
+const service = new UsuarioService(httpClientSpy);
+service.obtenerUsuarios().subscribe(data =>
+  expect(data.length).toBe(1)
+);
+```
+
+#### 5.2 Componentes con Inputs/Outputs
+[Volver al índice](#Índice-2-)
+
+```ts
+@Component({
+  selector: 'app-hijo',
+  template: `<button (click)="emitir()">Emitir</button>`
+})
+export class HijoComponent {
+  @Output() cambio = new EventEmitter<number>();
+
+  emitir() {
+    this.cambio.emit(42);
+  }
+}
+```
+
+Test:
+
+```ts
+it('debería emitir el valor 42', () => {
+  const fixture = TestBed.createComponent(HijoComponent);
+  const comp = fixture.componentInstance;
+  spyOn(comp.cambio, 'emit');
+
+  comp.emitir();
+  expect(comp.cambio.emit).toHaveBeenCalledWith(42);
+});
+```
+
+[Volver al índice](#Índice)
+
+---
+
+#### 5.3 **Directiva o Pipe**
+[Volver al índice](#Índice-2-)
+
+> **Objetivo:** Probar un pipe personalizado para asegurarse de que su lógica funciona correctamente.
+
+**Escenario:** Supón que tienes un pipe personalizado llamado `CapitalizePipe` que convierte la primera letra de una palabra en mayúsculas.
+
+**Cómo hacerlo:**
+1. Configura una prueba simple para asegurar que el pipe transforma correctamente los datos.
+
+**Paso a paso:**
+1. **Pipe `CapitalizePipe`:**
+```ts
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'capitalize'
+})
+export class CapitalizePipe implements PipeTransform {
+  transform(value: string): string {
+    if (!value) return value;
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+}
+```
+
+2. **Prueba del pipe:**
+```ts
+import { CapitalizePipe } from './capitalize.pipe';
+
+describe('CapitalizePipe', () => {
+  let pipe: CapitalizePipe;
+
+  beforeEach(() => {
+    pipe = new CapitalizePipe();
+  });
+
+  it('debería capitalizar la primera letra de una palabra', () => {
+    expect(pipe.transform('hola')).toBe('Hola');
+  });
+
+  it('debería retornar la misma palabra si ya está capitalizada', () => {
+    expect(pipe.transform('Hola')).toBe('Hola');
+  });
+
+  it('debería retornar vacío si la entrada es un string vacío', () => {
+    expect(pipe.transform('')).toBe('');
+  });
+});
+```
+
+3. **Explicación de código:**
+   - `CapitalizePipe`: Implementa el pipe que transforma la primera letra de un string a mayúscula.
+   - En las pruebas, verificamos que el pipe funcione correctamente con distintas entradas.
+
+**Consejo:** Los pipes son ideales para operaciones de transformación de datos y se deben probar para asegurar que manejen todos los casos posibles, como cadenas vacías o valores nulos.
+
+---
+
+### 6. Conclusiones y próximos pasos
+[Volver al índice](#Índice-2-)
+
+Aplicar TDD en Angular no solo es posible sino muy recomendable. Nos permite:
+
+- Garantizar el correcto funcionamiento desde el principio.
+- Evitar bugs regresivos.
+- Documentar el comportamiento del sistema.
+
+#### Recomendaciones:
+
+- Empieza con tests unitarios antes de abordar integración o e2e.
+- Automatiza los tests en el CI/CD.
+- Usa *coverage reports* (`--code-coverage`) para asegurar buena cobertura.
+- Sigue indagando acerca de tests con Angular, sobre (guards, interceptors, etc.).
+
+---
+
+## 37 - Microfrontends con Angular y Webpack Module Federation
+
+🧪🧠 **En este video aprenderás qué es un microfrontend y cómo construir una arquitectura modular con Angular y Webpack Module Federation**, paso a paso desde cero. Exploramos los fundamentos, cómo estructurar los proyectos y la configuración inicial para que puedas implementar esta técnica en tus propios desarrollos.
+
+## Índice 📌
+
+- [1. Introducción a los Microfrontends](#1-introducción-a-los-microfrontends)
+- [2. Fundamentos de Webpack Module Federation](#2-fundamentos-de-webpack-module-federation)
+- [3. Arquitectura de Microfrontends](#3-arquitectura-de-microfrontends)
+- [4. Implementación de Microfrontends con Angular](#4-implementación-de-microfrontends-con-angular)
+  - [4.1. Configuración Inicial](#41-configuración-inicial)
+  - [4.2. Creación de Microfrontends](#42-creación-de-microfrontends)
+  - [4.3. Integración de Microfrontends](#43-integración-de-microfrontends)
+- [5. Desafíos y Buenas Prácticas](#5-desafíos-y-buenas-prácticas)
+- [6. Conclusión](#6-conclusión)
+
+---
+
+## 1. Introducción a los Microfrontends
+
+Los **microfrontends** son una arquitectura que permite dividir una aplicación frontend en varias partes autónomas que pueden ser desarrolladas, desplegadas y gestionadas de forma independiente. Similar a los microservicios en el backend, los microfrontends permiten que equipos trabajen en diferentes partes de la aplicación sin interferir entre sí.
+
+### Ventajas de los Microfrontends:
+- **Escalabilidad**: Cada equipo puede trabajar en su propia parte de la aplicación sin preocuparse por el código de otros equipos.
+- **Desarrollo autónomo**: Los equipos pueden elegir las tecnologías más adecuadas para su parte de la aplicación.
+- **Despliegue independiente**: Cada microfrontend puede desplegarse de forma independiente, lo que facilita las actualizaciones sin afectar al sistema completo.
+
+[Índice 📌](#índice--)
+
+---
+
+## 2. Fundamentos de Webpack Module Federation
+
+**Webpack Module Federation** es una característica de Webpack que permite compartir módulos entre diferentes aplicaciones de manera eficiente. Esta técnica es clave para implementar microfrontends, ya que permite que una aplicación cargue componentes desde otras aplicaciones de forma dinámica, sin necesidad de duplicar el código.
+
+### ¿Cómo Funciona Module Federation?
+- **Host**: La aplicación que carga los microfrontends.
+- **Remote**: El microfrontend que es cargado desde una aplicación remota.
+- **Shared Modules**: Los módulos compartidos que son usados tanto por el host como por los remotes.
+
+**Ventajas**:
+- Reduce la duplicación de código entre aplicaciones.
+- Permite el intercambio dinámico de módulos y dependencias.
+- Facilita la integración de diferentes equipos y tecnologías en un mismo proyecto.
+
+---
+
+## 3. Arquitectura de Microfrontends
+
+En una arquitectura de microfrontends, cada parte de la aplicación es tratada como una unidad autónoma, con su propio ciclo de vida y despliegue. Los microfrontends pueden ser desarrollados utilizando diferentes frameworks y tecnologías (por ejemplo, Angular, React, Vue.js), pero se integran en una sola aplicación a través de **Webpack Module Federation**.
+
+### Componentes Principales:
+- **Shell Application (Host)**: La aplicación principal que orquesta la carga de los microfrontends.
+- **Microfrontends (Remotes)**: Aplicaciones o módulos independientes que se cargan y se muestran dentro de la shell application.
+
+El host actúa como un **contenedor** que gestiona la navegación y la carga de los remotes, mientras que los remotes son aplicaciones independientes que pueden ser desarrolladas y desplegadas por separado.
+
+---
+
+## 4. Implementación de Microfrontends con Angular
+
+A continuación, exploramos cómo implementar microfrontends con Angular utilizando Webpack Module Federation. Vamos a cubrir la configuración inicial, la creación de los microfrontends y cómo integrarlos.
+
+### 4.1. Configuración Inicial
+
+Para configurar Webpack Module Federation en un proyecto Angular, necesitamos instalar las dependencias necesarias y modificar los archivos de configuración de Webpack. Aquí están los pasos iniciales:
+
+1. **Instalar las dependencias necesarias**:
+   ```bash
+   npm install --save @angular-architects/module-federation
+   ```
+
+2. **Crear los archivos de configuración de Webpack**:
+   En el archivo `webpack.config.js`, se definen los `remotes` y `shared modules`:
+   ```js
+   module.exports = {
+     output: {
+       uniqueName: "app",
+       publicPath: "auto",
+     },
+     optimization: {
+       runtimeChunk: false,
+     },
+     experiments: {
+       asyncWebAssembly: true,
+     },
+     plugins: [
+       new ModuleFederationPlugin({
+         name: "host",
+         remotes: {
+           remoteApp: "remoteApp@http://localhost:3001/remoteEntry.js",
+         },
+         shared: {
+           "@angular/core": { singleton: true },
+           "@angular/common": { singleton: true },
+           "@angular/router": { singleton: true },
+         },
+       }),
+     ],
+   };
+   ```
+
+3. **Configurar el Angular CLI para usar Webpack**:
+   Modifica el archivo `angular.json` para que Angular use la configuración de Webpack personalizada.
+
+---
+
+### 4.2. Creación de Microfrontends
+
+Cada microfrontend se desarrolla como una aplicación Angular independiente. Utilizando el módulo de federación, estos microfrontends pueden ser cargados en el **Host**.
+
+1. **Crear un microfrontend en Angular**:
+   Puedes usar el comando de Angular CLI para crear una nueva aplicación Angular:
+   ```bash
+   ng generate application microfrontendApp
+   ```
+
+2. **Configurar Webpack en el Microfrontend**:
+   En la aplicación microfrontend, se configura también el `ModuleFederationPlugin`, pero en lugar de ser un host, se define como un `remote`:
+   ```js
+   new ModuleFederationPlugin({
+     name: "remoteApp",
+     filename: "remoteEntry.js",
+     exposes: {
+       './Component': './src/app/component/component.module.ts',
+     },
+     shared: ["@angular/core", "@angular/common"],
+   }),
+   ```
+
+3. **Exponer módulos y componentes**:
+   Los módulos y componentes de cada microfrontend se exponen para ser utilizados por el host.
+
+---
+
+### 4.3. Integración de Microfrontends
+
+Una vez que tanto el host como los remotes estén configurados, es necesario integrarlos.
+
+1. **Cargar microfrontends en el Host**:
+   El host utiliza el sistema de Webpack para cargar los microfrontends a través de la configuración de `remotes`.
+   ```ts
+   import('remoteApp/Component').then((m) => {
+     // Uso del componente del microfrontend
+   });
+   ```
+
+2. **Configurar rutas para microfrontends**:
+   Utiliza el sistema de rutas de Angular para gestionar la navegación entre los microfrontends.
+
+---
+
+## 5. Desafíos y Buenas Prácticas
+
+- **Gestión de dependencias**: Asegúrate de que las dependencias compartidas entre aplicaciones estén bien gestionadas para evitar conflictos.
+- **Rendimiento**: Si bien los microfrontends permiten una carga más eficiente, es importante realizar un seguimiento del rendimiento para no afectar la experiencia del usuario.
+- **Comunicación entre microfrontends**: La comunicación entre microfrontends puede ser compleja, por lo que se recomienda establecer contratos claros y un sistema de eventos o API para la comunicación.
+
+---
+
+## 6. Conclusión
+
+Los **microfrontends** son una excelente manera de dividir aplicaciones grandes en partes más pequeñas y manejables, permitiendo una mayor autonomía y escalabilidad. Con la ayuda de **Webpack Module Federation** y Angular, puedes crear aplicaciones modulares que facilitan el desarrollo, las pruebas y el despliegue independiente de cada parte de la aplicación. Implementar esta arquitectura requiere una planificación cuidadosa, pero los beneficios son considerables en términos de escalabilidad y mantenimiento a largo plazo.
+
+[Índice 📌](#índice--)
+
+## 38. Implementación de Service Workers en Angular
+
+### Introducción
+
+En este video, exploraremos cómo implementar **Service Workers** en una aplicación Angular para convertirla en una **PWA** (Progressive Web App). Los **Service Workers** son una tecnología fundamental que permite a las aplicaciones funcionar de manera offline, manejar notificaciones push, y mejorar el rendimiento al cachear recursos.
+
+### Índice 📌
+
+- [¿Qué son los Service Workers?](#qué-son-los-service-workers)
+- [¿Por qué usar Service Workers en Angular?](#por-qué-usar-service-workers-en-angular)
+- [Configuración Inicial en Angular](#configuración-inicial-en-angular)
+- [Creación del Service Worker](#creación-del-service-worker)
+- [Estrategias de Cache](#estrategias-de-cache)
+- [Pruebas y Depuración del Service Worker](#pruebas-y-depuración-del-service-worker)
+- [Conclusión](#conclusión)
+
+---
+
+### ¿Qué son los Service Workers?
+
+Un **Service Worker** es un script que el navegador ejecuta en segundo plano, fuera del contexto de la página web. Este script puede interceptar solicitudes de red, gestionar el cache de recursos y permitir que la aplicación siga funcionando incluso sin conexión a internet. Los Service Workers son la base para la creación de PWAs, ya que proporcionan funcionalidades clave como:
+
+- **Funcionamiento offline**: Cacheo de recursos para que la aplicación funcione sin conexión.
+- **Notificaciones push**: Enviar notificaciones a los usuarios incluso cuando la aplicación no está activa.
+- **Actualización en segundo plano**: Descargar actualizaciones de la aplicación en segundo plano sin interrumpir al usuario.
+
+---
+
+### ¿Por qué usar Service Workers en Angular?
+
+Angular ofrece soporte integrado para implementar **Service Workers** a través del paquete `@angular/service-worker`. Esto permite que nuestras aplicaciones se comporten como una PWA, mejorando su rendimiento y la experiencia del usuario. Algunas de las ventajas de usar **Service Workers** en Angular son:
+
+- **Mejor rendimiento**: Los recursos de la aplicación se cachean, lo que reduce el tiempo de carga y mejora la experiencia del usuario.
+- **Acceso offline**: Los usuarios pueden seguir utilizando la aplicación sin conexión, ya que los recursos esenciales están almacenados en el cache.
+- **Desempeño optimizado**: Los Service Workers permiten una actualización eficiente de recursos, descargando solo lo que es necesario.
+
+---
+
+### Configuración Inicial en Angular
+
+#### 1. **Activar PWA en Angular CLI**
+
+Para empezar a usar **Service Workers** en una aplicación Angular, necesitamos activar el soporte para PWA utilizando Angular CLI. Afortunadamente, Angular CLI tiene una opción integrada para agregar soporte de PWA con un solo comando.
+
+1. Primero, asegúrate de tener instalada la versión más reciente de Angular CLI.
+
+2. Ejecuta el siguiente comando para agregar soporte de PWA:
+
+   ```bash
+   ng add @angular/pwa
+   ```
+
+   Esto añadirá automáticamente todos los archivos y configuraciones necesarias, como:
+   - Un archivo `ngsw-config.json` (configuración del Service Worker).
+   - El módulo `ServiceWorkerModule` importado en el archivo `app.module.ts`.
+   - Modificaciones en el archivo `angular.json` para habilitar el Service Worker.
+
+#### 2. **Revisar las configuraciones en `angular.json`**
+
+Una vez que Angular agrega el soporte para PWA, revisa las configuraciones dentro del archivo `angular.json`. Verás algo como esto:
+
+```json
+"projects": {
+  "your-project-name": {
+    "architect": {
+      "build": {
+        "configurations": {
+          "production": {
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Esto indica que el Service Worker estará habilitado solo en el entorno de producción.
+
+---
+
+### Creación del Service Worker
+
+#### 1. **Configuración de `ngsw-config.json`**
+
+El archivo `ngsw-config.json` contiene las reglas de cacheo que el Service Worker seguirá para almacenar recursos. Este archivo se encuentra en la raíz del proyecto, y Angular lo genera automáticamente al agregar el soporte para PWA.
+
+Aquí un ejemplo de una configuración básica en el archivo `ngsw-config.json`:
+
+```json
+{
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "resources": {
+        "files": [
+          "/**/*.css",
+          "/**/*.html",
+          "/**/*.js",
+          "/**/*.ico"
+        ]
+      }
+    }
+  ]
+}
+```
+
+- **index**: Especifica la ruta del archivo `index.html` que se utilizará al entrar en la aplicación.
+- **assetGroups**: Define los grupos de recursos a cachear, como archivos CSS, HTML, JavaScript, imágenes, etc.
+
+#### 2. **Uso de estrategias de cache**
+
+Angular permite configurar diferentes estrategias de cache para recursos específicos. Las más comunes son:
+
+- **CacheFirst**: Intenta obtener los datos desde el cache primero, y si no están disponibles, hace una solicitud de red.
+- **NetworkFirst**: Intenta obtener los datos de la red primero, y si falla, recurre al cache.
+
+Puedes personalizar estas estrategias directamente en el archivo `ngsw-config.json`.
+
+---
+
+#### Estrategias de Cache
+
+Las estrategias de cache son fundamentales para decidir cómo interactuar con los recursos almacenados en el cache y cómo actualizar esos recursos.
+
+#### Ejemplo de Estrategia: **CacheFirst**
+
+```json
+"assetGroups": [
+  {
+    "name": "app",
+    "resources": {
+      "files": [
+        "/**/*.css",
+        "/**/*.html",
+        "/**/*.js"
+      ]
+    },
+    "installMode": "prefetch",
+    "updateMode": "prefetch"
+  }
+]
+```
+
+Con esta configuración, los archivos de recursos se almacenarán en el cache al ser accedidos por primera vez. Si el usuario vuelve a visitarlos, el Service Worker servirá los archivos directamente desde el cache.
+
+#### Ejemplo de Estrategia: **NetworkFirst**
+
+```json
+"dataGroups": [
+  {
+    "name": "api",
+    "urlPattern": "https://api.example.com/**",
+    "cacheConfig": {
+      "strategy": "networkFirst",
+      "maxAge": "1h",
+      "maxSize": 100
+    }
+  }
+]
+```
+
+Este patrón de cache buscará siempre obtener los datos de la red primero, pero si la red no está disponible, usará el cache.
+
+---
+
+### Pruebas y Depuración del Service Worker
+
+#### 1. **Pruebas en el Navegador**
+
+Una vez implementado el Service Worker, es importante probarlo. Para ello, puedes usar las herramientas de desarrollo de Chrome:
+
+1. Ve a la pestaña de **Application** en las DevTools.
+2. Revisa la sección de **Service Workers** para asegurarte de que el worker esté activo y funcionando.
+3. Puedes simular un entorno offline para probar el comportamiento de la aplicación sin conexión.
+
+#### 2. **Auditoría con Lighthouse**
+
+Lighthouse es una herramienta que te permite auditar el rendimiento de tu PWA. Puedes usarlo desde las DevTools o como una herramienta de línea de comandos. Lighthouse te dará un informe detallado sobre la implementación del Service Worker y otros aspectos de la PWA.
+
+---
+
+### Conclusión
+
+Los **Service Workers** son una herramienta poderosa para convertir tu aplicación Angular en una **PWA** de alto rendimiento. Nos permiten ofrecer una experiencia de usuario mucho más fluida y estable, incluso sin conexión a Internet.
+
+Hoy hemos cubierto:
+- La configuración de PWA en Angular.
+- La creación de un Service Worker básico.
+- Estrategias de cacheo y cómo implementarlas.
+- Cómo probar y depurar el Service Worker.
+
+¡Ahora es tu turno! Puedes tomar lo aprendido y empezar a construir tus propias aplicaciones offline con Angular. No olvides explorar más sobre optimización y características avanzadas de los Service Workers para llevar tu PWA al siguiente nivel.
+
+---
+
+[Índice 📌](#índice--)
+
+## 39. Guía de migración de Angular 16 → 17
+
+### 1. Verifica tu entorno actual
+
+1. Desde la raíz de tu proyecto, comprueba la versión del CLI local:
+   ```bash
+  npx ng version
+  # Angular CLI: 15.0.0
+  # Node: 16.17.0
+  # Package Manager: npm 9.7.2
+   ```
+2. Comprueba tu versión global (opcional):
+   ```bash
+   npm list -g @angular/cli
+   # C:\Program Files\nodejs -> .\
+   #  └── @angular/cli@15.0.0
+   ```
+Esto se debe a que estamos usando nvm, y en esa versión de node, tenemos esa versión de angular instalada
+
+3. Si usas nvm comprueba las versiones disponibles
+
+  ```bash
+  nvm list available
+  # 22.13.0
+  # 20.17.0
+  # 20.10.0
+  # 18.20.8
+  # 16.20.1
+  # * 16.17.0 (Currently using 64-bit executable) // estamos usando esta
+  # 16.14.2
+  # 10.9.0
+---
+
+### 2. Haz copia de seguridad
+
+Antes de tocar nada, **versiona tus cambios** o haz un branch:
+
+```bash
+git checkout -b upgrade/angular-17
+
+npx ng update @angular-eslint/schematics@17
+
+```
+
+---
+
+### 3. Actualiza TypeScript y zone.js
+
+Angular 17 requiere TypeScript `>=5.2 <5.5` y `zone.js@~0.14.0`:
+
+```bash
+npm install typescript@~5.4.5 --save-dev
+npm install zone.js@~0.14.0 --save-dev
+```
+
+- En `package.json`, en `devDependencies`:
+  ```diff
+  "devDependencies": {
+  -  "typescript": "~5.1.3",
+  +  "typescript": "~5.4.5",
+     // …
+  }
+  ```
+- En `dependencies`:
+  ```diff
+  "dependencies": {
+  -  "zone.js": "~0.13.0",
+  +  "zone.js": "~0.14.0",
+     // …
+  }
+  ```
+
+---
+
+### 4. Ajusta todas las dependencias de Angular
+
+Cambia las versiones de los paquetes `@angular/*` y `@angular-devkit/build-angular` a la serie 17:
+
+```diff
+"dependencies": {
+- "@angular/core": "^16.2.9",
++ "@angular/core": "^17.0.0",
+  // repite para @angular/common, /animations, /forms, etc.
+},
+"devDependencies": {
+- "@angular/cli": "^16.2.6",
+- "@angular-devkit/build-angular": "^16.2.6",
++ "@angular/cli": "^17.0.0",
++ "@angular-devkit/build-angular": "^17.0.0",
+  "@angular/compiler-cli": "^17.0.0",
+  // repite para @angular-eslint, @angular/compiler-cli, etc.
+}
+```
+
+---
+
+### 5. (Opcional) Ajusta librerías de terceros
+
+Si usas `ngx-markdown`, alinéalo a la versión 17:
+
+```bash
+npm install ngx-markdown@^17.0.0 marked@^12.0.0 --save
+```
+
+Y en `package.json` debería quedar:
+```jsonc
+"dependencies": {
+  "ngx-markdown": "^17.0.0",
+  "marked": "^12.0.0",
+  // …
+}
+```
+
+---
+
+### 6. Limpia y reinstala
+
+Borra artefactos y reinstala desde cero:
+
+```bash
+rm -rf node_modules package-lock.json
+npm cache verify
+npm install
+```
+
+---
+
+### 7. Ejecuta migraciones automáticas
+
+Angular CLI 17 trae ayudas de migración. Para invocar el esquema de actualización:
+
+```bash
+npx ng update @angular/core@17 @angular/cli@17
+```
+
+Revisa la salida y aplica los cambios sugeridos a tus archivos de configuración (`tsconfig.json`, `angular.json`, etc.).
+
+---
+
+### 8. Revisa y corrige breaking changes
+
+Consulta la [guía oficial de Angular 17](https://update.angular.io/) para ver si alguna de tus APIs usa patrones obsoletos. Ajusta:
+
+- Cambios en **View Engine → Ivy** (si aún lo tenías deshabilitado).  
+- Migraciones del router, forms o animaciones.
+
+---
+
+### 9. Verifica vulnerabilidades y versiones
+
+1. Ejecuta auditoría de seguridad:
+   ```bash
+   npm audit
+   ```
+2. Si aparecen vulnerabilidades en dependencias profundas (mermaid, vite…), añade temporalmente un bloque de `overrides` en `package.json`:
+   ```jsonc
+   "overrides": {
+     "dompurify": "^3.2.4",
+     "esbuild": "^0.25.0",
+     "http-proxy-middleware": ">=3.0.5"
+   }
+   ```
+3. Reinstala (`rm -rf node_modules && npm install`) y comprueba `npm audit` → 0 vulnerabilidades.
+
+---
+
+### 10. Prueba tu aplicación
+
+- **Compile y sirva**:
+  ```bash
+  ng serve --open
+  ```
+- **Tests unitarios**:
+  ```bash
+  npm run ng:test:ci
+  ```
+- **E2E (Cypress)**:
+  ```bash
+  npm run cypress:open
+  ```
+
+---
+
+### 11. Confirma y fusiona
+
+1. Si todo funciona, haz commit:
+   ```bash
+   git add .
+   git commit -m "chore: migrate project to Angular 17"
+   ```
+2. Fusiona en tu rama principal y elimina la rama de migración si ya no la necesitas.
+
+---
+
+## Notas finales
+
+- **Mantén tu `package-lock.json`** en control de versiones para reproducir instalaciones.  
+- Repite este flujo en cada proyecto “gemelo” para estandarizar tu proceso de migración.  
+- Ajusta versiones menores (`^17.3.x`) según vayan saliendo parches de Angular 17.

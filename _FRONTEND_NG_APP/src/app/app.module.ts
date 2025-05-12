@@ -44,6 +44,7 @@ import { BlogEntriesComponent } from './components/blog-entry/blog-entries/blog-
 import { CreateBlogEntryComponent } from './components/blog-entry/create-blog-entry/create-blog-entry.component';
 import { ViewBlogEntryComponent } from './components/blog-entry/view-blog-entry/view-blog-entry.component';
 import { AuthorPostsComponent } from './components/author-posts/author-posts.component';
+import { ContadorComponent } from './tdd/components/contador/contador.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import { AuthorPostsComponent } from './components/author-posts/author-posts.com
     CreateBlogEntryComponent,
     ViewBlogEntryComponent,
     AuthorPostsComponent,
+    ContadorComponent,
   ],
   imports: [
     BrowserModule,
