@@ -115,16 +115,16 @@
           },
           "configurations": {
             "prod": {
-              "browserTarget": "frontend:build:prod"
+              "buildTarget": "frontend:build:prod"
             },
             "dev": {
-              "browserTarget": "frontend:build:dev"
+              "buildTarget": "frontend:build:dev"
             },
             "test": {
-              "browserTarget": "frontend:build:test"
+              "buildTarget": "frontend:build:test"
             },
             "local": {
-              "browserTarget": "frontend:build:local"
+              "buildTarget": "frontend:build:local"
             }
           },
           "defaultConfiguration": "local"
@@ -132,7 +132,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "frontend:build"
+            "buildTarget": "frontend:build"
           }
         },
         "test": {

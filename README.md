@@ -4495,7 +4495,11 @@ tras esto comprobaremos varias cosas:
 
 1. que todo funciona correctamente, lanza la app
 
-2. 
+2. Los cambios que se han generado en los ficheros **package.json**, **package-lock.json** y en **angular.json**
+
+3. Si todo correcto, haz commit de los cambios
+
+4. si no debes seguir las indicaciones que te pongo en el README.md relativo a este vídeo.
 
 ---
 
