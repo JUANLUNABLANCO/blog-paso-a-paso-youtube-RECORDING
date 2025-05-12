@@ -4491,11 +4491,17 @@ npx ng update @angular-eslint/schematics@17
 
 ```
 
+tras esto comprobaremos varias cosas:
+
+1. que todo funciona correctamente, lanza la app
+
+2. 
+
 ---
 
 ### 3. Actualiza TypeScript y zone.js
 
-Angular 17 requiere TypeScript `>=5.2 <5.5` y `zone.js@~0.14.0`:
+Angular 17 requiere TypeScript `~5.4.5` y `zone.js@~0.14.0`: Si no están instálalos
 
 ```bash
 npm install typescript@~5.4.5 --save-dev
@@ -4523,7 +4529,7 @@ npm install zone.js@~0.14.0 --save-dev
 
 ### 4. Ajusta todas las dependencias de Angular
 
-Cambia las versiones de los paquetes `@angular/*` y `@angular-devkit/build-angular` a la serie 17:
+Observa como han cambiado las versiones de los paquetes `@angular/*` y `@angular-devkit/build-angular` a la serie 17:
 
 ```diff
 "dependencies": {
@@ -4545,7 +4551,7 @@ Cambia las versiones de los paquetes `@angular/*` y `@angular-devkit/build-angul
 
 ### 5. (Opcional) Ajusta librerías de terceros
 
-Si usas `ngx-markdown`, alinéalo a la versión 17:
+Si usas `ngx-markdown`, alinéalo a la versión 17, sino lo está ya:
 
 ```bash
 npm install ngx-markdown@^17.0.0 marked@^12.0.0 --save
@@ -4564,7 +4570,7 @@ Y en `package.json` debería quedar:
 
 ### 6. Limpia y reinstala
 
-Borra artefactos y reinstala desde cero:
+Si sigue sin funcionar Borra artefactos y reinstala desde cero:
 
 ```bash
 rm -rf node_modules package-lock.json
@@ -4576,7 +4582,7 @@ npm install
 
 ### 7. Ejecuta migraciones automáticas
 
-Angular CLI 17 trae ayudas de migración. Para invocar el esquema de actualización:
+Angular CLI 17 trae ayudas de migración. Si nada de lo anterior te funcionó, prueba a invocar el esquema de actualización:
 
 ```bash
 npx ng update @angular/core@17 @angular/cli@17

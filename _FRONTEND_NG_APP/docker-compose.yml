@@ -2,7 +2,7 @@
 version: '2'
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:15-alpine'
     restart: always
     volumes:
       - './postgres_data:/var/lib/postgresql/data'
